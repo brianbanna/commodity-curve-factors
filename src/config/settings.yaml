@@ -1,0 +1,69 @@
+# Configuration settings for commodity curve factors research
+
+# Commodity symbols
+commodities:
+  - symbol: CL=F
+    name: WTI Crude Oil
+    exchange: NYMEX
+  - symbol: BZ=F
+    name: Brent Crude
+    exchange: ICE
+  - symbol: NG=F
+    name: Natural Gas
+    exchange: NYMEX
+  - symbol: GC=F
+    name: Gold
+    exchange: COMEX
+  - symbol: HG=F
+    name: Copper
+    exchange: COMEX
+  - symbol: ZC=F
+    name: Corn
+    exchange: CBOT
+  - symbol: ZW=F
+    name: Wheat
+    exchange: CBOT
+
+# Data settings
+data:
+  start_date: "2010-01-01"
+  end_date: "2024-12-31"
+  source: "yfinance"
+  roll_method: "back_adjusted"
+
+# Feature engineering
+features:
+  maturities: [1, 3, 6, 12]
+  carry:
+    near_month: 1
+    far_month: 12
+  curvature:
+    short_month: 1
+    mid_month: 6
+    long_month: 12
+
+# Model parameters
+models:
+  pca:
+    n_components: 3
+    standardize: true
+  garch:
+    p: 1
+    q: 1
+    dist: "normal"
+  hmm:
+    n_states: 2
+    n_iter: 100
+
+# Trading parameters
+trading:
+  signal_lookback: 20
+  signal_threshold: 1.0
+  vol_target: 0.15
+  transaction_cost: 0.001
+
+# Backtesting
+backtesting:
+  train_window: 252
+  test_window: 63
+  step: 21
