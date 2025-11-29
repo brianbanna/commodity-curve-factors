@@ -1,4 +1,4 @@
-# Adaptive Curve Factors for Commodity Trading
+# Commodity Futures Curve Modeling and Factor Trading
 
 A quantitative trading research framework for modeling and trading term-structure factors in global commodity futures markets.
 
