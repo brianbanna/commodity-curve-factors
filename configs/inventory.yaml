@@ -1,0 +1,31 @@
+eia:
+  api_base: "https://api.eia.gov/v2"
+  series:
+    crude_stocks:
+      id: "PET.WCESTUS1.W"
+      commodity: "CL"
+      frequency: "weekly"
+      release_day: "wednesday"
+    natural_gas_storage:
+      id: "NG.NW2_EPG0_SWO_R48_BCF.W"
+      commodity: "NG"
+      frequency: "weekly"
+      release_day: "thursday"
+    gasoline_stocks:
+      id: "PET.WGFSTUS1.W"
+      commodity: "RB"
+      frequency: "weekly"
+      release_day: "wednesday"
+    distillate_stocks:
+      id: "PET.WDISTUS1.W"
+      commodity: "HO"
+      frequency: "weekly"
+      release_day: "wednesday"
+
+usda:
+  crops: ["ZC", "ZS", "ZW"]
+  frequency: "monthly"
+
+surprise:
+  seasonal_years: 5
+  z_score_window: "expanding"

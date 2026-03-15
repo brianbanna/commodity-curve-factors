@@ -1,0 +1,44 @@
+metrics:
+  - sharpe_ratio
+  - sortino_ratio
+  - calmar_ratio
+  - max_drawdown
+  - cagr
+  - annual_volatility
+  - turnover
+  - hit_rate_monthly
+  - profit_factor
+
+factor_metrics:
+  - information_coefficient
+  - ic_information_ratio
+  - factor_return
+  - factor_decay
+
+rolling:
+  window_days: 252
+
+bootstrap:
+  n_samples: 10000
+  confidence_level: 0.95
+  random_state: 42
+
+benchmarks:
+  equal_weight_long:
+    description: "1/N long across all commodities"
+  cash:
+    description: "Zero return (natural benchmark for long-short)"
+
+stress_periods:
+  oil_crash_2008:
+    start: "2008-07-01"
+    end: "2008-12-31"
+  oil_glut_2014:
+    start: "2014-06-01"
+    end: "2016-02-28"
+  covid_negative_wti:
+    start: "2020-03-01"
+    end: "2020-05-31"
+  energy_spike_2022:
+    start: "2022-02-01"
+    end: "2022-06-30"

@@ -1,0 +1,26 @@
+costs:
+  default:
+    commission_bps: 3
+    slippage_bps: 2
+    roll_cost_bps: 2
+  per_commodity:
+    CL: { commission_bps: 2, slippage_bps: 1, roll_cost_bps: 1 }
+    GC: { commission_bps: 2, slippage_bps: 1, roll_cost_bps: 1 }
+    NG: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    HO: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    RB: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    SI: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    HG: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    ZC: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    ZS: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    ZW: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    KC: { commission_bps: 5, slippage_bps: 3, roll_cost_bps: 3 }
+    SB: { commission_bps: 5, slippage_bps: 3, roll_cost_bps: 3 }
+    CC: { commission_bps: 5, slippage_bps: 3, roll_cost_bps: 3 }
+
+risk_free_rate:
+  source: "FRED"
+  series: "DGS3MO"
+  fallback: 0.02
+
+sensitivity_cost_bps: [0, 2, 5, 8, 10, 15, 20]

@@ -1,0 +1,26 @@
+standard_tenors: [1, 2, 3, 6, 9, 12]  # months
+
+interpolation:
+  method: "log_linear"
+  min_contracts: 3  # minimum contracts needed to build a curve
+
+roll_rules:
+  default:
+    roll_days_before_expiry: 5
+    roll_to: "second_month"
+  CL:
+    roll_days_before_expiry: 5
+    roll_to: "second_month"
+  GC:
+    roll_days_before_expiry: 10
+    roll_to: "next_active_month"
+  ZC:
+    roll_days_before_expiry: 15
+    roll_to: "next_delivery_month"
+
+metrics:
+  slope: "(F12M - F1M) / F1M"
+  front_slope: "(F3M - F1M) / F1M"
+  curvature: "F1M - 2*F6M + F12M"
+  carry: "(F1M - F2M) / F2M * 12"
+  term_carry: "(F1M - F12M) / F12M"

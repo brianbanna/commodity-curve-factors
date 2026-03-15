@@ -1,0 +1,34 @@
+carry:
+  type: "time_series_and_cross_section"
+  formula: "(F1 - F2) / F2 * 12"
+  z_score_window: "expanding"
+
+slope:
+  type: "time_series_and_cross_section"
+  formula: "(F12M - F1M) / F1M"
+  z_score_window: "expanding"
+
+curvature:
+  type: "time_series"
+  formula: "F1M - 2*F6M + F12M"
+  z_score_window: "expanding"
+
+momentum:
+  type: "time_series_and_cross_section"
+  lookback_days: [20, 60]
+  formula: "slope(t) - slope(t - lookback)"
+  z_score_window: "expanding"
+
+inventory:
+  type: "time_series"
+  frequency: "weekly"
+  fill_method: "step_function"
+  surprise_seasonal_years: 5
+  z_score_window: "expanding"
+  available_for: ["CL", "NG", "HO", "RB", "ZC", "ZS", "ZW"]
+
+combination:
+  default_method: "equal_weight"
+  ic_weighted:
+    lookback_days: 252
+    min_observations: 60

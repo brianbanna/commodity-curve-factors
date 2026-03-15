@@ -1,0 +1,160 @@
+commodities:
+  CL:
+    name: "WTI Crude Oil"
+    exchange: "NYMEX"
+    sector: "energy"
+    nasdaq_prefix: "CHRIS/CME_CL"
+    stooq_symbol: "CL.F"
+    contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    max_tenor: 12
+    contract_multiplier: 1000
+    tick_size: 0.01
+    currency: "USD"
+
+  NG:
+    name: "Natural Gas"
+    exchange: "NYMEX"
+    sector: "energy"
+    nasdaq_prefix: "CHRIS/CME_NG"
+    stooq_symbol: "NG.F"
+    contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    max_tenor: 12
+    contract_multiplier: 10000
+    tick_size: 0.001
+    currency: "USD"
+
+  HO:
+    name: "Heating Oil"
+    exchange: "NYMEX"
+    sector: "energy"
+    nasdaq_prefix: "CHRIS/CME_HO"
+    stooq_symbol: "HO.F"
+    contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    max_tenor: 12
+    contract_multiplier: 42000
+    tick_size: 0.0001
+    currency: "USD"
+
+  RB:
+    name: "RBOB Gasoline"
+    exchange: "NYMEX"
+    sector: "energy"
+    nasdaq_prefix: "CHRIS/CME_RB"
+    stooq_symbol: "RB.F"
+    contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    max_tenor: 12
+    contract_multiplier: 42000
+    tick_size: 0.0001
+    currency: "USD"
+
+  GC:
+    name: "Gold"
+    exchange: "COMEX"
+    sector: "metals"
+    nasdaq_prefix: "CHRIS/CME_GC"
+    stooq_symbol: "GC.F"
+    contract_months: [2, 4, 6, 8, 10, 12]
+    max_tenor: 12
+    contract_multiplier: 100
+    tick_size: 0.10
+    currency: "USD"
+
+  SI:
+    name: "Silver"
+    exchange: "COMEX"
+    sector: "metals"
+    nasdaq_prefix: "CHRIS/CME_SI"
+    stooq_symbol: "SI.F"
+    contract_months: [3, 5, 7, 9, 12]
+    max_tenor: 12
+    contract_multiplier: 5000
+    tick_size: 0.005
+    currency: "USD"
+
+  HG:
+    name: "Copper"
+    exchange: "COMEX"
+    sector: "metals"
+    nasdaq_prefix: "CHRIS/CME_HG"
+    stooq_symbol: "HG.F"
+    contract_months: [3, 5, 7, 9, 12]
+    max_tenor: 12
+    contract_multiplier: 25000
+    tick_size: 0.0005
+    currency: "USD"
+
+  ZC:
+    name: "Corn"
+    exchange: "CBOT"
+    sector: "agriculture"
+    nasdaq_prefix: "CHRIS/CME_C"
+    stooq_symbol: "ZC.F"
+    contract_months: [3, 5, 7, 9, 12]
+    max_tenor: 12
+    contract_multiplier: 5000
+    tick_size: 0.25
+    currency: "USc"
+
+  ZS:
+    name: "Soybeans"
+    exchange: "CBOT"
+    sector: "agriculture"
+    nasdaq_prefix: "CHRIS/CME_S"
+    stooq_symbol: "ZS.F"
+    contract_months: [1, 3, 5, 7, 8, 9, 11]
+    max_tenor: 12
+    contract_multiplier: 5000
+    tick_size: 0.25
+    currency: "USc"
+
+  ZW:
+    name: "Wheat (SRW)"
+    exchange: "CBOT"
+    sector: "agriculture"
+    nasdaq_prefix: "CHRIS/CME_W"
+    stooq_symbol: "ZW.F"
+    contract_months: [3, 5, 7, 9, 12]
+    max_tenor: 12
+    contract_multiplier: 5000
+    tick_size: 0.25
+    currency: "USc"
+
+  KC:
+    name: "Coffee"
+    exchange: "ICE"
+    sector: "softs"
+    nasdaq_prefix: "CHRIS/ICE_KC"
+    stooq_symbol: "KC.F"
+    contract_months: [3, 5, 7, 9, 12]
+    max_tenor: 12
+    contract_multiplier: 37500
+    tick_size: 0.05
+    currency: "USc"
+
+  SB:
+    name: "Sugar #11"
+    exchange: "ICE"
+    sector: "softs"
+    nasdaq_prefix: "CHRIS/ICE_SB"
+    stooq_symbol: "SB.F"
+    contract_months: [3, 5, 7, 10]
+    max_tenor: 12
+    contract_multiplier: 112000
+    tick_size: 0.01
+    currency: "USc"
+
+  CC:
+    name: "Cocoa"
+    exchange: "ICE"
+    sector: "softs"
+    nasdaq_prefix: "CHRIS/ICE_CC"
+    stooq_symbol: "CC.F"
+    contract_months: [3, 5, 7, 9, 12]
+    max_tenor: 12
+    contract_multiplier: 10
+    tick_size: 1.0
+    currency: "USD"
+
+date_range:
+  start: "2005-01-01"
+  end: "2024-12-31"
