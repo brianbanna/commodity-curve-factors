@@ -4,7 +4,7 @@
 
 Extract carry, slope, curvature, and momentum signals from commodity futures term structures. Build systematic factor portfolios. Backtest with realistic roll costs.
 
-A config-driven framework that constructs daily term structures across 13 commodity markets, computes factor signals from curve shape, and evaluates long-short trading strategies with futures-aware backtesting including roll costs, margin tracking, and per-commodity transaction cost modeling.
+This framework constructs daily term structures across 13 commodity markets, computes factor signals from curve shape, and runs long-short trading strategies through a futures-aware backtest that accounts for roll costs, margin, and per-commodity transaction costs. Everything is config-driven.
 
 <!--
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)]()
@@ -13,30 +13,30 @@ A config-driven framework that constructs daily term structures across 13 commod
 
 ## Overview
 
-A commodity futures price is not a single number. It is a **curve** — a series of prices stretching months into the future. The shape of that curve encodes fundamental information about the market:
+A commodity futures price is not a single number - it is a curve, a series of prices stretching months into the future. That curve shape tells you something real about the market:
 
-- **Backwardation** (near prices above deferred) signals scarcity and strong demand
-- **Contango** (near prices below deferred) signals abundance and storage costs
-- **Curve flattening** often precedes or accompanies price rallies
-- **Curve steepening** often precedes or accompanies price declines
+- **Backwardation** (near prices above deferred) means scarcity, strong demand
+- **Contango** (near prices below deferred) means plenty of supply, storage costs getting priced in
+- **Curve flattening** tends to show up before or during price rallies
+- **Curve steepening** tends to show up before or during selloffs
 
-This framework extracts systematic trading signals from these curve dynamics across energy, metals, and agricultural commodity markets.
+This framework takes those dynamics and turns them into systematic trading signals across energy, metals, and agricultural markets.
 
 **What it does:**
 
 - Downloads futures data across multiple maturities for 13 commodities
-- Constructs daily term structures with proper contract roll handling
+- Builds daily term structures with proper contract roll handling
 - Computes five factor signals from curve shape and fundamental data
-- Builds cross-sectional and time-series trading portfolios
+- Constructs cross-sectional and time-series trading portfolios
 - Runs vectorized backtests with roll costs, slippage, and margin tracking
-- Evaluates performance with factor-level analysis (IC, decay, attribution)
+- Evaluates performance at the factor level (IC, decay, attribution)
 
 **What it produces:**
 
-- Daily term structures and curve metrics for all commodities
+- Daily term structures and curve metrics for every commodity
 - Factor signals: carry, slope, curvature, momentum, inventory surprise
-- Net-of-cost strategy returns for multiple portfolio variants
-- Full performance tearsheet with factor IC analysis and cost sensitivity
+- Net-of-cost strategy returns across multiple portfolio variants
+- Performance tearsheet with factor IC analysis and cost sensitivity
 - Static research website with term structure visualizations
 
 ## Research Pipeline
@@ -69,40 +69,40 @@ This framework extracts systematic trading signals from these curve dynamics acr
 
 ## Factors
 
-Five systematic factors extracted from curve structure and fundamentals:
+Five factors extracted from curve structure and fundamentals:
 
 | Factor | Formula | What It Captures |
 | --- | --- | --- |
-| **Carry** | `(F1 - F2) / F2 × 12` | Annualized roll yield. Positive in backwardation, negative in contango. The dominant return driver in commodity futures. |
-| **Slope** | `(F12M - F1M) / F1M` | Full-curve tilt. Steep contango = bearish, steep backwardation = bullish. Mean-reverts over weeks. |
-| **Curvature** | `F1M - 2×F6M + F12M` | Butterfly shape. Convexity vs concavity of the term structure. Fastest mean-reverting curve signal. |
-| **Curve Momentum** | `slope(t) - slope(t-L)` | Rate of change in curve shape. Flattening precedes rallies, steepening precedes declines. |
+| **Carry** | `(F1 - F2) / F2 x 12` | Annualized roll yield. Positive in backwardation, negative in contango. The single biggest return driver in commodity futures. |
+| **Slope** | `(F12M - F1M) / F1M` | Full-curve tilt. Steep contango is bearish, steep backwardation is bullish. Tends to mean-revert over weeks. |
+| **Curvature** | `F1M - 2 x F6M + F12M` | Butterfly shape - convexity vs concavity of the term structure. The fastest mean-reverting curve signal. |
+| **Curve Momentum** | `slope(t) - slope(t-L)` | How fast the curve shape is changing. Flattening tends to precede rallies, steepening tends to precede declines. |
 | **Inventory Surprise** | `(actual - seasonal_avg) / std` | Deviation from 5-year seasonal norm. Draws support backwardation, builds support contango. |
 
-All factors are z-scored using expanding windows to prevent lookahead.
+All factors z-scored with expanding windows so there is no lookahead.
 
 ## Strategies
 
-Factor signals drive six portfolio strategies:
+Six portfolio strategies built on top of the factor signals:
 
 | Strategy | Method | Characteristics |
 | --- | --- | --- |
-| Cross-Sectional Carry | Long top 3 carry, short bottom 3 | Classic commodity carry trade |
-| Multi-Factor | Composite z-score ranking | Diversified across all factors |
-| Sector-Neutral | Within-sector long/short | Removes sector beta |
+| Cross-Sectional Carry | Long top 3 carry, short bottom 3 | The classic commodity carry trade |
+| Multi-Factor | Composite z-score ranking | Diversified across all five factors |
+| Sector-Neutral | Within-sector long/short | Strips out sector beta |
 | Time-Series Carry | Per-commodity threshold signals | No cross-sectional dependence |
 | Calendar Spread Carry | Long front / short back per commodity | Lower margin, direct curve expression |
-| Regime-Conditioned | Factor weights adjusted by volatility regime | Carry in calm, momentum in turbulent |
+| Regime-Conditioned | Factor weights shift with vol regime | Heavier carry in calm, heavier momentum in turbulent |
 
 All strategies include:
 
 - Weekly rebalancing (signal Friday, execute Monday)
-- Per-commodity volatility targeting (10% annualized)
-- Sector exposure limits (max 40% per sector)
+- Per-commodity vol targeting at 10% annualized
+- Sector exposure caps at 40%
 - Per-commodity cost model (commission + slippage + roll costs)
-- Cost sensitivity analysis from 0 to 20 bps
+- Cost sensitivity sweep from 0 to 20 bps
 
-Benchmarks: equal-weight long-only commodity basket, cash (for long-short strategies).
+Benchmarks: equal-weight long-only commodity basket, cash (for long-short).
 
 ## Data
 
@@ -115,7 +115,7 @@ Benchmarks: equal-weight long-only commodity basket, cash (for long-short strate
 | Speculative positioning | CFTC COT | Weekly |
 | Dollar index, rates, inflation | FRED | Daily |
 
-Data downloads automatically via `make data`. API keys for Nasdaq Data Link and EIA are read from environment variables.
+`make data` handles all downloads. API keys for Nasdaq Data Link and EIA are read from environment variables.
 
 ## Commodity Universe
 
@@ -126,17 +126,17 @@ Data downloads automatically via `make data`. API keys for Nasdaq Data Link and 
 | Agriculture | Corn (ZC), Soybeans (ZS), Wheat (ZW) |
 | Softs | Coffee (KC), Sugar (SB), Cocoa (CC) |
 
-13 commodities across 4 sectors. Curve depth varies by commodity (monthly contracts for energy, seasonal for agriculture).
+13 commodities across 4 sectors. Curve depth varies - monthly contracts for energy, seasonal delivery months for agriculture.
 
 ## Key Research Outputs
 
-- Daily term structures and curve metrics for all commodities
-- Factor performance analysis with information coefficients and decay curves
-- Strategy backtests with futures-aware roll cost modeling
-- Factor attribution by commodity, sector, and time period
-- Transaction cost sensitivity and breakeven analysis
-- Full performance tearsheet with bootstrap confidence intervals
-- Static research website with term structure heatmaps
+- Daily term structures and curve metrics for every commodity in the universe
+- Factor performance with information coefficients and decay curves
+- Strategy backtests with proper futures roll cost modeling
+- Factor attribution broken down by commodity, sector, and time period
+- Transaction cost sensitivity with breakeven identification
+- Performance tearsheet with bootstrap confidence intervals
+- Research website with term structure heatmaps and factor charts
 
 ## Quickstart
 
@@ -162,7 +162,7 @@ make report        # Generate tearsheet and charts
 make test
 ```
 
-Requires Python 3.10+. API keys needed for Nasdaq Data Link and EIA (both free).
+Requires Python 3.10+. Free API keys needed for Nasdaq Data Link and EIA.
 
 ## Project Structure
 
@@ -197,7 +197,7 @@ commodity-curve-factors/
 └── pyproject.toml             # Dependencies
 ```
 
-All parameters are externalized to YAML configs. No magic numbers in source code.
+All parameters live in YAML configs. No magic numbers in source code.
 
 ## License
 
