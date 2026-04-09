@@ -29,7 +29,8 @@ MAX_CONSECUTIVE_NANS = 10
 
 def _check_price_range(df: pd.DataFrame, start: str, end: str, col: str = "Close") -> float | None:
     """Return the max price in a date range, or None if no data."""
-    subset = df.loc[start:end, col]
+    mask = (df.index >= start) & (df.index <= end)
+    subset = df.loc[mask, col]
     if subset.empty:
         return None
     return float(subset.max())
@@ -37,7 +38,8 @@ def _check_price_range(df: pd.DataFrame, start: str, end: str, col: str = "Close
 
 def _check_min_price(df: pd.DataFrame, start: str, end: str, col: str = "Close") -> float | None:
     """Return the min price in a date range, or None if no data."""
-    subset = df.loc[start:end, col]
+    mask = (df.index >= start) & (df.index <= end)
+    subset = df.loc[mask, col]
     if subset.empty:
         return None
     return float(subset.min())
@@ -134,7 +136,8 @@ def validate_returns(data: dict[str, pd.DataFrame]) -> list[str]:
         returns = df["Close"].pct_change().abs()
         large = returns[returns > LARGE_RETURN_THRESHOLD]
         for date, ret in large.items():
-            msg = f"{sym} {date.date()}: {ret:.1%} daily return"
+            date_str = str(date)[:10]
+            msg = f"{sym} {date_str}: {ret:.1%} daily return"
             warnings.append(msg)
 
     return warnings
