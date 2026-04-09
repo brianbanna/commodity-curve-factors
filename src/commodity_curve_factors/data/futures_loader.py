@@ -31,7 +31,8 @@ def _get_yfinance_symbol(symbol: str) -> str | None:
     spec = universe["commodities"].get(symbol)
     if spec is None:
         return None
-    return spec.get("yfinance_symbol")
+    result: str | None = spec.get("yfinance_symbol")
+    return result
 
 
 def download_front_month(
@@ -62,7 +63,7 @@ def download_front_month(
     logger.info("Downloading %s (%s) from yfinance", symbol, yf_ticker)
 
     try:
-        df = yf.download(yf_ticker, start=start, end=end, progress=False)
+        df: pd.DataFrame = yf.download(yf_ticker, start=start, end=end, progress=False)
     except Exception:
         logger.exception("yfinance download failed for %s", symbol)
         return None
