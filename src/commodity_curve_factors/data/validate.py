@@ -12,6 +12,7 @@ Checks:
 Usage:
     python -m commodity_curve_factors.data.validate
 """
+
 import logging
 import sys
 
@@ -26,9 +27,7 @@ LARGE_RETURN_THRESHOLD = 0.20
 MAX_CONSECUTIVE_NANS = 10
 
 
-def _check_price_range(
-    df: pd.DataFrame, start: str, end: str, col: str = "Close"
-) -> float | None:
+def _check_price_range(df: pd.DataFrame, start: str, end: str, col: str = "Close") -> float | None:
     """Return the max price in a date range, or None if no data."""
     subset = df.loc[start:end, col]
     if subset.empty:
@@ -36,9 +35,7 @@ def _check_price_range(
     return float(subset.max())
 
 
-def _check_min_price(
-    df: pd.DataFrame, start: str, end: str, col: str = "Close"
-) -> float | None:
+def _check_min_price(df: pd.DataFrame, start: str, end: str, col: str = "Close") -> float | None:
     """Return the min price in a date range, or None if no data."""
     subset = df.loc[start:end, col]
     if subset.empty:
@@ -120,8 +117,9 @@ def validate_completeness(data: dict[str, pd.DataFrame]) -> list[str]:
                 if max_gap > MAX_CONSECUTIVE_NANS:
                     failures.append(f"{sym}: {max_gap} consecutive NaN closes")
 
-        logger.info("PASS  %s: %d rows, %s to %s", sym, len(df),
-                     df.index[0].date(), df.index[-1].date())
+        logger.info(
+            "PASS  %s: %d rows, %s to %s", sym, len(df), df.index[0].date(), df.index[-1].date()
+        )
 
     return failures
 
@@ -170,7 +168,7 @@ def main() -> None:
     for w in warnings:
         logger.warning("REVIEW  %s", w)
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     if all_failures:
         print(f"  FAILURES: {len(all_failures)}")
         for f in all_failures:

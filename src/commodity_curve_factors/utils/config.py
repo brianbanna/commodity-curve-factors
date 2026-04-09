@@ -1,4 +1,5 @@
 """YAML config loader for commodity-curve-factors."""
+
 import yaml
 from pathlib import Path
 

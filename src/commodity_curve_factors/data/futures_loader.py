@@ -10,6 +10,7 @@ back to ~2000 for most commodities.
 Usage:
     python -m commodity_curve_factors.data.futures_loader
 """
+
 import logging
 import time
 
@@ -88,7 +89,10 @@ def download_front_month(
 
     logger.info(
         "%s front month: %d rows, %s to %s",
-        symbol, len(df), df.index[0].date(), df.index[-1].date(),
+        symbol,
+        len(df),
+        df.index[0].date(),
+        df.index[-1].date(),
     )
     return df
 
@@ -186,7 +190,10 @@ def main() -> None:
     for symbol, df in sorted(data.items()):
         logger.info(
             "  %-4s  %5d rows  %s → %s",
-            symbol, len(df), df.index[0].date(), df.index[-1].date(),
+            symbol,
+            len(df),
+            df.index[0].date(),
+            df.index[-1].date(),
         )
 
 

@@ -3,6 +3,7 @@
 Usage:
     python -m commodity_curve_factors.data.catalog
 """
+
 import logging
 from datetime import datetime
 
@@ -38,24 +39,28 @@ def catalog_directory(directory: str, glob_pattern: str = "**/*.parquet") -> pd.
             df = pd.read_parquet(path)
             start = df.index.min() if isinstance(df.index, pd.DatetimeIndex) else None
             end = df.index.max() if isinstance(df.index, pd.DatetimeIndex) else None
-            records.append({
-                "file": str(path.relative_to(root)),
-                "rows": len(df),
-                "columns": len(df.columns),
-                "start": start.date() if start else None,
-                "end": end.date() if end else None,
-                "size_kb": round(path.stat().st_size / 1024, 1),
-            })
+            records.append(
+                {
+                    "file": str(path.relative_to(root)),
+                    "rows": len(df),
+                    "columns": len(df.columns),
+                    "start": start.date() if start else None,
+                    "end": end.date() if end else None,
+                    "size_kb": round(path.stat().st_size / 1024, 1),
+                }
+            )
         except Exception as exc:
-            records.append({
-                "file": str(path.relative_to(root)),
-                "rows": None,
-                "columns": None,
-                "start": None,
-                "end": None,
-                "size_kb": round(path.stat().st_size / 1024, 1),
-                "error": str(exc),
-            })
+            records.append(
+                {
+                    "file": str(path.relative_to(root)),
+                    "rows": None,
+                    "columns": None,
+                    "start": None,
+                    "end": None,
+                    "size_kb": round(path.stat().st_size / 1024, 1),
+                    "error": str(exc),
+                }
+            )
 
     return pd.DataFrame(records)
 
@@ -68,11 +73,11 @@ def print_catalog() -> None:
         print("No data files found. Run `make data` first.")
         return
 
-    print(f"\n{'='*72}")
+    print(f"\n{'=' * 72}")
     print(f"  DATA CATALOG  —  {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    print(f"{'='*72}")
+    print(f"{'=' * 72}")
     print(f"  {'File':<35s} {'Rows':>6s}  {'Start':>12s}  {'End':>12s}  {'KB':>7s}")
-    print(f"  {'-'*35} {'-'*6}  {'-'*12}  {'-'*12}  {'-'*7}")
+    print(f"  {'-' * 35} {'-' * 6}  {'-' * 12}  {'-' * 12}  {'-' * 7}")
 
     for _, row in cat.iterrows():
         start = str(row["start"]) if row["start"] else "—"
@@ -84,7 +89,7 @@ def print_catalog() -> None:
     total_rows = cat["rows"].sum()
     total_kb = cat["size_kb"].sum()
     print(f"  Total rows:  {int(total_rows):,}")
-    print(f"  Total size:  {total_kb:.0f} KB ({total_kb/1024:.1f} MB)")
+    print(f"  Total size:  {total_kb:.0f} KB ({total_kb / 1024:.1f} MB)")
     print()
 
 
