@@ -1,7 +1,5 @@
 # Commodity Futures Curve Modeling and Factor Trading
 
-**A Quantitative Research Framework**
-
 Extract carry, slope, curvature, and momentum signals from commodity futures term structures. Build systematic factor portfolios. Backtest with realistic roll costs.
 
 This framework constructs daily term structures across 13 commodity markets, computes factor signals from curve shape, and runs long-short trading strategies through a futures-aware backtest that accounts for roll costs, margin, and per-commodity transaction costs. Everything is config-driven.
