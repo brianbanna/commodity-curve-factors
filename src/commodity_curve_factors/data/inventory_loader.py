@@ -46,6 +46,28 @@ EIA_ROUTES: dict[str, str] = {
 _EIA_API_BASE = "https://api.eia.gov/v2"
 _REQUEST_TIMEOUT_SECONDS = 30
 
+# USDA NASS QuickStats ---------------------------------------------------------
+
+USDA_NASS_BASE_URL: str = "https://quickstats.nass.usda.gov/api/api_GET/"
+
+# Maps commodity symbol to the (commodity_desc, short_desc) pair for NASS
+# filtering. ``short_desc`` is the specific stocks measure — using exact
+# match avoids ambiguity between e.g. total stocks and on-farm-only stocks.
+USDA_STOCK_SERIES: dict[str, dict[str, str]] = {
+    "ZC": {
+        "commodity_desc": "CORN",
+        "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
+    },
+    "ZS": {
+        "commodity_desc": "SOYBEANS",
+        "short_desc": "SOYBEANS - STOCKS, MEASURED IN BU",
+    },
+    "ZW": {
+        "commodity_desc": "WHEAT",
+        "short_desc": "WHEAT - STOCKS, MEASURED IN BU",
+    },
+}
+
 _WEEKDAY_INDEX: dict[str, int] = {
     "monday": 0,
     "tuesday": 1,
@@ -239,6 +261,192 @@ def align_to_daily(weekly_df: pd.DataFrame, release_day: str) -> pd.DataFrame:
     daily = shifted.reindex(business_days).ffill()
     daily.index.name = "Date"
     return daily
+
+
+def _parse_usda_value(raw: Any) -> float:
+    """Parse a USDA NASS ``Value`` string to a float.
+
+    NASS encodes numeric stock quantities as comma-separated strings
+    (e.g. ``"1,760,000,000"``). Undisclosed values are reported as
+    ``"(D)"`` and should become ``NaN``. Empty strings and ``None``
+    likewise map to ``NaN``. Any other non-parseable value also yields
+    ``NaN`` rather than raising, so a single malformed row does not
+    abort the whole download.
+    """
+    if raw is None:
+        return float("nan")
+    text = str(raw).strip()
+    if text == "" or text == "(D)":
+        return float("nan")
+    try:
+        return float(text.replace(",", ""))
+    except ValueError:
+        return float("nan")
+
+
+def download_usda_stocks(
+    commodity: str,
+    start: str,
+    end: str,
+    api_key: str,
+) -> pd.DataFrame | None:
+    """Download a USDA NASS QuickStats stocks series for one crop commodity.
+
+    Parameters
+    ----------
+    commodity : str
+        Commodity symbol, one of the keys of :data:`USDA_STOCK_SERIES`
+        (``"ZC"``, ``"ZS"``, ``"ZW"``).
+    start, end : str
+        Date range in ``YYYY-MM-DD`` format. NASS filters by year, so the
+        API request uses ``year__GE`` / ``year__LE`` derived from these
+        dates; the returned DataFrame is then trimmed to the exact date
+        window on the release (``load_time``) axis.
+    api_key : str
+        USDA NASS QuickStats API key. Never logged.
+
+    Returns
+    -------
+    pd.DataFrame or None
+        DataFrame with a ``DatetimeIndex`` of release dates (the
+        ``load_time`` field, i.e. the day USDA published the report) and
+        a single ``value`` column of ``float`` bushels. Sorted ascending;
+        deduplicated on index with ``keep="last"`` so that if NASS
+        republishes a figure on the same ``load_time`` the most recent
+        value in the response wins. Returns ``None`` on network/API
+        failure, on an unknown commodity symbol, on an error response
+        body, or when no rows match the ``short_desc`` filter.
+
+    Notes
+    -----
+    We filter strictly on ``short_desc == USDA_STOCK_SERIES[commodity]["short_desc"]``
+    rather than matching only the leading commodity name. NASS publishes
+    several disaggregated stocks series per crop (on-farm vs. off-farm,
+    for instance); only the "total" series — exact string match — should
+    flow into the inventory surprise factor. The ``reference_period_desc``
+    (e.g. ``"SEP 1"``) is discarded: for no-lookahead purposes the
+    release date (``load_time``) is the only timestamp that matters.
+    """
+    series = USDA_STOCK_SERIES.get(commodity)
+    if series is None:
+        logger.warning("No USDA stock series registered for %s", commodity)
+        return None
+
+    logger.info("Downloading USDA NASS stocks for %s", commodity)
+
+    start_ts = pd.Timestamp(start)
+    end_ts = pd.Timestamp(end)
+
+    params = {
+        "key": api_key,
+        "commodity_desc": series["commodity_desc"],
+        "statisticcat_desc": "STOCKS",
+        "year__GE": str(start_ts.year),
+        "year__LE": str(end_ts.year),
+        "agg_level_desc": "NATIONAL",
+        "format": "JSON",
+    }
+
+    try:
+        response = requests.get(
+            USDA_NASS_BASE_URL, params=params, timeout=_REQUEST_TIMEOUT_SECONDS
+        )
+    except requests.RequestException as exc:
+        # As with EIA, never include ``exc`` in the log message: default
+        # stringification may embed the full URL which contains ``key=...``.
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        logger.warning(
+            "USDA download failed for %s (%s, status=%s)",
+            commodity,
+            type(exc).__name__,
+            status,
+        )
+        return None
+
+    if response.status_code != 200:
+        logger.warning(
+            "USDA download failed for %s: HTTP %d", commodity, response.status_code
+        )
+        return None
+
+    try:
+        payload: dict[str, Any] = response.json()
+    except ValueError as exc:
+        logger.warning("USDA response for %s was not valid JSON: %s", commodity, exc)
+        return None
+
+    # NASS sometimes returns HTTP 200 with an ``error`` body (e.g. invalid
+    # key or bad parameter combination). Surface that directly.
+    if "error" in payload:
+        logger.warning("USDA API error for %s: %s", commodity, payload["error"])
+        return None
+
+    records = payload.get("data")
+    if records is None:
+        logger.warning("USDA response for %s missing 'data' key", commodity)
+        return None
+
+    target_short_desc = series["short_desc"]
+    filtered = [r for r in records if r.get("short_desc") == target_short_desc]
+
+    if len(filtered) == 0:
+        logger.warning(
+            "USDA returned no rows matching short_desc=%r for %s (%s to %s)",
+            target_short_desc,
+            commodity,
+            start,
+            end,
+        )
+        return None
+
+    rows: list[dict[str, Any]] = []
+    for record in filtered:
+        load_time_raw = record.get("load_time")
+        if not load_time_raw:
+            continue
+        try:
+            load_time = pd.to_datetime(load_time_raw)
+        except (ValueError, TypeError):
+            continue
+        rows.append({"load_time": load_time, "value": _parse_usda_value(record.get("Value"))})
+
+    if len(rows) == 0:
+        logger.warning("USDA response for %s had no parseable rows", commodity)
+        return None
+
+    df = pd.DataFrame.from_records(rows)
+    df = df.set_index("load_time").sort_index()
+    df.index.name = "Date"
+    # If NASS republishes a value on the same load_time, keep the most
+    # recent entry from the response (last wins after sort).
+    df = df[~df.index.duplicated(keep="last")]
+    df["value"] = df["value"].astype(float)
+
+    # NASS filtered by year, so trim to the exact requested window.
+    df = df.loc[(df.index >= start_ts) & (df.index <= end_ts)]
+
+    if len(df) == 0:
+        logger.warning(
+            "USDA %s: all rows fell outside window %s to %s", commodity, start, end
+        )
+        return None
+
+    # Cache raw parsed response for reuse.
+    DATA_CACHE.mkdir(parents=True, exist_ok=True)
+    cache_path = DATA_CACHE / f"usda_{commodity}.parquet"
+    try:
+        df.to_parquet(cache_path)
+    except Exception:
+        logger.exception("Failed to cache USDA %s at %s", commodity, cache_path)
+
+    logger.info(
+        "USDA %s: %d rows, %s to %s",
+        commodity,
+        len(df),
+        df.index[0].date(),
+        df.index[-1].date(),
+    )
+    return df
 
 
 def download_all_eia(use_cache: bool = True) -> dict[str, pd.DataFrame]:
