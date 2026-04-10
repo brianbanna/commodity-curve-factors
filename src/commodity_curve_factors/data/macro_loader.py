@@ -119,36 +119,63 @@ def download_fred_series(
     return df
 
 
-def download_vix(start: str, end: str) -> pd.DataFrame | None:
-    """Download daily VIX OHLCV from yfinance.
+def _download_yf_series(
+    ticker: str,
+    cache_key: str,
+    keep_cols: list[str],
+    start: str,
+    end: str,
+    use_cache: bool = True,
+) -> pd.DataFrame | None:
+    """Download a single yfinance ticker with caching and column normalization.
+
+    Shared backend for :func:`download_vix` and :func:`download_benchmarks`.
+    Handles the cache read/write, MultiIndex column flattening, DatetimeIndex
+    normalization, OHLCV column filtering, and ``Close`` dropna.
 
     Parameters
     ----------
+    ticker : str
+        yfinance ticker symbol (e.g. ``"^VIX"``, ``"^GSPC"``, ``"AGG"``).
+    cache_key : str
+        Short name used in the cache filename (``yf_<cache_key>.parquet``)
+        and in log messages.
+    keep_cols : list[str]
+        OHLCV column names to retain in the output. Columns not present in
+        the yfinance response are silently dropped.
     start, end : str
         Date range in YYYY-MM-DD format.
+    use_cache : bool
+        If True and a cached Parquet exists, return it without hitting the
+        network.
 
     Returns
     -------
     pd.DataFrame or None
-        DataFrame with DatetimeIndex and standard OHLCV columns, or None on
+        DataFrame with DatetimeIndex and the requested columns, or None on
         failure.
     """
-    logger.info("Downloading VIX (%s) from yfinance", _VIX_TICKER)
+    cache_path = DATA_CACHE / f"yf_{cache_key}.parquet"
+    if use_cache and cache_path.exists():
+        logger.info("Using cached yfinance data for %s", cache_key)
+        return pd.read_parquet(cache_path)
+
+    logger.info("Downloading %s (%s) from yfinance", cache_key, ticker)
 
     try:
         df: pd.DataFrame = yf.download(
-            _VIX_TICKER,
+            ticker,
             start=start,
             end=end,
             progress=False,
             auto_adjust=False,
         )
     except Exception:
-        logger.exception("yfinance download failed for VIX")
+        logger.exception("yfinance download failed for %s (%s)", cache_key, ticker)
         return None
 
     if df is None or df.empty:
-        logger.warning("No VIX data returned from yfinance")
+        logger.warning("No data returned for %s (%s)", cache_key, ticker)
         return None
 
     df = _flatten_yf_columns(df)
@@ -156,19 +183,20 @@ def download_vix(start: str, end: str) -> pd.DataFrame | None:
     df.index.name = "Date"
     df = df.sort_index()
 
-    keep_cols = [c for c in ["Open", "High", "Low", "Close", "Volume"] if c in df.columns]
-    df = df[keep_cols]
-    df = df.dropna(subset=["Close"])
+    available = [c for c in keep_cols if c in df.columns]
+    df = df[available]
+    if "Close" in df.columns:
+        df = df.dropna(subset=["Close"])
 
     DATA_CACHE.mkdir(parents=True, exist_ok=True)
-    cache_path = DATA_CACHE / "yf_vix.parquet"
     try:
         df.to_parquet(cache_path)
     except Exception:
-        logger.exception("Failed to cache VIX at %s", cache_path)
+        logger.exception("Failed to cache %s at %s", cache_key, cache_path)
 
     logger.info(
-        "VIX: %d rows, %s to %s",
+        "%s: %d rows, %s to %s",
+        cache_key,
         len(df),
         df.index[0].date(),
         df.index[-1].date(),
@@ -176,8 +204,23 @@ def download_vix(start: str, end: str) -> pd.DataFrame | None:
     return df
 
 
+def download_vix(start: str, end: str, use_cache: bool = True) -> pd.DataFrame | None:
+    """Download daily VIX OHLCV from yfinance (``^VIX``)."""
+    return _download_yf_series(
+        ticker=_VIX_TICKER,
+        cache_key="vix",
+        keep_cols=["Open", "High", "Low", "Close", "Volume"],
+        start=start,
+        end=end,
+        use_cache=use_cache,
+    )
+
+
 def download_benchmarks(
-    start: str, end: str, keys: list[str] | None = None
+    start: str,
+    end: str,
+    keys: list[str] | None = None,
+    use_cache: bool = True,
 ) -> dict[str, pd.DataFrame]:
     """Download S&P 500 and US aggregate bond benchmarks from yfinance.
 
@@ -194,64 +237,32 @@ def download_benchmarks(
         If provided, only download this subset of benchmark keys (e.g.
         ``["spy"]``). Unknown keys are ignored. Default ``None`` downloads
         every ticker in ``_BENCHMARK_TICKERS``.
+    use_cache : bool
+        If True, return cached Parquet files from ``data/cache/`` when they
+        exist.
 
     Returns
     -------
     dict
         ``{"spy": df_gspc, "agg": df_agg}``. Missing downloads are omitted.
     """
-    result: dict[str, pd.DataFrame] = {}
-
     if keys is None:
         tickers_to_fetch = _BENCHMARK_TICKERS
     else:
         tickers_to_fetch = {k: _BENCHMARK_TICKERS[k] for k in keys if k in _BENCHMARK_TICKERS}
 
+    result: dict[str, pd.DataFrame] = {}
     for key, ticker in tickers_to_fetch.items():
-        logger.info("Downloading benchmark %s (%s) from yfinance", key, ticker)
-
-        try:
-            df: pd.DataFrame = yf.download(
-                ticker,
-                start=start,
-                end=end,
-                progress=False,
-                auto_adjust=False,
-            )
-        except Exception:
-            logger.exception("yfinance download failed for benchmark %s (%s)", key, ticker)
-            continue
-
-        if df is None or df.empty:
-            logger.warning("No benchmark data returned for %s (%s)", key, ticker)
-            continue
-
-        df = _flatten_yf_columns(df)
-        df.index = pd.DatetimeIndex(df.index)
-        df.index.name = "Date"
-        df = df.sort_index()
-
-        keep_cols = [
-            c for c in ["Open", "High", "Low", "Close", "Adj Close", "Volume"] if c in df.columns
-        ]
-        df = df[keep_cols]
-        df = df.dropna(subset=["Close"])
-
-        DATA_CACHE.mkdir(parents=True, exist_ok=True)
-        cache_path = DATA_CACHE / f"yf_{key}.parquet"
-        try:
-            df.to_parquet(cache_path)
-        except Exception:
-            logger.exception("Failed to cache benchmark %s at %s", key, cache_path)
-
-        logger.info(
-            "Benchmark %s: %d rows, %s to %s",
-            key,
-            len(df),
-            df.index[0].date(),
-            df.index[-1].date(),
+        df = _download_yf_series(
+            ticker=ticker,
+            cache_key=key,
+            keep_cols=["Open", "High", "Low", "Close", "Adj Close", "Volume"],
+            start=start,
+            end=end,
+            use_cache=use_cache,
         )
-        result[key] = df
+        if df is not None:
+            result[key] = df
 
     return result
 
@@ -310,7 +321,7 @@ def download_all_macro(use_cache: bool = True) -> dict[str, pd.DataFrame]:
     if cached_vix is not None:
         all_data["vix"] = cached_vix
     else:
-        vix = download_vix(start, end)
+        vix = download_vix(start, end, use_cache=use_cache)
         if vix is not None:
             all_data["vix"] = vix
 
@@ -325,7 +336,9 @@ def download_all_macro(use_cache: bool = True) -> dict[str, pd.DataFrame]:
 
     if bench_to_fetch:
         # Only hit the network for benchmarks not already in the cache.
-        benches = download_benchmarks(start, end, keys=list(bench_to_fetch))
+        benches = download_benchmarks(
+            start, end, keys=list(bench_to_fetch), use_cache=use_cache
+        )
         for key in bench_to_fetch:
             if key in benches:
                 all_data[key] = benches[key]
