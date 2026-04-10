@@ -23,10 +23,7 @@ def test_eia_routes_covers_all_series() -> None:
 def test_align_to_daily_forward_fills_from_release_day() -> None:
     """Weekly observations should be visible only from the release day onward.
 
-    Data point with period 2020-01-03 (Friday) released on Wednesday 2020-01-08
-    should:
-    - NOT be visible on 2020-01-06 or 2020-01-07 (before release)
-    - Be visible on 2020-01-08 (release day) and onward until the next release
+    Pre-release dates exist in the index with NaN values (not absent).
     """
     weekly = pd.DataFrame(
         {"value": [100.0, 105.0, 98.0]},
@@ -34,15 +31,17 @@ def test_align_to_daily_forward_fills_from_release_day() -> None:
     )
     daily = align_to_daily(weekly, release_day="wednesday")
 
-    # 2020-01-06 (Mon), 01-07 (Tue): still pre-release-1, should be NaN or not present
-    if pd.Timestamp("2020-01-06") in daily.index:
-        assert pd.isna(daily.loc[pd.Timestamp("2020-01-06"), "value"])
-    # 2020-01-08 (Wed) is the release day for the period 2020-01-03 observation
+    # Pre-release dates (before first release on 2020-01-08) should be NaN.
+    # 2020-01-03 (Fri), 01-06 (Mon), 01-07 (Tue) are all before first release.
+    assert pd.isna(daily.loc[pd.Timestamp("2020-01-03"), "value"])
+    assert pd.isna(daily.loc[pd.Timestamp("2020-01-06"), "value"])
+    assert pd.isna(daily.loc[pd.Timestamp("2020-01-07"), "value"])
+    # 2020-01-08 (Wed) is the release day for the 2020-01-03 observation.
     assert daily.loc[pd.Timestamp("2020-01-08"), "value"] == 100.0
-    # 2020-01-09, 01-10, 01-13, 01-14 should all still be 100 (next release is Wed 01-15)
+    # Forward fill continues through 2020-01-14 (Tue before next release).
     assert daily.loc[pd.Timestamp("2020-01-09"), "value"] == 100.0
     assert daily.loc[pd.Timestamp("2020-01-14"), "value"] == 100.0
-    # 2020-01-15 (Wed) is the release day for the period 2020-01-10 observation
+    # 2020-01-15 (Wed) is the release day for the 2020-01-10 observation.
     assert daily.loc[pd.Timestamp("2020-01-15"), "value"] == 105.0
 
 

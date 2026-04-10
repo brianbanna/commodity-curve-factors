@@ -193,7 +193,9 @@ def align_to_daily(weekly_df: pd.DataFrame, release_day: str) -> pd.DataFrame:
     Each weekly observation is shifted forward to its release date (the next
     occurrence of ``release_day`` strictly after the period date) and then
     forward-filled across business days until the next release. Dates before
-    the first release are left as ``NaN``.
+    the first release date exist in the output index with ``NaN`` values,
+    so the result can be joined cleanly against a full daily trading
+    calendar.
 
     Parameters
     ----------
@@ -229,7 +231,11 @@ def align_to_daily(weekly_df: pd.DataFrame, release_day: str) -> pd.DataFrame:
     # with EIA weekly data, but guard against it by keeping the latest.
     shifted = shifted[~shifted.index.duplicated(keep="last")]
 
-    business_days = pd.bdate_range(start=shifted.index.min(), end=shifted.index.max())
+    # Start the business-day index from the first raw weekly period date,
+    # not the first release date, so that pre-release dates appear in the
+    # output with NaN values (matches the docstring contract and lets
+    # downstream factor code join against a full trading calendar).
+    business_days = pd.bdate_range(start=weekly_df.index.min(), end=shifted.index.max())
     daily = shifted.reindex(business_days).ffill()
     daily.index.name = "Date"
     return daily
