@@ -18,6 +18,7 @@ dependencies = [
     "fredapi>=0.5",
     "nasdaq-data-link>=1.0",
     "requests>=2.31",
+    "python-dotenv>=1.0",
 ]
 
 [project.optional-dependencies]
