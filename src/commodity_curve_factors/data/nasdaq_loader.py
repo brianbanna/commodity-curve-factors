@@ -159,7 +159,9 @@ def download_all_back_months(use_cache: bool = True) -> dict[str, dict[int, pd.D
     Parameters
     ----------
     use_cache : bool
-        Whether to use the Parquet cache for raw CHRIS responses.
+        If True, skip commodities whose full set of output Parquet files
+        (contracts 1..max_tenor) already exists under ``data/raw/futures/chris/``.
+        Matches the semantics used by :mod:`futures_loader`.
 
     Returns
     -------
@@ -171,6 +173,7 @@ def download_all_back_months(use_cache: bool = True) -> dict[str, dict[int, pd.D
     end = universe["date_range"]["end"]
     commodities = universe["commodities"]
 
+    chris_dir = DATA_RAW / "futures" / "chris"
     all_data: dict[str, dict[int, pd.DataFrame]] = {}
 
     for symbol, spec in commodities.items():
@@ -178,6 +181,21 @@ def download_all_back_months(use_cache: bool = True) -> dict[str, dict[int, pd.D
         max_tenor = spec.get("max_tenor")
         if nasdaq_prefix is None or max_tenor is None:
             logger.warning("Skipping %s — missing nasdaq_prefix or max_tenor", symbol)
+            continue
+
+        # If all expected output files already exist, load them instead of redownloading.
+        expected_paths = [
+            chris_dir / f"{symbol}_c{n}.parquet" for n in range(1, max_tenor + 1)
+        ]
+        if use_cache and all(p.exists() for p in expected_paths):
+            logger.info(
+                "Using cached Parquet files for %s back months (1..%d)",
+                symbol,
+                max_tenor,
+            )
+            all_data[symbol] = {
+                n: pd.read_parquet(p) for n, p in enumerate(expected_paths, start=1)
+            }
             continue
 
         contracts = download_back_months(
