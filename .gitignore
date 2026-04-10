@@ -1,9 +1,10 @@
 # Data (downloaded via pipeline)
 /data/raw/*
 /data/processed/*
+/data/cache/*
 !/data/raw/.gitkeep
 !/data/processed/.gitkeep
-!/data/cache/*
+!/data/cache/.gitkeep
 
 # Python
 __pycache__/
