@@ -1,0 +1,410 @@
+"""Download macro time series: FRED rates/USD/breakevens, VIX, and benchmarks.
+
+Series downloaded:
+  - FRED (via fredapi): broad USD index, 10Y Treasury, 5Y breakeven inflation,
+    3M T-bill (used as risk-free rate proxy).
+  - VIX: daily close from yfinance ticker ``^VIX``.
+  - Benchmarks: S&P 500 index (``^GSPC``) and US aggregate bond ETF (``AGG``).
+
+Used downstream for macro factor exposure regressions, VIX-based regime
+classification, and strategy-vs-benchmark comparisons.
+
+Usage:
+    python -m commodity_curve_factors.data.macro_loader
+"""
+
+import logging
+import os
+
+import pandas as pd
+import yfinance as yf
+
+from commodity_curve_factors.utils.config import load_config
+from commodity_curve_factors.utils.paths import DATA_CACHE, DATA_RAW
+
+logger = logging.getLogger(__name__)
+
+MACRO_SERIES: dict[str, str] = {
+    "usd_index": "DTWEXBGS",
+    "dgs10": "DGS10",
+    "t5yie": "T5YIE",
+    "dgs3mo": "DGS3MO",
+}
+
+# yfinance tickers used for non-FRED series. ``^GSPC`` (S&P 500 index) is used
+# instead of the SPY ETF because the index has longer history with no ETF fees
+# baked into the price. The internal dict key stays ``"spy"`` as a short,
+# readable alias for "S&P 500 equivalent" used elsewhere in the codebase.
+_BENCHMARK_TICKERS: dict[str, str] = {
+    "spy": "^GSPC",
+    "agg": "AGG",
+}
+
+_VIX_TICKER = "^VIX"
+
+
+def _flatten_yf_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Flatten yfinance MultiIndex columns to plain column names."""
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    return df
+
+
+def download_fred_series(
+    series_id: str,
+    start: str,
+    end: str,
+    api_key: str,
+) -> pd.DataFrame | None:
+    """Download a single FRED series via fredapi.
+
+    Parameters
+    ----------
+    series_id : str
+        FRED series identifier (e.g. ``"DGS10"``).
+    start, end : str
+        Date range in YYYY-MM-DD format.
+    api_key : str
+        FRED API key.
+
+    Returns
+    -------
+    pd.DataFrame or None
+        DataFrame with DatetimeIndex and a single ``value`` column, or None
+        on failure.
+    """
+    logger.info("Downloading FRED series %s", series_id)
+
+    try:
+        from fredapi import Fred
+    except ImportError:
+        logger.exception("fredapi not installed")
+        return None
+
+    try:
+        fred = Fred(api_key=api_key)
+        series = fred.get_series(
+            series_id,
+            observation_start=start,
+            observation_end=end,
+        )
+    except Exception as exc:
+        logger.warning("FRED download failed for %s: %s", series_id, exc)
+        return None
+
+    if series is None or len(series) == 0:
+        logger.warning("FRED returned empty series for %s", series_id)
+        return None
+
+    df = pd.DataFrame({"value": series})
+    df.index = pd.DatetimeIndex(df.index)
+    df.index.name = "Date"
+    df = df.sort_index().dropna(subset=["value"])
+
+    # Cache raw response for reuse if needed later.
+    DATA_CACHE.mkdir(parents=True, exist_ok=True)
+    cache_path = DATA_CACHE / f"fred_{series_id}.parquet"
+    try:
+        df.to_parquet(cache_path)
+    except Exception:
+        logger.exception("Failed to cache FRED %s at %s", series_id, cache_path)
+
+    logger.info(
+        "FRED %s: %d rows, %s to %s",
+        series_id,
+        len(df),
+        df.index[0].date(),
+        df.index[-1].date(),
+    )
+    return df
+
+
+def download_vix(start: str, end: str) -> pd.DataFrame | None:
+    """Download daily VIX OHLCV from yfinance.
+
+    Parameters
+    ----------
+    start, end : str
+        Date range in YYYY-MM-DD format.
+
+    Returns
+    -------
+    pd.DataFrame or None
+        DataFrame with DatetimeIndex and standard OHLCV columns, or None on
+        failure.
+    """
+    logger.info("Downloading VIX (%s) from yfinance", _VIX_TICKER)
+
+    try:
+        df: pd.DataFrame = yf.download(
+            _VIX_TICKER,
+            start=start,
+            end=end,
+            progress=False,
+            auto_adjust=False,
+        )
+    except Exception:
+        logger.exception("yfinance download failed for VIX")
+        return None
+
+    if df is None or df.empty:
+        logger.warning("No VIX data returned from yfinance")
+        return None
+
+    df = _flatten_yf_columns(df)
+    df.index = pd.DatetimeIndex(df.index)
+    df.index.name = "Date"
+    df = df.sort_index()
+
+    keep_cols = [c for c in ["Open", "High", "Low", "Close", "Volume"] if c in df.columns]
+    df = df[keep_cols]
+    df = df.dropna(subset=["Close"])
+
+    DATA_CACHE.mkdir(parents=True, exist_ok=True)
+    cache_path = DATA_CACHE / "yf_vix.parquet"
+    try:
+        df.to_parquet(cache_path)
+    except Exception:
+        logger.exception("Failed to cache VIX at %s", cache_path)
+
+    logger.info(
+        "VIX: %d rows, %s to %s",
+        len(df),
+        df.index[0].date(),
+        df.index[-1].date(),
+    )
+    return df
+
+
+def download_benchmarks(start: str, end: str) -> dict[str, pd.DataFrame]:
+    """Download S&P 500 and US aggregate bond benchmarks from yfinance.
+
+    The S&P 500 is downloaded via the index ticker ``^GSPC`` (not the SPY ETF)
+    because the index has longer history and no ETF fees baked in. The
+    returned dict still uses ``"spy"`` as the key for downstream naming
+    consistency.
+
+    Parameters
+    ----------
+    start, end : str
+        Date range in YYYY-MM-DD format.
+
+    Returns
+    -------
+    dict
+        ``{"spy": df_gspc, "agg": df_agg}``. Missing downloads are omitted.
+    """
+    result: dict[str, pd.DataFrame] = {}
+
+    for key, ticker in _BENCHMARK_TICKERS.items():
+        logger.info("Downloading benchmark %s (%s) from yfinance", key, ticker)
+
+        try:
+            df: pd.DataFrame = yf.download(
+                ticker,
+                start=start,
+                end=end,
+                progress=False,
+                auto_adjust=False,
+            )
+        except Exception:
+            logger.exception("yfinance download failed for benchmark %s (%s)", key, ticker)
+            continue
+
+        if df is None or df.empty:
+            logger.warning("No benchmark data returned for %s (%s)", key, ticker)
+            continue
+
+        df = _flatten_yf_columns(df)
+        df.index = pd.DatetimeIndex(df.index)
+        df.index.name = "Date"
+        df = df.sort_index()
+
+        keep_cols = [
+            c for c in ["Open", "High", "Low", "Close", "Adj Close", "Volume"] if c in df.columns
+        ]
+        df = df[keep_cols]
+        df = df.dropna(subset=["Close"])
+
+        DATA_CACHE.mkdir(parents=True, exist_ok=True)
+        cache_path = DATA_CACHE / f"yf_{key}.parquet"
+        try:
+            df.to_parquet(cache_path)
+        except Exception:
+            logger.exception("Failed to cache benchmark %s at %s", key, cache_path)
+
+        logger.info(
+            "Benchmark %s: %d rows, %s to %s",
+            key,
+            len(df),
+            df.index[0].date(),
+            df.index[-1].date(),
+        )
+        result[key] = df
+
+    return result
+
+
+def download_all_macro(use_cache: bool = True) -> dict[str, pd.DataFrame]:
+    """Download all macro series (FRED + VIX + benchmarks).
+
+    Date range is read from ``configs/universe.yaml``. The FRED API key is
+    read from the ``FRED_API_KEY`` environment variable; if missing, the
+    FRED block is skipped with a warning but VIX and benchmarks are still
+    downloaded.
+
+    Parameters
+    ----------
+    use_cache : bool
+        If True, skip series whose final Parquet file already exists in
+        ``data/raw/macro/``.
+
+    Returns
+    -------
+    dict
+        Flat dict keyed by series name
+        (``usd_index``, ``dgs10``, ``t5yie``, ``dgs3mo``, ``vix``, ``spy``,
+        ``agg``). Series that failed to download are omitted.
+    """
+    universe = load_config("universe")
+    start = universe["date_range"]["start"]
+    end = universe["date_range"]["end"]
+
+    macro_dir = DATA_RAW / "macro"
+    all_data: dict[str, pd.DataFrame] = {}
+
+    def _cached(name: str) -> pd.DataFrame | None:
+        path = macro_dir / f"{name}.parquet"
+        if use_cache and path.exists():
+            logger.info("Using cached Parquet for %s", name)
+            return pd.read_parquet(path)
+        return None
+
+    # FRED series
+    api_key = os.environ.get("FRED_API_KEY")
+    if not api_key:
+        logger.warning("FRED_API_KEY not set — skipping FRED series")
+    else:
+        for name, series_id in MACRO_SERIES.items():
+            cached = _cached(name)
+            if cached is not None:
+                all_data[name] = cached
+                continue
+            df = download_fred_series(series_id, start, end, api_key)
+            if df is not None:
+                all_data[name] = df
+
+    # VIX
+    cached_vix = _cached("vix")
+    if cached_vix is not None:
+        all_data["vix"] = cached_vix
+    else:
+        vix = download_vix(start, end)
+        if vix is not None:
+            all_data["vix"] = vix
+
+    # Benchmarks (spy, agg)
+    bench_to_fetch: dict[str, str] = {}
+    for key, ticker in _BENCHMARK_TICKERS.items():
+        cached = _cached(key)
+        if cached is not None:
+            all_data[key] = cached
+        else:
+            bench_to_fetch[key] = ticker
+
+    if bench_to_fetch:
+        # download_benchmarks iterates over its own internal ticker dict;
+        # we call it once and only keep keys we actually still need.
+        benches = download_benchmarks(start, end)
+        for key in bench_to_fetch:
+            if key in benches:
+                all_data[key] = benches[key]
+
+    logger.info("Macro download complete: %d series", len(all_data))
+    return all_data
+
+
+def save_macro_data(data: dict[str, pd.DataFrame]) -> None:
+    """Save each macro series as Parquet in ``data/raw/macro/``."""
+    out_dir = DATA_RAW / "macro"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    for name, df in data.items():
+        path = out_dir / f"{name}.parquet"
+        df.to_parquet(path)
+        if len(df) > 0:
+            logger.info(
+                "Saved %s → %s (%d rows, %s to %s)",
+                name,
+                path,
+                len(df),
+                df.index[0].date(),
+                df.index[-1].date(),
+            )
+        else:
+            logger.info("Saved %s → %s (0 rows)", name, path)
+
+
+def load_macro_data() -> dict[str, pd.DataFrame]:
+    """Load previously saved macro Parquet files from ``data/raw/macro/``.
+
+    Returns
+    -------
+    dict
+        Keys are file stems (e.g. ``"dgs10"``, ``"vix"``, ``"spy"``). Empty
+        dict if the directory does not exist.
+    """
+    macro_dir = DATA_RAW / "macro"
+    if not macro_dir.exists():
+        logger.warning("No macro data directory at %s", macro_dir)
+        return {}
+
+    data: dict[str, pd.DataFrame] = {}
+    for path in sorted(macro_dir.glob("*.parquet")):
+        name = path.stem
+        data[name] = pd.read_parquet(path)
+        logger.debug("Loaded %s (%d rows)", name, len(data[name]))
+
+    return data
+
+
+def main() -> None:
+    """Download all macro series and save as Parquet."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        logger.debug("python-dotenv not installed; skipping .env loading")
+
+    logger.info("=== Macro Data Download ===")
+    data = download_all_macro(use_cache=True)
+
+    if not data:
+        logger.error("No macro data downloaded — check network and FRED_API_KEY")
+        return
+
+    save_macro_data(data)
+
+    logger.info("=== Download Summary ===")
+    for name, df in sorted(data.items()):
+        if len(df) > 0:
+            logger.info(
+                "  %-10s  %5d rows  %s → %s",
+                name,
+                len(df),
+                df.index[0].date(),
+                df.index[-1].date(),
+            )
+        else:
+            logger.info("  %-10s  %5d rows", name, 0)
+
+
+if __name__ == "__main__":
+    main()
