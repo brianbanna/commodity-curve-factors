@@ -200,8 +200,8 @@ def download_all_back_months(use_cache: bool = True) -> dict[str, dict[int, pd.D
 
 
 def save_back_month_data(data: dict[str, dict[int, pd.DataFrame]]) -> None:
-    """Save back-month contract data as Parquet files under data/raw/futures/."""
-    out_dir = DATA_RAW / "futures"
+    """Save back-month contract data as Parquet files under data/raw/futures/chris/."""
+    out_dir = DATA_RAW / "futures" / "chris"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for symbol, contracts in data.items():
@@ -219,13 +219,13 @@ def load_back_month_data() -> dict[str, dict[int, pd.DataFrame]]:
     dict[str, dict[int, pd.DataFrame]]
         Same structure as :func:`download_all_back_months`.
     """
-    futures_dir = DATA_RAW / "futures"
-    if not futures_dir.exists():
-        logger.warning("No futures data directory at %s", futures_dir)
+    chris_dir = DATA_RAW / "futures" / "chris"
+    if not chris_dir.exists():
+        logger.warning("No CHRIS data directory at %s", chris_dir)
         return {}
 
     data: dict[str, dict[int, pd.DataFrame]] = {}
-    for path in sorted(futures_dir.glob("*_c*.parquet")):
+    for path in sorted(chris_dir.glob("*_c*.parquet")):
         stem = path.stem  # e.g. "CL_c3"
         if "_c" not in stem:
             continue
