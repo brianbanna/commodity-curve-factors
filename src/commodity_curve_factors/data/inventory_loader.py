@@ -345,14 +345,10 @@ def download_usda_stocks(
     pd.DataFrame or None
         DataFrame with a ``DatetimeIndex`` of release dates (the
         ``load_time`` field, i.e. the day USDA published the report)
-        and columns ``value`` (float bushels) and ``period_date``
-        (the quarterly as-of date derived from ``year`` +
-        ``reference_period_desc``). The index may contain duplicate
-        timestamps because a single NASS Grain Stocks report typically
-        publishes several quarterly observations on the same
-        ``load_time``; rows are deduplicated on the composite key
-        ``(load_time, period_date)`` with ``keep="last"``. Sorted
-        ascending by ``(load_time, period_date)``. Returns ``None`` on
+        and a single ``value`` column of ``float`` dtype. The index is
+        unique and sorted ascending. This matches the schema returned
+        by :func:`download_eia_series` so that downstream factor code
+        can treat both sources uniformly. Returns ``None`` on
         network/API failure, on an unknown commodity symbol, on an
         error response body, or when no rows match the ``short_desc``
         filter.
@@ -366,11 +362,13 @@ def download_usda_stocks(
     flow into the inventory surprise factor.
 
     The ``load_time`` (release date) is the no-lookahead anchor: data
-    should only be visible to a strategy from that date onward. The
-    ``period_date`` column is the measurement timestamp (e.g. September 1
-    for a Q3 Grain Stocks observation) — downstream factor code can use
-    it to compute quarterly inventory changes without lookahead because
-    both dates are preserved.
+    should only be visible to a strategy from that date onward. When a
+    single NASS Grain Stocks report publishes several ``period_date``
+    values under one ``load_time`` (for example a new observation plus
+    revisions to earlier quarters), only the row with the LATEST
+    ``period_date`` is kept — that is the new observation being released
+    in that report. Revisions of historical values are intentionally
+    dropped; callers that need them should hit the NASS API directly.
     """
     series = USDA_STOCK_SERIES.get(commodity)
     if series is None:
@@ -469,17 +467,21 @@ def download_usda_stocks(
         return None
 
     df = pd.DataFrame.from_records(rows)
-    # Sort by (load_time, period_date) so that dedup with keep="last" picks
-    # the most recent entry for each (release, as-of) pair. Missing
-    # period_date values sort to the end — we still keep them so unknown
-    # reference periods never silently vanish.
-    df = df.sort_values(["load_time", "period_date"], na_position="last")
-    df = df.drop_duplicates(subset=["load_time", "period_date"], keep="last")
-    df["value"] = df["value"].astype(float)
     df["period_date"] = pd.to_datetime(df["period_date"])
+    # For each load_time, keep only the row with the LATEST period_date —
+    # that is the new observation being released in that report. Older
+    # period_dates appearing under the same load_time are revisions of
+    # historical values, which we intentionally drop in order to keep the
+    # schema uniform with the EIA loader. Missing period_date values sort
+    # to the end, so they lose to any dated row on the same load_time.
+    df = df.sort_values(["load_time", "period_date"], na_position="first")
+    df = df.drop_duplicates(subset=["load_time"], keep="last")
+    df = df.drop(columns=["period_date"])
+    df["value"] = df["value"].astype(float)
 
     df = df.set_index("load_time")
     df.index.name = "Date"
+    df = df.sort_index()
 
     # NASS filtered by year, so trim to the exact requested window on the
     # release-date axis (the no-lookahead anchor).

@@ -126,12 +126,16 @@ def test_usda_value_parsing_handles_comma_strings(monkeypatch, tmp_path) -> None
                 "commodity_desc": "CORN",
                 "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
                 "load_time": "2024-09-30 00:00:00",
+                "reference_period_desc": "FIRST OF SEP",
+                "year": "2024",
                 "Value": "1,760,000,000",
             },
             {
                 "commodity_desc": "CORN",
                 "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
                 "load_time": "2024-06-28 00:00:00",
+                "reference_period_desc": "FIRST OF JUN",
+                "year": "2024",
                 "Value": "5,200,000,000",
             },
             {
@@ -139,6 +143,8 @@ def test_usda_value_parsing_handles_comma_strings(monkeypatch, tmp_path) -> None
                 "commodity_desc": "CORN",
                 "short_desc": "CORN, GRAIN, ON FARM - STOCKS, MEASURED IN BU",
                 "load_time": "2024-06-28 00:00:00",
+                "reference_period_desc": "FIRST OF JUN",
+                "year": "2024",
                 "Value": "3,000,000,000",
             },
             {
@@ -146,6 +152,8 @@ def test_usda_value_parsing_handles_comma_strings(monkeypatch, tmp_path) -> None
                 "commodity_desc": "CORN",
                 "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
                 "load_time": "2024-03-28 00:00:00",
+                "reference_period_desc": "FIRST OF MAR",
+                "year": "2024",
                 "Value": "(D)",
             },
         ]
@@ -170,40 +178,50 @@ def test_usda_value_parsing_handles_comma_strings(monkeypatch, tmp_path) -> None
     )
 
     assert result is not None
-    # Three CORN GRAIN (total) rows; ON FARM row is filtered out.
+    # Uniform schema: single 'value' column, DatetimeIndex = load_time.
+    assert list(result.columns) == ["value"]
+    # Three unique load_times (Mar, Jun, Sep); ON FARM row is filtered out.
     assert len(result) == 3
     assert result.loc[pd.Timestamp("2024-09-30"), "value"] == 1_760_000_000
     assert result.loc[pd.Timestamp("2024-06-28"), "value"] == 5_200_000_000
     assert pd.isna(result.loc[pd.Timestamp("2024-03-28"), "value"])
+    # Index is unique so the shape matches the EIA loader's output.
+    assert result.index.is_unique
 
 
-def test_usda_preserves_multiple_observations_per_release(monkeypatch, tmp_path) -> None:
-    """A single NASS release can carry several quarterly observations.
-
-    When two rows share a ``load_time`` but have different
-    ``reference_period_desc`` values, both must be kept (the composite
-    key is ``(load_time, period_date)``), and both should receive a
-    non-null ``period_date``.
+def test_usda_keeps_latest_period_date_per_release(monkeypatch, tmp_path) -> None:
+    """When NASS publishes multiple period_dates under one load_time (revisions),
+    keep only the row with the LATEST period_date (the new observation).
     """
     from commodity_curve_factors.data import inventory_loader
 
+    # One load_time with THREE period_date values — simulates a release that
+    # includes a new Sep observation plus revisions to Jun and Mar.
     fake_response_data = {
         "data": [
             {
                 "commodity_desc": "CORN",
                 "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
-                "load_time": "2024-01-12 12:00:00",
-                "year": 2023,
-                "reference_period_desc": "FIRST OF DEC",
-                "Value": "12,000,000,000",
+                "load_time": "2024-09-30 00:00:00",
+                "reference_period_desc": "FIRST OF SEP",
+                "year": "2024",
+                "Value": "1,760,000,000",
             },
             {
                 "commodity_desc": "CORN",
                 "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
-                "load_time": "2024-01-12 12:00:00",
-                "year": 2023,
-                "reference_period_desc": "FIRST OF SEP",
-                "Value": "1,760,000,000",
+                "load_time": "2024-09-30 00:00:00",
+                "reference_period_desc": "FIRST OF JUN",
+                "year": "2024",
+                "Value": "5,100,000,000",
+            },
+            {
+                "commodity_desc": "CORN",
+                "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
+                "load_time": "2024-09-30 00:00:00",
+                "reference_period_desc": "FIRST OF MAR",
+                "year": "2024",
+                "Value": "8,400,000,000",
             },
         ]
     }
@@ -227,12 +245,9 @@ def test_usda_preserves_multiple_observations_per_release(monkeypatch, tmp_path)
     )
 
     assert result is not None
-    assert len(result) == 2
-    # Both rows share the same load_time (index) but have distinct period_dates.
-    assert (result.index == pd.Timestamp("2024-01-12 12:00:00")).all()
-    period_dates = set(pd.to_datetime(result["period_date"]).dt.normalize())
-    assert pd.Timestamp("2023-09-01") in period_dates
-    assert pd.Timestamp("2023-12-01") in period_dates
+    # Three rows, one load_time → kept only the LATEST period_date (Sep).
+    assert len(result) == 1
+    assert result.loc[pd.Timestamp("2024-09-30"), "value"] == 1_760_000_000
 
 
 def test_usda_error_body_returns_none(monkeypatch, tmp_path) -> None:
