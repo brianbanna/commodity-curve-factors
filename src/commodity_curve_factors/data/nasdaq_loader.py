@@ -225,16 +225,15 @@ def load_back_month_data() -> dict[str, dict[int, pd.DataFrame]]:
         return {}
 
     data: dict[str, dict[int, pd.DataFrame]] = {}
-    for path in sorted(chris_dir.glob("*_c*.parquet")):
+    # Only match files whose suffix after "_c" starts with a digit, e.g. "CL_c3".
+    # This guards against stray files like "HG_carry_c3.parquet" or "CL_cfoo.parquet".
+    for path in sorted(chris_dir.glob("*_c[0-9]*.parquet")):
         stem = path.stem  # e.g. "CL_c3"
-        if "_c" not in stem:
-            continue
         symbol, tenor_part = stem.rsplit("_c", 1)
-        try:
-            n = int(tenor_part)
-        except ValueError:
+        if not tenor_part.isdigit():
             logger.debug("Skipping unrecognized filename %s", path.name)
             continue
+        n = int(tenor_part)
         data.setdefault(symbol, {})[n] = pd.read_parquet(path)
         logger.debug("Loaded %s c%d (%d rows)", symbol, n, len(data[symbol][n]))
 
