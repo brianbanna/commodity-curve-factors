@@ -122,13 +122,20 @@ def download_eia_series(
     try:
         response = requests.get(url, params=params, timeout=_REQUEST_TIMEOUT_SECONDS)
     except requests.RequestException as exc:
-        logger.warning("EIA download failed for %s: %s", v2_id, exc)
+        # Never include ``exc`` itself in the log message: the default
+        # stringification on ConnectionError / Timeout embeds the full URL,
+        # which contains ``api_key=...`` in the query string.
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        logger.warning(
+            "EIA download failed for %s (%s, status=%s)",
+            v2_id,
+            type(exc).__name__,
+            status,
+        )
         return None
 
     if response.status_code != 200:
-        logger.warning(
-            "EIA download failed for %s: HTTP %d", v2_id, response.status_code
-        )
+        logger.warning("EIA download failed for %s: HTTP %d", v2_id, response.status_code)
         return None
 
     try:
