@@ -144,6 +144,12 @@ def download_eia_series(
         logger.warning("EIA response for %s was not valid JSON: %s", v2_id, exc)
         return None
 
+    # EIA v2 sometimes returns HTTP 200 with an error body (e.g. invalid API
+    # key) and no ``response.data`` field. Surface that directly.
+    if "error" in payload:
+        logger.warning("EIA API error for %s: %s", v2_id, payload["error"])
+        return None
+
     records = payload.get("response", {}).get("data")
     if records is None:
         logger.warning("EIA response for %s missing 'response.data' key", v2_id)
