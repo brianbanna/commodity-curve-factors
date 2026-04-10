@@ -78,4 +78,3 @@ def test_load_inventory_data_roundtrip(tmp_path, monkeypatch) -> None:
     result = inventory_loader.load_inventory_data()
     assert "crude_stocks" in result
     assert_frame_equal(result["crude_stocks"], df_in)
-
