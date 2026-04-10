@@ -57,24 +57,6 @@ _WEEKDAY_INDEX: dict[str, int] = {
 }
 
 
-def _extract_v2_series_id(raw_id: str) -> str:
-    """Extract the v2 series ID from a legacy ``PET.WCESTUS1.W``-style string.
-
-    The EIA v1 API used dotted identifiers like ``PET.WCESTUS1.W``, but the v2
-    API's ``facets[series][]`` filter expects just the middle part
-    (``WCESTUS1``). If the incoming id already has no dots it is returned as
-    is, which allows the YAML config to use either style.
-    """
-    if "." not in raw_id:
-        return raw_id
-    parts = raw_id.split(".")
-    # Strip any empty trailing frequency suffix and take the longest segment.
-    segments = [p for p in parts if p]
-    if len(segments) >= 2:
-        return segments[1]
-    return segments[0]
-
-
 def download_eia_series(
     series_id: str,
     route: str,
@@ -87,8 +69,9 @@ def download_eia_series(
     Parameters
     ----------
     series_id : str
-        EIA v2 series identifier (e.g. ``"WCESTUS1"``). Legacy dotted ids
-        like ``"PET.WCESTUS1.W"`` are also accepted and normalised.
+        EIA v2 series identifier (e.g. ``"WCESTUS1"``). This is the value
+        passed straight to the ``facets[series][]`` query parameter; legacy
+        dotted ids like ``"PET.WCESTUS1.W"`` are not supported.
     route : str
         URL path segment between ``/v2/`` and ``/data/`` (e.g.
         ``"petroleum/stoc/wstk"``). Look up from :data:`EIA_ROUTES`.
@@ -106,15 +89,14 @@ def download_eia_series(
         also returned as ``None`` with a warning so the orchestrator can
         skip cleanly.
     """
-    v2_id = _extract_v2_series_id(series_id)
-    logger.info("Downloading EIA series %s from %s", v2_id, route)
+    logger.info("Downloading EIA series %s from %s", series_id, route)
 
     url = f"{_EIA_API_BASE}/{route}/data/"
     params = {
         "api_key": api_key,
         "frequency": "weekly",
         "data[0]": "value",
-        "facets[series][]": v2_id,
+        "facets[series][]": series_id,
         "start": start,
         "end": end,
     }
@@ -128,42 +110,42 @@ def download_eia_series(
         status = getattr(getattr(exc, "response", None), "status_code", None)
         logger.warning(
             "EIA download failed for %s (%s, status=%s)",
-            v2_id,
+            series_id,
             type(exc).__name__,
             status,
         )
         return None
 
     if response.status_code != 200:
-        logger.warning("EIA download failed for %s: HTTP %d", v2_id, response.status_code)
+        logger.warning("EIA download failed for %s: HTTP %d", series_id, response.status_code)
         return None
 
     try:
         payload: dict[str, Any] = response.json()
     except ValueError as exc:
-        logger.warning("EIA response for %s was not valid JSON: %s", v2_id, exc)
+        logger.warning("EIA response for %s was not valid JSON: %s", series_id, exc)
         return None
 
     # EIA v2 sometimes returns HTTP 200 with an error body (e.g. invalid API
     # key) and no ``response.data`` field. Surface that directly.
     if "error" in payload:
-        logger.warning("EIA API error for %s: %s", v2_id, payload["error"])
+        logger.warning("EIA API error for %s: %s", series_id, payload["error"])
         return None
 
     records = payload.get("response", {}).get("data")
     if records is None:
-        logger.warning("EIA response for %s missing 'response.data' key", v2_id)
+        logger.warning("EIA response for %s missing 'response.data' key", series_id)
         return None
 
     if len(records) == 0:
-        logger.warning("EIA returned empty data for %s (%s to %s)", v2_id, start, end)
+        logger.warning("EIA returned empty data for %s (%s to %s)", series_id, start, end)
         return None
 
     df = pd.DataFrame.from_records(records)
     if "period" not in df.columns or "value" not in df.columns:
         logger.warning(
             "EIA response for %s missing required columns; got %s",
-            v2_id,
+            series_id,
             list(df.columns),
         )
         return None
@@ -175,18 +157,17 @@ def download_eia_series(
     df.index.name = "Date"
     df["value"] = df["value"].astype(float)
 
-    # Cache raw parsed response for reuse. Key the cache file by v2 id so
-    # callers using either id style land on the same file.
+    # Cache raw parsed response for reuse.
     DATA_CACHE.mkdir(parents=True, exist_ok=True)
-    cache_path = DATA_CACHE / f"eia_{v2_id}.parquet"
+    cache_path = DATA_CACHE / f"eia_{series_id}.parquet"
     try:
         df.to_parquet(cache_path)
     except Exception:
-        logger.exception("Failed to cache EIA %s at %s", v2_id, cache_path)
+        logger.exception("Failed to cache EIA %s at %s", series_id, cache_path)
 
     logger.info(
         "EIA %s: %d rows, %s to %s",
-        v2_id,
+        series_id,
         len(df),
         df.index[0].date(),
         df.index[-1].date(),
