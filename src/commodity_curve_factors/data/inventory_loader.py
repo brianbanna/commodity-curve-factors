@@ -627,7 +627,7 @@ def load_inventory_data() -> dict[str, pd.DataFrame]:
 
 
 def main() -> None:
-    """Download all EIA inventory series and save as Parquet."""
+    """Download all EIA and USDA inventory series and save as Parquet."""
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -642,16 +642,28 @@ def main() -> None:
         logger.debug("python-dotenv not installed; skipping .env loading")
 
     logger.info("=== EIA Inventory Data Download ===")
-    data = download_all_eia(use_cache=True)
+    eia_data = download_all_eia(use_cache=True)
 
-    if not data:
-        logger.error("No inventory data downloaded — check network and EIA_API_KEY")
+    if eia_data:
+        save_inventory_data(eia_data)
+    else:
+        logger.error("No EIA inventory data downloaded — check network and EIA_API_KEY")
+
+    logger.info("=== USDA NASS Inventory Data Download ===")
+    usda_data = download_all_usda(use_cache=True)
+
+    if usda_data:
+        save_inventory_data(usda_data, prefix="usda_")
+    else:
+        logger.error(
+            "No USDA inventory data downloaded — check network and USDA_NASS_API_KEY"
+        )
+
+    if not eia_data and not usda_data:
         return
 
-    save_inventory_data(data)
-
     logger.info("=== Download Summary ===")
-    for name, df in sorted(data.items()):
+    for name, df in sorted(eia_data.items()):
         if len(df) > 0:
             logger.info(
                 "  %-22s  %5d rows  %s → %s",
@@ -662,6 +674,18 @@ def main() -> None:
             )
         else:
             logger.info("  %-22s  %5d rows", name, 0)
+    for commodity, df in sorted(usda_data.items()):
+        label = f"usda_{commodity}"
+        if len(df) > 0:
+            logger.info(
+                "  %-22s  %5d rows  %s → %s",
+                label,
+                len(df),
+                df.index[0].date(),
+                df.index[-1].date(),
+            )
+        else:
+            logger.info("  %-22s  %5d rows", label, 0)
 
 
 if __name__ == "__main__":
