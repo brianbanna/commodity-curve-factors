@@ -511,13 +511,84 @@ def download_all_eia(use_cache: bool = True) -> dict[str, pd.DataFrame]:
     return all_data
 
 
-def save_inventory_data(data: dict[str, pd.DataFrame]) -> None:
-    """Save each inventory series as Parquet in ``data/raw/inventory/``."""
+def download_all_usda(use_cache: bool = True) -> dict[str, pd.DataFrame]:
+    """Download every USDA NASS stocks series listed in ``configs/inventory.yaml``.
+
+    Crops are read from ``inventory.yaml`` under ``usda.crops``. Date range
+    is read from ``configs/universe.yaml``. The API key is read from the
+    ``USDA_NASS_API_KEY`` environment variable; if missing, an empty dict
+    is returned and the caller is warned.
+
+    Parameters
+    ----------
+    use_cache : bool
+        If True, crops whose final Parquet file already exists in
+        ``data/raw/inventory/`` (under the ``usda_`` prefix) are loaded
+        from disk instead of re-downloaded.
+
+    Returns
+    -------
+    dict
+        ``{commodity_symbol: df}`` for each successfully downloaded crop.
+        Crops that fail are omitted; the orchestrator does not abort on
+        a single failure.
+    """
+    api_key = os.environ.get("USDA_NASS_API_KEY")
+    if not api_key:
+        logger.error("USDA_NASS_API_KEY not set — cannot download USDA inventory data")
+        return {}
+
+    inventory_config = load_config("inventory")
+    crops = inventory_config["usda"]["crops"]
+
+    universe = load_config("universe")
+    start = universe["date_range"]["start"]
+    end = universe["date_range"]["end"]
+
+    inventory_dir = DATA_RAW / "inventory"
+    all_data: dict[str, pd.DataFrame] = {}
+
+    for commodity in crops:
+        cached_path = inventory_dir / f"usda_{commodity}.parquet"
+        if use_cache and cached_path.exists():
+            logger.info("Using cached Parquet for USDA %s", commodity)
+            all_data[commodity] = pd.read_parquet(cached_path)
+            continue
+
+        if commodity not in USDA_STOCK_SERIES:
+            logger.warning("No USDA series registered for %s — skipping", commodity)
+            continue
+
+        df = download_usda_stocks(
+            commodity=commodity,
+            start=start,
+            end=end,
+            api_key=api_key,
+        )
+        if df is not None:
+            all_data[commodity] = df
+
+    logger.info("USDA download complete: %d crops", len(all_data))
+    return all_data
+
+
+def save_inventory_data(data: dict[str, pd.DataFrame], prefix: str = "") -> None:
+    """Save each inventory series as Parquet in ``data/raw/inventory/``.
+
+    Parameters
+    ----------
+    data : dict[str, pd.DataFrame]
+        Mapping from series name (or commodity symbol) to DataFrame.
+    prefix : str, optional
+        Optional filename prefix. For example, ``prefix="usda_"`` saves
+        ``"ZC"`` as ``usda_ZC.parquet``. Default is no prefix, which
+        keeps behaviour backwards-compatible with the EIA call sites.
+    """
     out_dir = DATA_RAW / "inventory"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for name, df in data.items():
-        path = out_dir / f"{name}.parquet"
+        path = out_dir / f"{prefix}{name}.parquet"
         df.to_parquet(path)
         if len(df) > 0:
             logger.info(
