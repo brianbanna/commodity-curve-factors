@@ -177,6 +177,64 @@ def test_usda_value_parsing_handles_comma_strings(monkeypatch, tmp_path) -> None
     assert pd.isna(result.loc[pd.Timestamp("2024-03-28"), "value"])
 
 
+def test_usda_preserves_multiple_observations_per_release(monkeypatch, tmp_path) -> None:
+    """A single NASS release can carry several quarterly observations.
+
+    When two rows share a ``load_time`` but have different
+    ``reference_period_desc`` values, both must be kept (the composite
+    key is ``(load_time, period_date)``), and both should receive a
+    non-null ``period_date``.
+    """
+    from commodity_curve_factors.data import inventory_loader
+
+    fake_response_data = {
+        "data": [
+            {
+                "commodity_desc": "CORN",
+                "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
+                "load_time": "2024-01-12 12:00:00",
+                "year": 2023,
+                "reference_period_desc": "FIRST OF DEC",
+                "Value": "12,000,000,000",
+            },
+            {
+                "commodity_desc": "CORN",
+                "short_desc": "CORN, GRAIN - STOCKS, MEASURED IN BU",
+                "load_time": "2024-01-12 12:00:00",
+                "year": 2023,
+                "reference_period_desc": "FIRST OF SEP",
+                "Value": "1,760,000,000",
+            },
+        ]
+    }
+
+    class FakeResponse:
+        status_code = 200
+
+        def json(self) -> dict:
+            return fake_response_data
+
+        def raise_for_status(self) -> None:
+            pass
+
+    monkeypatch.setattr(
+        inventory_loader.requests, "get", lambda *args, **kwargs: FakeResponse()
+    )
+    monkeypatch.setattr(inventory_loader, "DATA_CACHE", tmp_path)
+
+    result = inventory_loader.download_usda_stocks(
+        "ZC", "2024-01-01", "2024-12-31", "FAKE_KEY"
+    )
+
+    assert result is not None
+    assert len(result) == 2
+    # Both rows share the same load_time (index) but have distinct period_dates.
+    assert (result.index == pd.Timestamp("2024-01-12 12:00:00")).all()
+    period_dates = set(pd.to_datetime(result["period_date"]).dt.normalize())
+    assert pd.Timestamp("2023-09-01") in period_dates
+    assert pd.Timestamp("2023-12-01") in period_dates
+
+
 def test_usda_error_body_returns_none(monkeypatch, tmp_path) -> None:
     """200-OK response with 'error' key should log and return None."""
     from commodity_curve_factors.data import inventory_loader

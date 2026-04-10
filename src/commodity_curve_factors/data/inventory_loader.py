@@ -284,6 +284,41 @@ def _parse_usda_value(raw: Any) -> float:
         return float("nan")
 
 
+# NASS Grain Stocks reference periods are always "first of" a quarter-end
+# month. Map the free-text ``reference_period_desc`` values we have seen in
+# practice onto the month number of the as-of date.
+_USDA_REF_PERIOD_MONTH: dict[str, int] = {
+    "FIRST OF MAR": 3,
+    "FIRST OF JUN": 6,
+    "FIRST OF SEP": 9,
+    "FIRST OF DEC": 12,
+    # Short variants occasionally returned by older API versions:
+    "MAR 1": 3,
+    "JUN 1": 6,
+    "SEP 1": 9,
+    "DEC 1": 12,
+}
+
+
+def _parse_usda_period_date(year: Any, reference_period_desc: Any) -> pd.Timestamp | None:
+    """Derive the as-of date of a NASS stocks observation.
+
+    Combines ``year`` with the month implied by ``reference_period_desc``
+    (e.g. ``"FIRST OF SEP"`` → September 1 of that year). Returns ``None``
+    when either input is missing or the reference period is unrecognised.
+    """
+    if year is None or reference_period_desc is None:
+        return None
+    try:
+        year_int = int(year)
+    except (TypeError, ValueError):
+        return None
+    month = _USDA_REF_PERIOD_MONTH.get(str(reference_period_desc).strip().upper())
+    if month is None:
+        return None
+    return pd.Timestamp(year=year_int, month=month, day=1)
+
+
 def download_usda_stocks(
     commodity: str,
     start: str,
@@ -309,13 +344,18 @@ def download_usda_stocks(
     -------
     pd.DataFrame or None
         DataFrame with a ``DatetimeIndex`` of release dates (the
-        ``load_time`` field, i.e. the day USDA published the report) and
-        a single ``value`` column of ``float`` bushels. Sorted ascending;
-        deduplicated on index with ``keep="last"`` so that if NASS
-        republishes a figure on the same ``load_time`` the most recent
-        value in the response wins. Returns ``None`` on network/API
-        failure, on an unknown commodity symbol, on an error response
-        body, or when no rows match the ``short_desc`` filter.
+        ``load_time`` field, i.e. the day USDA published the report)
+        and columns ``value`` (float bushels) and ``period_date``
+        (the quarterly as-of date derived from ``year`` +
+        ``reference_period_desc``). The index may contain duplicate
+        timestamps because a single NASS Grain Stocks report typically
+        publishes several quarterly observations on the same
+        ``load_time``; rows are deduplicated on the composite key
+        ``(load_time, period_date)`` with ``keep="last"``. Sorted
+        ascending by ``(load_time, period_date)``. Returns ``None`` on
+        network/API failure, on an unknown commodity symbol, on an
+        error response body, or when no rows match the ``short_desc``
+        filter.
 
     Notes
     -----
@@ -323,9 +363,14 @@ def download_usda_stocks(
     rather than matching only the leading commodity name. NASS publishes
     several disaggregated stocks series per crop (on-farm vs. off-farm,
     for instance); only the "total" series — exact string match — should
-    flow into the inventory surprise factor. The ``reference_period_desc``
-    (e.g. ``"SEP 1"``) is discarded: for no-lookahead purposes the
-    release date (``load_time``) is the only timestamp that matters.
+    flow into the inventory surprise factor.
+
+    The ``load_time`` (release date) is the no-lookahead anchor: data
+    should only be visible to a strategy from that date onward. The
+    ``period_date`` column is the measurement timestamp (e.g. September 1
+    for a Q3 Grain Stocks observation) — downstream factor code can use
+    it to compute quarterly inventory changes without lookahead because
+    both dates are preserved.
     """
     series = USDA_STOCK_SERIES.get(commodity)
     if series is None:
@@ -408,21 +453,36 @@ def download_usda_stocks(
             load_time = pd.to_datetime(load_time_raw)
         except (ValueError, TypeError):
             continue
-        rows.append({"load_time": load_time, "value": _parse_usda_value(record.get("Value"))})
+        period_date = _parse_usda_period_date(
+            record.get("year"), record.get("reference_period_desc")
+        )
+        rows.append(
+            {
+                "load_time": load_time,
+                "period_date": period_date,
+                "value": _parse_usda_value(record.get("Value")),
+            }
+        )
 
     if len(rows) == 0:
         logger.warning("USDA response for %s had no parseable rows", commodity)
         return None
 
     df = pd.DataFrame.from_records(rows)
-    df = df.set_index("load_time").sort_index()
-    df.index.name = "Date"
-    # If NASS republishes a value on the same load_time, keep the most
-    # recent entry from the response (last wins after sort).
-    df = df[~df.index.duplicated(keep="last")]
+    # Sort by (load_time, period_date) so that dedup with keep="last" picks
+    # the most recent entry for each (release, as-of) pair. Missing
+    # period_date values sort to the end — we still keep them so unknown
+    # reference periods never silently vanish.
+    df = df.sort_values(["load_time", "period_date"], na_position="last")
+    df = df.drop_duplicates(subset=["load_time", "period_date"], keep="last")
     df["value"] = df["value"].astype(float)
+    df["period_date"] = pd.to_datetime(df["period_date"])
 
-    # NASS filtered by year, so trim to the exact requested window.
+    df = df.set_index("load_time")
+    df.index.name = "Date"
+
+    # NASS filtered by year, so trim to the exact requested window on the
+    # release-date axis (the no-lookahead anchor).
     df = df.loc[(df.index >= start_ts) & (df.index <= end_ts)]
 
     if len(df) == 0:
