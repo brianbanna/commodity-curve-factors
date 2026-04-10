@@ -22,10 +22,6 @@ eia:
       frequency: "weekly"
       release_day: "wednesday"
 
-usda:
-  crops: ["ZC", "ZS", "ZW"]
-  frequency: "monthly"
-
 surprise:
   seasonal_years: 5
   z_score_window: "expanding"
