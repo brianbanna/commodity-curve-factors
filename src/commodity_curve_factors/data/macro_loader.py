@@ -176,7 +176,9 @@ def download_vix(start: str, end: str) -> pd.DataFrame | None:
     return df
 
 
-def download_benchmarks(start: str, end: str) -> dict[str, pd.DataFrame]:
+def download_benchmarks(
+    start: str, end: str, keys: list[str] | None = None
+) -> dict[str, pd.DataFrame]:
     """Download S&P 500 and US aggregate bond benchmarks from yfinance.
 
     The S&P 500 is downloaded via the index ticker ``^GSPC`` (not the SPY ETF)
@@ -188,6 +190,10 @@ def download_benchmarks(start: str, end: str) -> dict[str, pd.DataFrame]:
     ----------
     start, end : str
         Date range in YYYY-MM-DD format.
+    keys : list[str] or None
+        If provided, only download this subset of benchmark keys (e.g.
+        ``["spy"]``). Unknown keys are ignored. Default ``None`` downloads
+        every ticker in ``_BENCHMARK_TICKERS``.
 
     Returns
     -------
@@ -196,7 +202,12 @@ def download_benchmarks(start: str, end: str) -> dict[str, pd.DataFrame]:
     """
     result: dict[str, pd.DataFrame] = {}
 
-    for key, ticker in _BENCHMARK_TICKERS.items():
+    if keys is None:
+        tickers_to_fetch = _BENCHMARK_TICKERS
+    else:
+        tickers_to_fetch = {k: _BENCHMARK_TICKERS[k] for k in keys if k in _BENCHMARK_TICKERS}
+
+    for key, ticker in tickers_to_fetch.items():
         logger.info("Downloading benchmark %s (%s) from yfinance", key, ticker)
 
         try:
@@ -313,9 +324,8 @@ def download_all_macro(use_cache: bool = True) -> dict[str, pd.DataFrame]:
             bench_to_fetch[key] = ticker
 
     if bench_to_fetch:
-        # download_benchmarks iterates over its own internal ticker dict;
-        # we call it once and only keep keys we actually still need.
-        benches = download_benchmarks(start, end)
+        # Only hit the network for benchmarks not already in the cache.
+        benches = download_benchmarks(start, end, keys=list(bench_to_fetch))
         for key in bench_to_fetch:
             if key in benches:
                 all_data[key] = benches[key]

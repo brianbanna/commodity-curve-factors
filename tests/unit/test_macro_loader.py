@@ -63,3 +63,41 @@ def test_save_macro_data_creates_directory_and_saves_all(tmp_path, monkeypatch) 
 
     assert (tmp_path / "macro" / "dgs10.parquet").exists()
     assert (tmp_path / "macro" / "vix.parquet").exists()
+
+
+def test_download_benchmarks_keys_parameter(monkeypatch) -> None:
+    """download_benchmarks with keys=['spy'] should only fetch spy, not agg."""
+    import tempfile
+    from pathlib import Path
+
+    import pandas as pd
+
+    from commodity_curve_factors.data import macro_loader
+
+    calls: list[str] = []
+
+    def fake_yf_download(ticker, **kwargs):
+        calls.append(ticker)
+        return pd.DataFrame(
+            {
+                ("Open", ticker): [1.0],
+                ("High", ticker): [1.0],
+                ("Low", ticker): [1.0],
+                ("Close", ticker): [1.0],
+                ("Adj Close", ticker): [1.0],
+                ("Volume", ticker): [0],
+            },
+            index=pd.to_datetime(["2020-01-02"]),
+        )
+
+    monkeypatch.setattr(macro_loader.yf, "download", fake_yf_download)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        monkeypatch.setattr(macro_loader, "DATA_CACHE", Path(tmp))
+        result = macro_loader.download_benchmarks(
+            "2020-01-01", "2020-01-10", keys=["spy"]
+        )
+
+    assert set(result.keys()) == {"spy"}
+    assert "^GSPC" in calls
+    assert "AGG" not in calls
