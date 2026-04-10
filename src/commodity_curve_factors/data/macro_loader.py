@@ -336,9 +336,7 @@ def download_all_macro(use_cache: bool = True) -> dict[str, pd.DataFrame]:
 
     if bench_to_fetch:
         # Only hit the network for benchmarks not already in the cache.
-        benches = download_benchmarks(
-            start, end, keys=list(bench_to_fetch), use_cache=use_cache
-        )
+        benches = download_benchmarks(start, end, keys=list(bench_to_fetch), use_cache=use_cache)
         for key in bench_to_fetch:
             if key in benches:
                 all_data[key] = benches[key]

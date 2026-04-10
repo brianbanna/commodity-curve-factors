@@ -18,6 +18,7 @@ def test_macro_series_fred_ids() -> None:
 def test_load_macro_data_empty_directory(tmp_path, monkeypatch) -> None:
     """Missing macro directory should return empty dict, not crash."""
     from commodity_curve_factors.data import macro_loader
+
     monkeypatch.setattr(macro_loader, "DATA_RAW", tmp_path)
     result = macro_loader.load_macro_data()
     assert result == {}
@@ -94,9 +95,7 @@ def test_download_benchmarks_keys_parameter(monkeypatch) -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         monkeypatch.setattr(macro_loader, "DATA_CACHE", Path(tmp))
-        result = macro_loader.download_benchmarks(
-            "2020-01-01", "2020-01-10", keys=["spy"]
-        )
+        result = macro_loader.download_benchmarks("2020-01-01", "2020-01-10", keys=["spy"])
 
     assert set(result.keys()) == {"spy"}
     assert "^GSPC" in calls
