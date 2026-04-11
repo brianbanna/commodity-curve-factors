@@ -3,6 +3,7 @@ standard_tenors: [1, 2, 3, 6, 9, 12]  # months
 interpolation:
   method: "log_linear"
   min_contracts: 3  # minimum contracts needed to build a curve
+  extrapolation_max_days: 45  # max calendar-day gap allowed when extrapolating beyond observed tenors
 
 roll_rules:
   default:
