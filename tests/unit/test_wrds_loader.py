@@ -160,6 +160,19 @@ def test_get_contract_metadata_one_row_per_contract(tmp_path: Path) -> None:
     ):
         assert col in meta.columns, f"Missing column in metadata: {col}"
 
+    # Price columns must be absent — metadata is contract-level, not price-level
+    forbidden_cols = {
+        "open_price",
+        "high_price",
+        "low_price",
+        "settlement",
+        "volume",
+        "openinterest",
+    }
+    assert not (forbidden_cols & set(meta.columns)), (
+        f"metadata must not expose price columns, got: {forbidden_cols & set(meta.columns)}"
+    )
+
 
 def test_load_all_contracts_skips_missing_without_raising(
     tmp_path: Path, caplog: pytest.LogCaptureFixture

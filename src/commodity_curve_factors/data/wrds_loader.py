@@ -9,8 +9,7 @@ The live download that produces these files lives in
 ``scripts/probes/wrds_download_all.py`` and is run once by the researcher
 outside of CI.
 
-Usage:
-    python -m commodity_curve_factors.data.wrds_loader
+This is a pure library module — no CLI entry point.
 """
 
 import logging
@@ -199,7 +198,6 @@ def load_all_contracts(
     all_symbols: list[str] = list(universe["commodities"].keys())
 
     if symbols is not None:
-        all_symbols = [s for s in symbols if s in all_symbols or s not in all_symbols]
         # keep caller-specified order; accept symbols not in universe.yaml so
         # tests with synthetic symbols work — they will simply produce a warning
         all_symbols = symbols
@@ -302,42 +300,3 @@ def get_contract_metadata(df: pd.DataFrame) -> pd.DataFrame:
     meta = meta.sort_values("lasttrddate").reset_index(drop=True)
 
     return meta
-
-
-# ---------------------------------------------------------------------------
-# CLI entry point (for interactive inspection, not CI)
-# ---------------------------------------------------------------------------
-
-
-def main() -> None:
-    """Print a summary of all contract files on disk."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
-    logger.info("=== WRDS Contracts Loader Summary ===")
-    data = load_all_contracts()
-
-    if not data:
-        logger.warning(
-            "No contract files found under %s. Run scripts/probes/wrds_download_all.py first.",
-            _default_contracts_root(),
-        )
-        return
-
-    for sym, df in sorted(data.items()):
-        meta = get_contract_metadata(df)
-        logger.info(
-            "  %-4s  %6d rows  %3d contracts  %s to %s",
-            sym,
-            len(df),
-            len(meta),
-            df["trade_date"].min().date(),
-            df["trade_date"].max().date(),
-        )
-
-
-if __name__ == "__main__":
-    main()
