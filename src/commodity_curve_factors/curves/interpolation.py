@@ -184,13 +184,10 @@ def interpolate_curve_day(
     # Use the first trade_date as the reference (all rows share one date)
     trade_date = pd.Timestamp(contracts_day["trade_date"].iloc[0])
 
-    # Compute time-to-expiry for each contract
-    tenors = np.array(
-        [
-            time_to_expiry_years(trade_date, row["lasttrddate"])
-            for _, row in contracts_day.iterrows()
-        ]
-    )
+    # Vectorized time-to-expiry: avoids per-row Python iteration
+    expiries = pd.to_datetime(contracts_day["lasttrddate"]).to_numpy(dtype="datetime64[ns]")
+    trade_ts = np.datetime64(trade_date, "ns")
+    tenors = (expiries - trade_ts).astype("timedelta64[D]").astype(float) / DAYS_PER_YEAR
     prices = contracts_day["settlement"].to_numpy(dtype=float)
 
     interpolated = log_linear_interpolate(
