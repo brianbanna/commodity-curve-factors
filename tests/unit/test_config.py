@@ -22,11 +22,14 @@ def test_load_universe_has_yfinance_symbols() -> None:
         assert "yfinance_symbol" in spec, f"{symbol} missing yfinance_symbol"
 
 
-def test_load_universe_has_nasdaq_prefix() -> None:
-    """Every commodity in universe.yaml has a nasdaq_prefix."""
+def test_load_universe_has_wrds_contrcode() -> None:
+    """Every commodity in universe.yaml has a WRDS Datastream contrcode."""
     cfg = load_config("universe")
     for symbol, spec in cfg["commodities"].items():
-        assert "nasdaq_prefix" in spec, f"{symbol} missing nasdaq_prefix"
+        assert "wrds_contrcode" in spec, f"{symbol} missing wrds_contrcode"
+        assert isinstance(spec["wrds_contrcode"], int), (
+            f"{symbol} wrds_contrcode must be int, got {type(spec['wrds_contrcode'])}"
+        )
 
 
 def test_load_universe_date_range() -> None:
