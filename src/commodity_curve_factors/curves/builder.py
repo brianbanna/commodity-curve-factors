@@ -10,10 +10,11 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from commodity_curve_factors.curves.interpolation import interpolate_curve_day
-from commodity_curve_factors.curves.roll_calendar import active_contracts_on_day
+from commodity_curve_factors.curves.roll_calendar import _active_contracts_from_group
 from commodity_curve_factors.utils.config import load_config
 from commodity_curve_factors.utils.paths import DATA_PROCESSED
 
@@ -61,20 +62,27 @@ def build_curve(
     extrap_max_days: int = interp_cfg.get("extrapolation_max_days", 45)
 
     tenor_labels = [f"F{m}M" for m in standard_tenors]
-    trade_dates = sorted(contracts["trade_date"].unique())
 
     rows: list[pd.Series] = []
     dates: list[pd.Timestamp] = []
+    insufficient_days: int = 0
 
-    for td in trade_dates:
-        ts = pd.Timestamp(td)
-        active = active_contracts_on_day(contracts, ts, roll_days)
+    for ts_key, day_df in contracts.groupby("trade_date", sort=True):
+        ts = pd.Timestamp(ts_key)  # type: ignore[arg-type]
+        active = _active_contracts_from_group(day_df, ts, roll_days)
+        if len(active) < min_contracts:
+            rows.append(pd.Series({label: np.nan for label in tenor_labels}, name=ts))
+            dates.append(ts)
+            insufficient_days += 1
+            continue
         curve_row = interpolate_curve_day(
             active,
             standard_tenors,
             extrapolation_max_days=extrap_max_days,
             min_contracts=min_contracts,
         )
+        if curve_row.isna().all():
+            insufficient_days += 1
         rows.append(curve_row)
         dates.append(ts)
 
@@ -82,7 +90,14 @@ def build_curve(
         return pd.DataFrame(columns=tenor_labels, index=pd.DatetimeIndex([], name="trade_date"))
 
     result = pd.DataFrame(rows, index=pd.DatetimeIndex(dates, name="trade_date"))
-    result = result[tenor_labels]  # enforce column order
+
+    if insufficient_days > 0:
+        logger.info(
+            "build_curve %s: %d/%d days had insufficient contracts for any tenor",
+            commodity,
+            insufficient_days,
+            len(rows),
+        )
 
     logger.info(
         "build_curve %s: %d rows, date range %s to %s",

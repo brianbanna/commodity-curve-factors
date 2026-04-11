@@ -64,7 +64,46 @@ def active_contracts_on_day(
 
     mask = (start_ts <= trade_date) & (trade_date <= roll_deadline) & day_rows["settlement"].notna()
 
-    return day_rows[mask.values].copy()
+    return day_rows[mask].copy()
+
+
+def _active_contracts_from_group(
+    day_rows: pd.DataFrame,
+    trade_date: pd.Timestamp,
+    roll_days_before_expiry: int,
+) -> pd.DataFrame:
+    """Filter a per-day group (already subset to one trade_date) to active contracts.
+
+    Identical filter logic to ``active_contracts_on_day`` but skips the outer
+    ``contracts[contracts["trade_date"] == trade_date]`` scan.  Used inside
+    ``build_curve``'s ``groupby("trade_date")`` loop where the scan is already
+    done by the groupby.
+
+    Parameters
+    ----------
+    day_rows : pd.DataFrame
+        Rows already filtered to a single ``trade_date``.
+    trade_date : pd.Timestamp
+        The date of interest.
+    roll_days_before_expiry : int
+        Number of calendar days before ``lasttrddate`` to stop treating a
+        contract as active.
+
+    Returns
+    -------
+    pd.DataFrame
+        Rows of ``day_rows`` where the contract is active on ``trade_date``.
+    """
+    if day_rows.empty:
+        return day_rows.copy()
+
+    start_ts = pd.to_datetime(day_rows["startdate"])
+    last_ts = pd.to_datetime(day_rows["lasttrddate"])
+    roll_deadline = last_ts - pd.Timedelta(days=roll_days_before_expiry)
+
+    mask = (start_ts <= trade_date) & (trade_date <= roll_deadline) & day_rows["settlement"].notna()
+
+    return day_rows[mask].copy()
 
 
 def get_front_contract(
@@ -121,14 +160,13 @@ def build_roll_schedule(
         settlement]``.  Sorted by ``trade_date`` ascending.  Rows where no
         active contract exists have NaN in the contract columns.
     """
-    trade_dates = contracts["trade_date"].sort_values().unique()
     records: list[dict[str, Any]] = []
 
-    for td in trade_dates:
-        ts = pd.Timestamp(td)
-        front = get_front_contract(contracts, ts, roll_days_before_expiry)
+    for ts_key, day_df in contracts.groupby("trade_date", sort=True):
+        ts = pd.Timestamp(ts_key)  # type: ignore[arg-type]
+        active = _active_contracts_from_group(day_df, ts, roll_days_before_expiry)
 
-        if front is None:
+        if active.empty:
             records.append(
                 {
                     "trade_date": ts,
@@ -139,7 +177,11 @@ def build_roll_schedule(
                 }
             )
         else:
-            last_td = pd.Timestamp(front["lasttrddate"])
+            # Front = smallest lasttrddate among active contracts
+            last_ts_series = pd.to_datetime(active["lasttrddate"])
+            front_idx = last_ts_series.idxmin()
+            front = active.loc[front_idx]
+            last_td = pd.Timestamp(str(front["lasttrddate"]))
             days_to_expiry = (last_td - ts).days
             records.append(
                 {
@@ -157,7 +199,7 @@ def build_roll_schedule(
 
     logger.debug(
         "build_roll_schedule: %d trade_dates, %d rows with front contract",
-        len(trade_dates),
+        len(records),
         result["front_futcode"].notna().sum() if not result.empty else 0,
     )
     return result
