@@ -28,6 +28,7 @@ producing spurious F1M / F2M values that are really unbounded extrapolations.
 
 import datetime
 import logging
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -117,9 +118,18 @@ def log_linear_interpolate(
     if len(tenors_valid) < min_points:
         return result
 
-    # Step 3: OLS fit on (tenor, log(price))
+    # Step 3: guard against degenerate fits, then OLS on (tenor, log(price))
+    tenor_span = float(tenors_valid.max() - tenors_valid.min())
+    if tenor_span < 30.0 / DAYS_PER_YEAR:  # less than ~30 days of curve span
+        return result  # still all-NaN
+
     log_prices = np.log(prices_valid)
-    slope, intercept = np.polyfit(tenors_valid, log_prices, deg=1)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", np.exceptions.RankWarning)
+        try:
+            slope, intercept = np.polyfit(tenors_valid, log_prices, deg=1)
+        except (np.exceptions.RankWarning, np.linalg.LinAlgError):
+            return result  # still all-NaN
 
     # Step 4 & 5: evaluate and apply extrapolation guard
     t_min = tenors_valid.min()

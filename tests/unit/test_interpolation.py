@@ -166,3 +166,15 @@ def test_interpolate_curve_day_empty_returns_nan_series() -> None:
 
     assert list(result.index) == ["F1M", "F3M", "F6M", "F12M"]
     assert result.isna().all()
+
+
+def test_log_linear_interpolate_degenerate_tenor_span() -> None:
+    """When all valid contracts sit within ~30 days, return all-NaN rather than
+    extrapolating a 12-month tenor off a 20-day observed span."""
+    from commodity_curve_factors.curves.interpolation import log_linear_interpolate
+
+    tenors = np.array([0.05, 0.06, 0.07])  # ~3 weeks apart
+    prices = np.array([50.0, 51.0, 52.0])
+    targets = np.array([1 / 12, 6 / 12, 12 / 12])
+    result = log_linear_interpolate(tenors, prices, targets)
+    assert np.all(np.isnan(result))
