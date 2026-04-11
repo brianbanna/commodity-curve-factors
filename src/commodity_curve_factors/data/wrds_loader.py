@@ -100,6 +100,13 @@ def _normalize_dtypes(df: pd.DataFrame) -> pd.DataFrame:
     -------
     pd.DataFrame
         Copy with corrected dtypes.
+
+    Raises
+    ------
+    pandas.errors.IntCastingNaNError
+        If the ``futcode`` column contains NaN — a contract ID must be a
+        valid int. Upstream WRDS should never produce NaN here, so this
+        is a fail-loud guard against schema drift.
     """
     df = df.copy()
     df["futcode"] = df["futcode"].astype("int64")
@@ -198,8 +205,12 @@ def load_all_contracts(
     all_symbols: list[str] = list(universe["commodities"].keys())
 
     if symbols is not None:
-        # keep caller-specified order; accept symbols not in universe.yaml so
-        # tests with synthetic symbols work — they will simply produce a warning
+        # Warn on any symbol the caller asked for that isn't in universe.yaml,
+        # then proceed to attempt loading it anyway (visibility, not filtering).
+        universe_keys: set[str] = set(universe["commodities"].keys())
+        for sym in symbols:
+            if sym not in universe_keys:
+                logger.warning("Symbol %s not in universe.yaml; loading anyway", sym)
         all_symbols = symbols
 
     result: dict[str, pd.DataFrame] = {}

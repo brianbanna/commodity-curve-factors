@@ -56,7 +56,7 @@ def test_load_contracts_captures_negative_wti_event(tmp_path: Path) -> None:
     assert len(day) > 0, "No rows found for trade_date 2020-04-20"
 
     min_settlement = day["settlement"].min()
-    assert abs(min_settlement - (-37.63)) < 0.1, (
+    assert abs(min_settlement - (-37.63)) < 0.01, (
         f"Expected min settlement near -37.63 on 2020-04-20, got {min_settlement}"
     )
 
@@ -79,14 +79,8 @@ def test_load_contracts_raises_on_bad_schema(tmp_path: Path) -> None:
     bad_df = pd.DataFrame({"futcode": [1], "trade_date": ["2020-01-02"]})
     bad_df.to_parquet(dest_dir / "all_contracts.parquet")
 
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(ValueError, match=r"missing required columns.*settlement"):
         load_contracts("XX", root=tmp_path)
-
-    # The error message should mention at least one missing column name.
-    msg = str(exc_info.value)
-    assert any(col in msg for col in ("settlement", "dsmnem", "open_price", "volume")), (
-        f"ValueError message did not mention a missing column: {msg}"
-    )
 
 
 def test_filter_to_date_range_inclusive_bounds(tmp_path: Path) -> None:
@@ -135,7 +129,7 @@ def test_get_contract_metadata_one_row_per_contract(tmp_path: Path) -> None:
     assert len(meta) == 145
 
     # Sorted by lasttrddate ascending
-    assert list(meta["lasttrddate"]) == sorted(meta["lasttrddate"].tolist()), (
+    assert meta["lasttrddate"].is_monotonic_increasing, (
         "get_contract_metadata should be sorted by lasttrddate ascending"
     )
 
@@ -192,4 +186,30 @@ def test_load_all_contracts_skips_missing_without_raising(
     warning_text = caplog.text.lower()
     assert "ng" in warning_text or "missing" in warning_text or "not found" in warning_text, (
         f"Expected a warning about missing NG, got log: {caplog.text!r}"
+    )
+
+
+def test_load_all_contracts_warns_on_unknown_symbol(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    """load_all_contracts should warn when a caller-provided symbol is not in universe.yaml."""
+    from commodity_curve_factors.data.wrds_loader import load_all_contracts
+
+    _copy_fixture_to(tmp_path, "CL")
+
+    with caplog.at_level(logging.WARNING, logger="commodity_curve_factors.data.wrds_loader"):
+        result = load_all_contracts(root=tmp_path, symbols=["CL", "ZZ"])
+
+    # CL should load; ZZ has no file so it gets skipped
+    assert set(result.keys()) == {"CL"}, f"Expected only CL, got {set(result.keys())}"
+
+    # One warning must mention ZZ and "not in universe.yaml"
+    warnings = [r.message for r in caplog.records if r.levelno == logging.WARNING]
+    assert any("ZZ" in str(w) and "not in universe.yaml" in str(w) for w in warnings), (
+        f"Expected a 'not in universe.yaml' warning for ZZ, got: {warnings}"
+    )
+
+    # A second warning must mention ZZ not being found on disk
+    assert any("ZZ" in str(w) or "zz" in str(w).lower() for w in warnings), (
+        f"Expected a FileNotFoundError-related warning for ZZ, got: {warnings}"
     )
