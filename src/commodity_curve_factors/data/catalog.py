@@ -6,9 +6,11 @@ Usage:
 
 import logging
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 
+from commodity_curve_factors.data.storage import build_catalog
 from commodity_curve_factors.utils.paths import DATA_RAW
 
 logger = logging.getLogger(__name__)
@@ -16,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 def catalog_directory(directory: str, glob_pattern: str = "**/*.parquet") -> pd.DataFrame:
     """Build a catalog DataFrame for all Parquet files under a directory.
+
+    Thin wrapper around :func:`~commodity_curve_factors.data.storage.build_catalog`
+    that accepts a string path for backward compatibility.
 
     Parameters
     ----------
@@ -27,47 +32,15 @@ def catalog_directory(directory: str, glob_pattern: str = "**/*.parquet") -> pd.
     Returns
     -------
     pd.DataFrame
-        Columns: file, rows, columns, start, end, size_kb.
+        Columns: path, rows, start_date, end_date, columns, size_mb.
     """
-    from pathlib import Path
-
-    root = Path(directory)
-    records = []
-
-    for path in sorted(root.glob(glob_pattern)):
-        try:
-            df = pd.read_parquet(path)
-            start = df.index.min() if isinstance(df.index, pd.DatetimeIndex) else None
-            end = df.index.max() if isinstance(df.index, pd.DatetimeIndex) else None
-            records.append(
-                {
-                    "file": str(path.relative_to(root)),
-                    "rows": len(df),
-                    "columns": len(df.columns),
-                    "start": start.date() if start else None,
-                    "end": end.date() if end else None,
-                    "size_kb": round(path.stat().st_size / 1024, 1),
-                }
-            )
-        except Exception as exc:
-            records.append(
-                {
-                    "file": str(path.relative_to(root)),
-                    "rows": None,
-                    "columns": None,
-                    "start": None,
-                    "end": None,
-                    "size_kb": round(path.stat().st_size / 1024, 1),
-                    "error": str(exc),
-                }
-            )
-
-    return pd.DataFrame(records)
+    result: pd.DataFrame = build_catalog(Path(directory), glob_pattern=glob_pattern)
+    return result
 
 
 def print_catalog() -> None:
     """Print the full data catalog to stdout."""
-    cat = catalog_directory(str(DATA_RAW))
+    cat = build_catalog(DATA_RAW)
 
     if cat.empty:
         print("No data files found. Run `make data` first.")
@@ -76,20 +49,29 @@ def print_catalog() -> None:
     print(f"\n{'=' * 72}")
     print(f"  DATA CATALOG  —  {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print(f"{'=' * 72}")
-    print(f"  {'File':<35s} {'Rows':>6s}  {'Start':>12s}  {'End':>12s}  {'KB':>7s}")
+    print(f"  {'File':<35s} {'Rows':>6s}  {'Start':>12s}  {'End':>12s}  {'MB':>7s}")
     print(f"  {'-' * 35} {'-' * 6}  {'-' * 12}  {'-' * 12}  {'-' * 7}")
 
     for _, row in cat.iterrows():
-        start = str(row["start"]) if row["start"] else "—"
-        end = str(row["end"]) if row["end"] else "—"
-        rows = str(row["rows"]) if row["rows"] else "ERR"
-        print(f"  {row['file']:<35s} {rows:>6s}  {start:>12s}  {end:>12s}  {row['size_kb']:>7.1f}")
+        start = (
+            str(row["start_date"].date())
+            if pd.notna(row["start_date"]) and row["start_date"] is not None
+            else "—"
+        )
+        end = (
+            str(row["end_date"].date())
+            if pd.notna(row["end_date"]) and row["end_date"] is not None
+            else "—"
+        )
+        rows = str(int(row["rows"])) if pd.notna(row["rows"]) and row["rows"] is not None else "ERR"
+        print(f"  {row['path']:<35s} {rows:>6s}  {start:>12s}  {end:>12s}  {row['size_mb']:>7.2f}")
 
     print(f"\n  Total files: {len(cat)}")
-    total_rows = cat["rows"].sum()
-    total_kb = cat["size_kb"].sum()
+    valid = cat[cat["rows"].notna()]
+    total_rows = valid["rows"].sum()
+    total_mb = cat["size_mb"].sum()
     print(f"  Total rows:  {int(total_rows):,}")
-    print(f"  Total size:  {total_kb:.0f} KB ({total_kb / 1024:.1f} MB)")
+    print(f"  Total size:  {total_mb:.2f} MB")
     print()
 
 
