@@ -115,7 +115,8 @@ def compute_positioning_factor(
         len(signal_daily),
         signal_daily.notna().mean().mean() * 100,
     )
-    return signal_daily
+    result: pd.DataFrame = signal_daily
+    return result
 
 
 def main() -> None:

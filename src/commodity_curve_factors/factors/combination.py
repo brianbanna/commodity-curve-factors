@@ -412,7 +412,10 @@ def _default_weights_by_regime() -> dict[str, dict[str, Any]]:
     from commodity_curve_factors.utils.config import load_config
 
     strategy = load_config("strategy")
-    return strategy.get("regime_conditioned", {}).get("weights_by_regime", {})
+    result: dict[str, dict[str, Any]] = strategy.get("regime_conditioned", {}).get(
+        "weights_by_regime", {}
+    )
+    return result
 
 
 def main() -> None:

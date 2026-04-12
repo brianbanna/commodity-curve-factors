@@ -66,7 +66,11 @@ def main() -> None:
     )
 
     # Compute daily log returns
-    returns = np.log(prices / prices.shift(1))
+    returns: pd.DataFrame = pd.DataFrame(
+        np.log(prices / prices.shift(1)),
+        index=prices.index,
+        columns=prices.columns,
+    )
 
     # --- Curve factors ---
     logger.info("Computing curve factors")

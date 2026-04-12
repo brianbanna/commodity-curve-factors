@@ -62,8 +62,9 @@ def compute_seasonal_expectation(
     """
     wow_change = series.diff()
 
-    iso_week = series.index.isocalendar().week.astype(int).to_numpy()
-    iso_year = series.index.isocalendar().year.astype(int).to_numpy()
+    dt_index = pd.DatetimeIndex(series.index)
+    iso_week = dt_index.isocalendar().week.astype(int).to_numpy()
+    iso_year = dt_index.isocalendar().year.astype(int).to_numpy()
 
     expectations = pd.Series(np.nan, index=series.index)
 
@@ -111,7 +112,7 @@ def compute_inventory_surprise(
 
     # Use min_periods=1 so we get values as soon as there is one surprise
     # observation; callers that want a longer warmup can filter themselves.
-    z_surprise = expanding_zscore(raw_surprise, min_periods=1)
+    z_surprise: pd.Series = expanding_zscore(raw_surprise, min_periods=1)
     return z_surprise
 
 
@@ -175,8 +176,10 @@ def compute_all_inventory_surprises(
         # We detect weekly data by checking if the median gap between
         # consecutive observations is around 7 days.
         if len(raw_series) > 1:
-            median_gap = pd.Series(raw_series.index).diff().median()
-            is_weekly = median_gap >= pd.Timedelta(days=5)
+            idx_series = pd.Series(pd.DatetimeIndex(raw_series.index))
+            gaps: pd.Series = idx_series.diff().dropna()
+            median_gap_td = pd.Timedelta(gaps.median())
+            is_weekly = bool(median_gap_td >= pd.Timedelta(days=5))
         else:
             is_weekly = True
 

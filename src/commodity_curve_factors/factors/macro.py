@@ -65,7 +65,7 @@ def _extract_macro_factors(
 
     if _KEY_USD in macro_data:
         usd = macro_data[_KEY_USD]["value"].dropna()
-        result["r_usd"] = np.log(usd / usd.shift(1))
+        result["r_usd"] = pd.Series(np.log(usd / usd.shift(1)), index=usd.index)
     else:
         logger.warning("macro_data missing '%s' — r_usd will be NaN", _KEY_USD)
         result["r_usd"] = pd.Series(dtype=float)
@@ -245,7 +245,7 @@ def compute_macro_factor(
     signal_df = signal_df.reindex(commodity_returns.index)
 
     # Expanding z-score
-    factor = expanding_zscore_df(signal_df, min_periods=min_periods)
+    factor: pd.DataFrame = expanding_zscore_df(signal_df, min_periods=min_periods)
 
     logger.info(
         "compute_macro_factor: %d commodities, %d dates, %.1f%% non-NaN",
@@ -281,7 +281,11 @@ def main() -> None:
     close_prices = pd.DataFrame(
         {sym: df["Close"] for sym, df in front_month.items() if "Close" in df.columns}
     )
-    returns = np.log(close_prices / close_prices.shift(1))
+    returns: pd.DataFrame = pd.DataFrame(
+        np.log(close_prices / close_prices.shift(1)),
+        index=close_prices.index,
+        columns=close_prices.columns,
+    )
 
     factor = compute_macro_factor(returns, macro_data, window=252, min_periods=60)
     logger.info("Factor shape: %s", factor.shape)

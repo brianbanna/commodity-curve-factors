@@ -48,7 +48,10 @@ def realized_volatility(
         NaN for the first ``window - 1`` rows.
     """
     annualization = np.sqrt(TRADING_DAYS_PER_YEAR)
-    return returns.rolling(window=window, min_periods=window).std(ddof=1) * annualization
+    result: pd.DataFrame = (
+        returns.rolling(window=window, min_periods=window).std(ddof=1) * annualization
+    )
+    return result
 
 
 def vol_regime_ratio(
@@ -87,7 +90,7 @@ def vol_regime_ratio(
     # Avoid division by zero: where long_vol is zero, ratio is undefined
     ratio = short_vol / long_vol.replace(0, np.nan)
 
-    factor = expanding_zscore_df(ratio, min_periods=min_periods)
+    factor: pd.DataFrame = expanding_zscore_df(ratio, min_periods=min_periods)
 
     logger.info(
         "vol_regime_ratio: %d commodities, %d dates, %.1f%% non-NaN",
@@ -116,7 +119,11 @@ def main() -> None:
     close_prices = pd.DataFrame(
         {sym: df["Close"] for sym, df in front_month.items() if "Close" in df.columns}
     )
-    returns = np.log(close_prices / close_prices.shift(1))
+    returns: pd.DataFrame = pd.DataFrame(
+        np.log(close_prices / close_prices.shift(1)),
+        index=close_prices.index,
+        columns=close_prices.columns,
+    )
 
     factor = vol_regime_ratio(returns, short_window=20, long_window=252, min_periods=252)
     logger.info("Factor shape: %s", factor.shape)
