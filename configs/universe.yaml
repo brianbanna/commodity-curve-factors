@@ -7,6 +7,7 @@ commodities:
     wrds_contrcode: 1986
     wrds_dscontrid: "NCL"
     wrds_contrname: "CRUDE OIL (LIGHT SWEET)"
+    cftc_code: "067651"  # WTI-PHYSICAL - NEW YORK MERCANTILE EXCHANGE
     contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     max_tenor: 12
     contract_multiplier: 1000
@@ -21,6 +22,7 @@ commodities:
     wrds_contrcode: 2060
     wrds_dscontrid: "NNG"
     wrds_contrname: "NATURAL GAS"
+    cftc_code: "023651"  # NAT GAS NYME - NEW YORK MERCANTILE EXCHANGE
     contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     max_tenor: 12
     contract_multiplier: 10000
@@ -35,6 +37,7 @@ commodities:
     wrds_contrcode: 2029
     wrds_dscontrid: "NHO"
     wrds_contrname: "HEATING OIL (NEW YORK)"
+    cftc_code: "022651"  # NY HARBOR ULSD - NEW YORK MERCANTILE EXCHANGE
     contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     max_tenor: 12
     contract_multiplier: 42000
@@ -49,6 +52,7 @@ commodities:
     wrds_contrcode: 2091
     wrds_dscontrid: "NRB"
     wrds_contrname: "GASOLINE RBOB"
+    cftc_code: "111659"  # GASOLINE RBOB - NEW YORK MERCANTILE EXCHANGE
     contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     max_tenor: 12
     contract_multiplier: 42000
@@ -63,6 +67,7 @@ commodities:
     wrds_contrcode: 2020
     wrds_dscontrid: "NGC"
     wrds_contrname: "GOLD (100 OZ)"
+    cftc_code: "088691"  # GOLD - COMMODITY EXCHANGE INC.
     contract_months: [2, 4, 6, 8, 10, 12]
     max_tenor: 12
     contract_multiplier: 100
@@ -77,6 +82,7 @@ commodities:
     wrds_contrcode: 2108
     wrds_dscontrid: "NSL"
     wrds_contrname: "SILVER (5000 OZ)"
+    cftc_code: "084691"  # SILVER - COMMODITY EXCHANGE INC.
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 5000
@@ -91,6 +97,7 @@ commodities:
     wrds_contrcode: 2026
     wrds_dscontrid: "NHG"
     wrds_contrname: "COPPER (HIGH GRADE)"
+    cftc_code: "085692"  # COPPER- #1 - COMMODITY EXCHANGE INC.
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 25000
@@ -105,6 +112,7 @@ commodities:
     wrds_contrcode: 3247
     wrds_dscontrid: "CCF"
     wrds_contrname: "CORN (CBT Electronic)"
+    cftc_code: "002602"  # CORN - CHICAGO BOARD OF TRADE
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 5000
@@ -119,6 +127,7 @@ commodities:
     wrds_contrcode: 3376
     wrds_dscontrid: "CSY"
     wrds_contrname: "CBT Soybean Composite"
+    cftc_code: "005602"  # SOYBEANS - CHICAGO BOARD OF TRADE
     contract_months: [1, 3, 5, 7, 8, 9, 11]
     max_tenor: 12
     contract_multiplier: 5000
@@ -133,6 +142,7 @@ commodities:
     wrds_contrcode: 464
     wrds_dscontrid: "CZW"
     wrds_contrname: "CBT Wheat Electronic"
+    cftc_code: "001602"  # WHEAT-SRW - CHICAGO BOARD OF TRADE
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 5000
@@ -147,6 +157,7 @@ commodities:
     wrds_contrcode: 2038
     wrds_dscontrid: "NKC"
     wrds_contrname: "COFFEE 'C'"
+    cftc_code: "083731"  # COFFEE C - ICE FUTURES U.S.
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 37500
@@ -161,6 +172,7 @@ commodities:
     wrds_contrcode: 2104
     wrds_dscontrid: "NSB"
     wrds_contrname: "SUGAR #11"
+    cftc_code: "080732"  # SUGAR NO. 11 - ICE FUTURES U.S.
     contract_months: [3, 5, 7, 10]
     max_tenor: 12
     contract_multiplier: 112000
@@ -175,6 +187,7 @@ commodities:
     wrds_contrcode: 1980
     wrds_dscontrid: "NCC"
     wrds_contrname: "COCOA"
+    cftc_code: "073732"  # COCOA - ICE FUTURES U.S.
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 10
