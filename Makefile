@@ -19,7 +19,7 @@ curves: ## Build daily term structures for all commodities
 	$(PYTHON) -m $(PKG).curves
 
 factors: ## Compute all factor signals (carry, slope, curvature, momentum, inventory)
-	$(PYTHON) -m $(PKG).factors.combination
+	$(PYTHON) -m $(PKG).factors
 
 signals: ## Generate portfolio signals and weights
 	$(PYTHON) -m $(PKG).signals.portfolio
