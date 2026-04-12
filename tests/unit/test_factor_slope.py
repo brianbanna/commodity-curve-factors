@@ -79,9 +79,7 @@ def test_slope_factor_no_lookahead() -> None:
     curve2.iloc[-1, curve2.columns.get_loc("F12M")] = 9999.0
     factor2 = compute_slope_factor({"CL": curve2}, min_periods=5)
 
-    pd.testing.assert_series_equal(
-        factor["CL"].iloc[:-1], factor2["CL"].iloc[:-1]
-    )
+    pd.testing.assert_series_equal(factor["CL"].iloc[:-1], factor2["CL"].iloc[:-1])
 
 
 def test_slope_factor_all_nan_when_insufficient_history() -> None:

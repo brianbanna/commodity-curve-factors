@@ -43,7 +43,7 @@ def compute_slope_factor(
     """
     raw = pd.DataFrame({sym: compute_slope(curve) for sym, curve in curves.items()})
 
-    factor = expanding_zscore_df(raw, min_periods=min_periods)
+    factor: pd.DataFrame = expanding_zscore_df(raw, min_periods=min_periods)
 
     logger.info(
         "compute_slope_factor: %d commodities, %d dates, %.1f%% non-NaN",
