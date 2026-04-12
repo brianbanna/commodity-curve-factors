@@ -44,7 +44,7 @@ def compute_curvature_factor(
     """
     raw = pd.DataFrame({sym: compute_curvature(curve) for sym, curve in curves.items()})
 
-    factor = expanding_zscore_df(raw, min_periods=min_periods)
+    factor: pd.DataFrame = expanding_zscore_df(raw, min_periods=min_periods)
 
     logger.info(
         "compute_curvature_factor: %d commodities, %d dates, %.1f%% non-NaN",
