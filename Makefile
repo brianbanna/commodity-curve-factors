@@ -13,10 +13,10 @@ help: ## Show this help message
 
 ## —— Pipeline ——————————————————————————————————————————
 data: ## Download all market data (futures, inventory, macro, CFTC)
-	$(PYTHON) -m $(PKG).data.futures_loader
+	$(PYTHON) -m $(PKG).data
 
 curves: ## Build daily term structures for all commodities
-	$(PYTHON) -m $(PKG).curves.builder
+	$(PYTHON) -m $(PKG).curves
 
 factors: ## Compute all factor signals (carry, slope, curvature, momentum, inventory)
 	$(PYTHON) -m $(PKG).factors.combination
