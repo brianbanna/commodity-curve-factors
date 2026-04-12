@@ -44,7 +44,7 @@ def compute_carry_factor(
     """
     raw = pd.DataFrame({sym: compute_carry(curve) for sym, curve in curves.items()})
 
-    factor = expanding_zscore_df(raw, min_periods=min_periods)
+    factor: pd.DataFrame = expanding_zscore_df(raw, min_periods=min_periods)
 
     logger.info(
         "compute_carry_factor: %d commodities, %d dates, %.1f%% non-NaN",

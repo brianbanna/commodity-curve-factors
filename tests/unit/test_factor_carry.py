@@ -78,9 +78,7 @@ def test_carry_factor_uses_expanding_zscore() -> None:
     curve2.iloc[-1, curve2.columns.get_loc("F1M")] = 999.0  # spike F1M on last day
     factor2 = compute_carry_factor({"CL": curve2}, min_periods=5)
 
-    pd.testing.assert_series_equal(
-        factor["CL"].iloc[:-1], factor2["CL"].iloc[:-1]
-    )
+    pd.testing.assert_series_equal(factor["CL"].iloc[:-1], factor2["CL"].iloc[:-1])
 
 
 def test_carry_factor_all_nan_when_insufficient_history() -> None:
