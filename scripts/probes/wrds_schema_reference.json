@@ -1,0 +1,717 @@
+{
+  "generated_at": "2026-04-11T13:59:17.913924",
+  "confirmed_candidates": {
+    "CL": 1986,
+    "HO": 2029,
+    "RB": 2091,
+    "SI": 2108,
+    "HG": 2026,
+    "ZC": 288,
+    "ZS": 462,
+    "ZW": 464,
+    "KC": 2038,
+    "CC": 1980
+  },
+  "ambiguous_searches": {
+    "GC": [
+      {
+        "contrcode": 3029.0,
+        "dscontrid": "NAS",
+        "contrtypecode": "FUT",
+        "contrname": "GOLD (100G)",
+        "exchtickersymb": null
+      },
+      {
+        "contrcode": 338.0,
+        "dscontrid": "CGD",
+        "contrtypecode": "FUT",
+        "contrname": "GOLD (100 OZ)",
+        "exchtickersymb": null
+      },
+      {
+        "contrcode": 340.0,
+        "dscontrid": "CGH",
+        "contrtypecode": "FUT",
+        "contrname": "GOLD (100 OZ)",
+        "exchtickersymb": "UNKNOWN"
+      },
+      {
+        "contrcode": 453.0,
+        "dscontrid": "CZG",
+        "contrtypecode": "FUT",
+        "contrname": "GOLD (100 OZ)",
+        "exchtickersymb": "ZG"
+      },
+      {
+        "contrcode": 2020.0,
+        "dscontrid": "NGC",
+        "contrtypecode": "FUT",
+        "contrname": "GOLD (100 OZ)",
+        "exchtickersymb": "GC"
+      },
+      {
+        "contrcode": 1648.0,
+        "dscontrid": "LQG",
+        "contrtypecode": "FUT",
+        "contrname": "GOLD 100 TROY OZ",
+        "exchtickersymb": null
+      }
+    ],
+    "NG": [
+      {
+        "contrcode": 2084.0,
+        "dscontrid": "NQG",
+        "contrtypecode": "FUT",
+        "contrname": "EMINI NATURAL GAS",
+        "exchtickersymb": "QG"
+      },
+      {
+        "contrcode": 3895.0,
+        "dscontrid": "NHT",
+        "contrtypecode": "FUT",
+        "contrname": "Henry Hub Basis (Platts IFERC) Swap Pit",
+        "exchtickersymb": "HB"
+      },
+      {
+        "contrcode": 2609.0,
+        "dscontrid": "NHB",
+        "contrtypecode": "FUT",
+        "contrname": "HENRY HUB BASIS SW",
+        "exchtickersymb": "E2"
+      },
+      {
+        "contrcode": 2028.0,
+        "dscontrid": "NHN",
+        "contrtypecode": "FUT",
+        "contrname": "HENRY HUB GAS SWAP",
+        "exchtickersymb": "NN"
+      },
+      {
+        "contrcode": 2027.0,
+        "dscontrid": "NHI",
+        "contrtypecode": "FUT",
+        "contrname": "HENRY HUB INDEX SWAP",
+        "exchtickersymb": "IN"
+      },
+      {
+        "contrcode": 3888.0,
+        "dscontrid": "NHD",
+        "contrtypecode": "FUT",
+        "contrname": "Henry Hub Natural Gas Financial Last Day Composite",
+        "exchtickersymb": "HH"
+      },
+      {
+        "contrcode": 3889.0,
+        "dscontrid": "NHF",
+        "contrtypecode": "FUT",
+        "contrname": "Henry Hub Natural Gas Look-Alike Penultimate Composite",
+        "exchtickersymb": "HP"
+      },
+      {
+        "contrcode": 2030.0,
+        "dscontrid": "NHP",
+        "contrtypecode": "FUT",
+        "contrname": "HENRY HUB PEN. SWAP",
+        "exchtickersymb": "NP"
+      },
+      {
+        "contrcode": 4421.0,
+        "dscontrid": "EQM",
+        "contrtypecode": "FUT",
+        "contrname": "ICE Europe Endex Natural Gas GASPOOL Monthly Energy Future",
+        "exchtickersymb": "GER"
+      },
+      {
+        "contrcode": 4442.0,
+        "dscontrid": "EQQ",
+        "contrtypecode": "FUT",
+        "contrname": "ICE Europe Endex Natural Gas GASPOOL Quarterly Energy Future",
+        "exchtickersymb": "GER"
+      },
+      {
+        "contrcode": 4443.0,
+        "dscontrid": "EQS",
+        "contrtypecode": "FUT",
+        "contrname": "ICE Europe Endex Natural Gas GASPOOL Seasonal Energy Future",
+        "exchtickersymb": "GER"
+      },
+      {
+        "contrcode": 4444.0,
+        "dscontrid": "EQY",
+        "contrtypecode": "FUT",
+        "contrname": "ICE Europe Endex Natural Gas GASPOOL Yearly Energy Future",
+        "exchtickersymb": "GER"
+      },
+      {
+        "contrcode": 4414.0,
+        "dscontrid": "ETM",
+        "contrtypecode": "FUT",
+        "contrname": "ICE Europe Endex Natural Gas TTF Monthly Energy Future",
+        "exchtickersymb": "TFM"
+      },
+      {
+        "contrcode": 4415.0,
+        "dscontrid": "ETQ",
+        "contrtypecode": "FUT",
+        "contrname": "ICE Europe Endex Natural Gas TTF Quarterly Future",
+        "exchtickersymb": "TFM"
+      },
+      {
+        "contrcode": 4416.0,
+        "dscontrid": "ETZ",
+        "contrtypecode": "FUT",
+        "contrname": "ICE Europe Endex Natural Gas TTF Seasonal Future",
+        "exchtickersymb": "TFM"
+      },
+      {
+        "contrcode": 4417.0,
+        "dscontrid": "ETY",
+        "contrtypecode": "FUT",
+        "contrname": "ICE Europe Endex Natural Gas TTF Yearly Future",
+        "exchtickersymb": "TFM"
+      },
+      {
+        "contrcode": 4264.0,
+        "dscontrid": "LZH",
+        "contrtypecode": "FUT",
+        "contrname": "Intercontinental Exchange Europe UK Natural Gas (EUR/MWh) Monthly Energy Future",
+        "exchtickersymb": "GWE"
+      },
+      {
+        "contrcode": 4265.0,
+        "dscontrid": "LZJ",
+        "contrtypecode": "FUT",
+        "contrname": "Intercontinental Exchange Europe UK Natural Gas (EUR/MWh) Quarterly Energy Future",
+        "exchtickersymb": "GWE"
+      },
+      {
+        "contrcode": 4266.0,
+        "dscontrid": "LZP",
+        "contrtypecode": "FUT",
+        "contrname": "Intercontinental Exchange Europe UK Natural Gas (EUR/MWh) Seasonal Energy Future",
+        "exchtickersymb": "GWE"
+      },
+      {
+        "contrcode": 4374.0,
+        "dscontrid": "LZY",
+        "contrtypecode": "FUT",
+        "contrname": "Intercontinental Exchange Europe UK Natural Gas (EUR/MWh) Yearly Energy Future",
+        "exchtickersymb": "GWE"
+      },
+      {
+        "contrcode": 4201.0,
+        "dscontrid": "MNG",
+        "contrtypecode": "FUT",
+        "contrname": "MCX-NATURAL GAS",
+        "exchtickersymb": "NATURALGAS"
+      },
+      {
+        "contrcode": 3851.0,
+        "dscontrid": "NBN",
+        "contrtypecode": "FUT",
+        "contrname": "Mont Belvieu Natural Gasoline (OPIS) Pit Swap",
+        "exchtickersymb": "7Q"
+      },
+      {
+        "contrcode": 1612.0,
+        "dscontrid": "LNG",
+        "contrtypecode": "FUT",
+        "contrname": "NATURAL GAS",
+        "exchtickersymb": "GWM"
+      },
+      {
+        "contrcode": 1619.0,
+        "dscontrid": "LNQ",
+        "contrtypecode": "FUT",
+        "contrname": "NATURAL GAS",
+        "exchtickersymb": "GWM"
+      },
+      {
+        "contrcode": 1620.0,
+        "dscontrid": "LNS",
+        "contrtypecode": "FUT",
+        "contrname": "NATURAL GAS",
+        "exchtickersymb": "GWM"
+      },
+      {
+        "contrcode": 2060.0,
+        "dscontrid": "NNG",
+        "contrtypecode": "FUT",
+        "contrname": "NATURAL GAS",
+        "exchtickersymb": "NG"
+      },
+      {
+        "contrcode": 3097.0,
+        "dscontrid": "NTR",
+        "contrtypecode": "FUT",
+        "contrname": "NATURAL GAS",
+        "exchtickersymb": "NATURALGAS"
+      },
+      {
+        "contrcode": 1968.0,
+        "dscontrid": "NAG",
+        "contrtypecode": "FUT",
+        "contrname": "NATURAL GAS (ALBERTA)",
+        "exchtickersymb": "UNKNOWN"
+      },
+      {
+        "contrcode": 1418.0,
+        "dscontrid": "KKG",
+        "contrtypecode": "FUT",
+        "contrname": "NATURAL GAS (WESTERN)",
+        "exchtickersymb": "UNKNOWN"
+      },
+      {
+        "contrcode": 3671.0,
+        "dscontrid": "LGY",
+        "contrtypecode": "FUT",
+        "contrname": "Natural Gas Yearly",
+        "exchtickersymb": "GWM"
+      },
+      {
+        "contrcode": 2888.0,
+        "dscontrid": "ION",
+        "contrtypecode": "FUT",
+        "contrname": "OIL & NATURAL GASRP.",
+        "exchtickersymb": "ONGC"
+      },
+      {
+        "contrcode": 4593.0,
+        "dscontrid": "PWM",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS Czech Physical Natural Gas VTP Monthly Energy Future",
+        "exchtickersymb": "G1BM"
+      },
+      {
+        "contrcode": 4594.0,
+        "dscontrid": "PWQ",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS Czech Physical Natural Gas VTP Quarterly Energy Future",
+        "exchtickersymb": "G1BQ"
+      },
+      {
+        "contrcode": 4595.0,
+        "dscontrid": "PWS",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS Czech Physical Natural Gas VTP Seasonal Energy Future",
+        "exchtickersymb": "G1BS"
+      },
+      {
+        "contrcode": 4596.0,
+        "dscontrid": "PWY",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS Czech Physical Natural Gas VTP Yearly Energy Future",
+        "exchtickersymb": "G1BY"
+      },
+      {
+        "contrcode": 4561.0,
+        "dscontrid": "PGM",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS GASPOOL Natural Gas Monthly Energy Future",
+        "exchtickersymb": "G2BM"
+      },
+      {
+        "contrcode": 4562.0,
+        "dscontrid": "PGQ",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS GASPOOL Natural Gas Quarterly Energy Future",
+        "exchtickersymb": "G2BQ"
+      },
+      {
+        "contrcode": 4563.0,
+        "dscontrid": "PGS",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS GASPOOL Natural Gas Seasonal Energy Future",
+        "exchtickersymb": "G2BS"
+      },
+      {
+        "contrcode": 4564.0,
+        "dscontrid": "PGY",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS GASPOOL Natural Gas Yearly Energy Future",
+        "exchtickersymb": "G2BY"
+      },
+      {
+        "contrcode": 4524.0,
+        "dscontrid": "PFM",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS NCG Natural Gas Monthly Energy Future",
+        "exchtickersymb": "G0BM"
+      },
+      {
+        "contrcode": 4529.0,
+        "dscontrid": "PFQ",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS NCG Natural Gas Quarterly Energy Future",
+        "exchtickersymb": "G0BQ"
+      },
+      {
+        "contrcode": 4530.0,
+        "dscontrid": "PFS",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS NCG Natural Gas Seasonal Energy Future",
+        "exchtickersymb": "G0BS"
+      },
+      {
+        "contrcode": 4531.0,
+        "dscontrid": "PFY",
+        "contrtypecode": "FUT",
+        "contrname": "PEGAS NCG Natural Gas Yearly Energy Future",
+        "exchtickersymb": "G0BY"
+      }
+    ],
+    "SB": [
+      {
+        "contrcode": 3616.0,
+        "dscontrid": "JKG",
+        "contrtypecode": "FUT",
+        "contrname": "KEX-RAW SUGAR",
+        "exchtickersymb": "21"
+      },
+      {
+        "contrcode": 4156.0,
+        "dscontrid": "NUM",
+        "contrtypecode": "FUT",
+        "contrname": "NCDEX Sugar M Commodity Futures",
+        "exchtickersymb": "SUGARM"
+      },
+      {
+        "contrcode": 1584.0,
+        "dscontrid": "LLS",
+        "contrtypecode": "FUT",
+        "contrname": "RAW SUGAR",
+        "exchtickersymb": "UNKNOWN"
+      },
+      {
+        "contrcode": 2983.0,
+        "dscontrid": "JSG",
+        "contrtypecode": "FUT",
+        "contrname": "RAW SUGAR",
+        "exchtickersymb": "UNKNOWN"
+      },
+      {
+        "contrcode": 2924.0,
+        "dscontrid": "ISR",
+        "contrtypecode": "FUT",
+        "contrname": "SHREE RENUKA SUGARS",
+        "exchtickersymb": "RENUKA"
+      },
+      {
+        "contrcode": 1313.0,
+        "dscontrid": "HSR",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR",
+        "exchtickersymb": null
+      },
+      {
+        "contrcode": 2235.0,
+        "dscontrid": "PPS",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR",
+        "exchtickersymb": null
+      },
+      {
+        "contrcode": 3115.0,
+        "dscontrid": "RSG",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR",
+        "exchtickersymb": "SUGA"
+      },
+      {
+        "contrcode": 3166.0,
+        "dscontrid": "ZSA",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR",
+        "exchtickersymb": "SR"
+      },
+      {
+        "contrcode": 2103.0,
+        "dscontrid": "NSA",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR #11",
+        "exchtickersymb": "YO"
+      },
+      {
+        "contrcode": 2104.0,
+        "dscontrid": "NSB",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR #11",
+        "exchtickersymb": "SB"
+      },
+      {
+        "contrcode": 2105.0,
+        "dscontrid": "NSC",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR #12",
+        "exchtickersymb": null
+      },
+      {
+        "contrcode": 2106.0,
+        "dscontrid": "NSE",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR #14",
+        "exchtickersymb": "UNKNOWN"
+      },
+      {
+        "contrcode": 2112.0,
+        "dscontrid": "NSR",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR #14",
+        "exchtickersymb": "UNKNOWN"
+      },
+      {
+        "contrcode": 3323.0,
+        "dscontrid": "NFS",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR #16",
+        "exchtickersymb": "SF"
+      },
+      {
+        "contrcode": 1528.0,
+        "dscontrid": "LFS",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR #6",
+        "exchtickersymb": null
+      },
+      {
+        "contrcode": 1666.0,
+        "dscontrid": "LRS",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR #7 (RAW)",
+        "exchtickersymb": null
+      },
+      {
+        "contrcode": 198.0,
+        "dscontrid": "BMR",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR (CRYSTAL)",
+        "exchtickersymb": "ISUN09"
+      },
+      {
+        "contrcode": 2231.0,
+        "dscontrid": "PPI",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR ICUMSA",
+        "exchtickersymb": null
+      },
+      {
+        "contrcode": 3814.0,
+        "dscontrid": "MKO",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR M KOL",
+        "exchtickersymb": "SUGARMKOL"
+      },
+      {
+        "contrcode": 2230.0,
+        "dscontrid": "PPD",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR (US DOLLAR)",
+        "exchtickersymb": "UNKNOWN"
+      },
+      {
+        "contrcode": 1690.0,
+        "dscontrid": "LSW",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR (WHITE)",
+        "exchtickersymb": "W"
+      },
+      {
+        "contrcode": 2116.0,
+        "dscontrid": "NSW",
+        "contrtypecode": "FUT",
+        "contrname": "SUGAR (WHITE)",
+        "exchtickersymb": null
+      }
+    ]
+  },
+  "additional_candidate_validation": {},
+  "confirmed_validation": {
+    "CL": {
+      "contrcode": 1986,
+      "n_contracts": 645,
+      "first_start": "1983-03-30",
+      "last_expiry": "2037-01-20",
+      "sample_mnem": "NCL0100",
+      "ldbs": "CFA,COM",
+      "n_price_rows": 610088,
+      "first_price_date": "1983-03-30",
+      "last_price_date": "2026-04-03"
+    },
+    "HO": {
+      "contrcode": 2029,
+      "n_contracts": 609,
+      "first_start": "1978-11-15",
+      "last_expiry": "2029-12-31",
+      "sample_mnem": "NHO0100",
+      "ldbs": "CFA,COM",
+      "n_price_rows": 293084,
+      "first_price_date": "1978-11-15",
+      "last_price_date": "2026-04-03"
+    },
+    "RB": {
+      "contrcode": 2091,
+      "n_contracts": 289,
+      "first_start": "2005-10-03",
+      "last_expiry": "2029-12-31",
+      "sample_mnem": "NRB0106",
+      "ldbs": "CFA,COM",
+      "n_price_rows": 197779,
+      "first_price_date": "2005-10-03",
+      "last_price_date": "2026-04-03"
+    },
+    "SI": {
+      "contrcode": 2108,
+      "n_contracts": 671,
+      "first_start": "1972-01-27",
+      "last_expiry": "2030-12-27",
+      "sample_mnem": "NSL0100",
+      "ldbs": "COM",
+      "n_price_rows": 221485,
+      "first_price_date": "1973-01-02",
+      "last_price_date": "2026-04-07"
+    },
+    "HG": {
+      "contrcode": 2026,
+      "n_contracts": 495,
+      "first_start": "1988-07-29",
+      "last_expiry": "2031-05-28",
+      "sample_mnem": "NHG0100",
+      "ldbs": "CFD,COM",
+      "n_price_rows": 274223,
+      "first_price_date": "1988-07-29",
+      "last_price_date": "2026-04-07"
+    },
+    "ZC": {
+      "contrcode": 288,
+      "n_contracts": 201,
+      "first_start": "1978-01-04",
+      "last_expiry": "2018-12-14",
+      "sample_mnem": "CC.0101",
+      "ldbs": "COM",
+      "n_price_rows": 88868,
+      "first_price_date": "1978-01-04",
+      "last_price_date": "2015-07-10"
+    },
+    "ZS": {
+      "contrcode": 462,
+      "n_contracts": 225,
+      "first_start": "1996-03-01",
+      "last_expiry": "2028-11-14",
+      "sample_mnem": "CZS0100",
+      "ldbs": "CFB,COM",
+      "n_price_rows": 117374,
+      "first_price_date": "1996-03-01",
+      "last_price_date": "2025-04-25"
+    },
+    "ZW": {
+      "contrcode": 464,
+      "n_contracts": 158,
+      "first_start": "1996-03-01",
+      "last_expiry": "2027-07-14",
+      "sample_mnem": "CZW0300",
+      "ldbs": "CFB,COM",
+      "n_price_rows": 79275,
+      "first_price_date": "1996-03-01",
+      "last_price_date": "2025-04-25"
+    },
+    "KC": {
+      "contrcode": 2038,
+      "n_contracts": 246,
+      "first_start": "1976-01-27",
+      "last_expiry": "2028-03-21",
+      "sample_mnem": "NKC0300",
+      "ldbs": "COM",
+      "n_price_rows": 124609,
+      "first_price_date": "1977-11-07",
+      "last_price_date": "2026-04-07"
+    },
+    "CC": {
+      "contrcode": 1980,
+      "n_contracts": 269,
+      "first_start": "1973-08-01",
+      "last_expiry": "2028-03-16",
+      "sample_mnem": "NCC0300",
+      "ldbs": "COM",
+      "n_price_rows": 110216,
+      "first_price_date": "1973-08-01",
+      "last_price_date": "2026-04-07"
+    },
+    "ZC_288": {
+      "contrcode": 288,
+      "n_contracts": 201,
+      "first_start": "1978-01-04",
+      "last_expiry": "2018-12-14",
+      "sample_mnem": "CC.0101",
+      "ldbs": "COM",
+      "n_price_rows": 88868,
+      "first_price_date": "1978-01-04",
+      "last_price_date": "2015-07-10"
+    },
+    "ZC_3247": {
+      "contrcode": 3247,
+      "n_contracts": 286,
+      "first_start": "1973-01-02",
+      "last_expiry": "2029-12-14",
+      "sample_mnem": "CCF0101",
+      "ldbs": "CFB,COM",
+      "n_price_rows": 137757,
+      "first_price_date": "1973-01-02",
+      "last_price_date": "2026-04-03"
+    },
+    "ZC_449": {
+      "contrcode": 449,
+      "n_contracts": 167,
+      "first_start": "1996-03-01",
+      "last_expiry": "2028-12-14",
+      "sample_mnem": "CZC0101",
+      "ldbs": "CFB,COM",
+      "n_price_rows": 87562,
+      "first_price_date": "1996-03-01",
+      "last_price_date": "2025-04-25"
+    },
+    "ZC_2695": {
+      "contrcode": 2695,
+      "n_contracts": 134,
+      "first_start": "2004-09-17",
+      "last_expiry": "2027-03-12",
+      "sample_mnem": "DC.0105",
+      "ldbs": "CIE",
+      "n_price_rows": 31293,
+      "first_price_date": "2004-09-22",
+      "last_price_date": "2026-04-08"
+    },
+    "ZS_462": {
+      "contrcode": 462,
+      "n_contracts": 225,
+      "first_start": "1996-03-01",
+      "last_expiry": "2028-11-14",
+      "sample_mnem": "CZS0100",
+      "ldbs": "CFB,COM",
+      "n_price_rows": 117374,
+      "first_price_date": "1996-03-01",
+      "last_price_date": "2025-04-25"
+    },
+    "ZS_3376": {
+      "contrcode": 3376,
+      "n_contracts": 393,
+      "first_start": "1969-06-26",
+      "last_expiry": "2029-11-14",
+      "sample_mnem": "CSY0100",
+      "ldbs": "CFB,COM,SID",
+      "n_price_rows": 181865,
+      "first_price_date": "1973-01-02",
+      "last_price_date": "2026-04-03"
+    },
+    "ZW_464": {
+      "contrcode": 464,
+      "n_contracts": 158,
+      "first_start": "1996-03-01",
+      "last_expiry": "2027-07-14",
+      "sample_mnem": "CZW0300",
+      "ldbs": "CFB,COM",
+      "n_price_rows": 79275,
+      "first_price_date": "1996-03-01",
+      "last_price_date": "2025-04-25"
+    }
+  }
+}

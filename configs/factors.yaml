@@ -25,7 +25,7 @@ inventory:
   fill_method: "step_function"
   surprise_seasonal_years: 5
   z_score_window: "expanding"
-  available_for: ["CL", "NG", "HO", "RB", "ZC", "ZS", "ZW"]
+  available_for: ["CL", "NG", "HO", "RB"]
 
 combination:
   default_method: "equal_weight"

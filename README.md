@@ -1,7 +1,5 @@
 # Commodity Futures Curve Modeling and Factor Trading
 
-**A Quantitative Research Framework**
-
 Extract carry, slope, curvature, and momentum signals from commodity futures term structures. Build systematic factor portfolios. Backtest with realistic roll costs.
 
 This framework constructs daily term structures across 13 commodity markets, computes factor signals from curve shape, and runs long-short trading strategies through a futures-aware backtest that accounts for roll costs, margin, and per-commodity transaction costs. Everything is config-driven.
@@ -52,7 +50,7 @@ This framework takes those dynamics and turns them into systematic trading signa
     (carry, slope, curvature, momentum)
                       |
            Inventory Overlay
-         (EIA, USDA surprise signals)
+          (EIA surprise signals)
                       |
           Signal Construction
    (cross-sectional rank, z-score)
@@ -111,7 +109,6 @@ Benchmarks: equal-weight long-only commodity basket, cash (for long-short).
 | Continuous futures (front + second month) | Stooq | Daily |
 | Back-month contracts (3M-12M) | Nasdaq Data Link | Daily |
 | US crude / gas / product inventories | EIA API | Weekly |
-| Crop production estimates | USDA WASDE | Monthly |
 | Speculative positioning | CFTC COT | Weekly |
 | Dollar index, rates, inflation | FRED | Daily |
 
@@ -172,7 +169,7 @@ commodity-curve-factors/
 │   ├── universe.yaml          # Commodity specs, contract months, sectors
 │   ├── curve.yaml             # Tenors, interpolation, roll rules
 │   ├── factors.yaml           # Factor definitions, z-score windows
-│   ├── inventory.yaml         # EIA/USDA series, seasonal params
+│   ├── inventory.yaml         # EIA series, seasonal params
 │   ├── strategy.yaml          # Portfolio weights, rebalance, constraints
 │   ├── backtest.yaml          # Per-commodity costs, margin, execution lag
 │   └── evaluation.yaml        # Metrics, benchmarks, stress test periods

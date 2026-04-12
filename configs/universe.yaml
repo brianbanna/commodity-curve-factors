@@ -3,8 +3,11 @@ commodities:
     name: "WTI Crude Oil"
     exchange: "NYMEX"
     sector: "energy"
-    nasdaq_prefix: "CHRIS/CME_CL"
-    stooq_symbol: "CL.F"
+    yfinance_symbol: "CL=F"
+    wrds_contrcode: 1986
+    wrds_dscontrid: "NCL"
+    wrds_contrname: "CRUDE OIL (LIGHT SWEET)"
+    cftc_code: "067651"  # WTI-PHYSICAL - NEW YORK MERCANTILE EXCHANGE
     contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     max_tenor: 12
     contract_multiplier: 1000
@@ -15,8 +18,11 @@ commodities:
     name: "Natural Gas"
     exchange: "NYMEX"
     sector: "energy"
-    nasdaq_prefix: "CHRIS/CME_NG"
-    stooq_symbol: "NG.F"
+    yfinance_symbol: "NG=F"
+    wrds_contrcode: 2060
+    wrds_dscontrid: "NNG"
+    wrds_contrname: "NATURAL GAS"
+    cftc_code: "023651"  # NAT GAS NYME - NEW YORK MERCANTILE EXCHANGE
     contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     max_tenor: 12
     contract_multiplier: 10000
@@ -27,8 +33,11 @@ commodities:
     name: "Heating Oil"
     exchange: "NYMEX"
     sector: "energy"
-    nasdaq_prefix: "CHRIS/CME_HO"
-    stooq_symbol: "HO.F"
+    yfinance_symbol: "HO=F"
+    wrds_contrcode: 2029
+    wrds_dscontrid: "NHO"
+    wrds_contrname: "HEATING OIL (NEW YORK)"
+    cftc_code: "022651"  # NY HARBOR ULSD - NEW YORK MERCANTILE EXCHANGE
     contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     max_tenor: 12
     contract_multiplier: 42000
@@ -39,8 +48,11 @@ commodities:
     name: "RBOB Gasoline"
     exchange: "NYMEX"
     sector: "energy"
-    nasdaq_prefix: "CHRIS/CME_RB"
-    stooq_symbol: "RB.F"
+    yfinance_symbol: "RB=F"
+    wrds_contrcode: 2091
+    wrds_dscontrid: "NRB"
+    wrds_contrname: "GASOLINE RBOB"
+    cftc_code: "111659"  # GASOLINE RBOB - NEW YORK MERCANTILE EXCHANGE
     contract_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     max_tenor: 12
     contract_multiplier: 42000
@@ -51,8 +63,11 @@ commodities:
     name: "Gold"
     exchange: "COMEX"
     sector: "metals"
-    nasdaq_prefix: "CHRIS/CME_GC"
-    stooq_symbol: "GC.F"
+    yfinance_symbol: "GC=F"
+    wrds_contrcode: 2020
+    wrds_dscontrid: "NGC"
+    wrds_contrname: "GOLD (100 OZ)"
+    cftc_code: "088691"  # GOLD - COMMODITY EXCHANGE INC.
     contract_months: [2, 4, 6, 8, 10, 12]
     max_tenor: 12
     contract_multiplier: 100
@@ -63,8 +78,11 @@ commodities:
     name: "Silver"
     exchange: "COMEX"
     sector: "metals"
-    nasdaq_prefix: "CHRIS/CME_SI"
-    stooq_symbol: "SI.F"
+    yfinance_symbol: "SI=F"
+    wrds_contrcode: 2108
+    wrds_dscontrid: "NSL"
+    wrds_contrname: "SILVER (5000 OZ)"
+    cftc_code: "084691"  # SILVER - COMMODITY EXCHANGE INC.
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 5000
@@ -75,8 +93,11 @@ commodities:
     name: "Copper"
     exchange: "COMEX"
     sector: "metals"
-    nasdaq_prefix: "CHRIS/CME_HG"
-    stooq_symbol: "HG.F"
+    yfinance_symbol: "HG=F"
+    wrds_contrcode: 2026
+    wrds_dscontrid: "NHG"
+    wrds_contrname: "COPPER (HIGH GRADE)"
+    cftc_code: "085692"  # COPPER- #1 - COMMODITY EXCHANGE INC.
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 25000
@@ -87,8 +108,11 @@ commodities:
     name: "Corn"
     exchange: "CBOT"
     sector: "agriculture"
-    nasdaq_prefix: "CHRIS/CME_C"
-    stooq_symbol: "ZC.F"
+    yfinance_symbol: "ZC=F"
+    wrds_contrcode: 3247
+    wrds_dscontrid: "CCF"
+    wrds_contrname: "CORN (CBT Electronic)"
+    cftc_code: "002602"  # CORN - CHICAGO BOARD OF TRADE
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 5000
@@ -99,8 +123,11 @@ commodities:
     name: "Soybeans"
     exchange: "CBOT"
     sector: "agriculture"
-    nasdaq_prefix: "CHRIS/CME_S"
-    stooq_symbol: "ZS.F"
+    yfinance_symbol: "ZS=F"
+    wrds_contrcode: 3376
+    wrds_dscontrid: "CSY"
+    wrds_contrname: "CBT Soybean Composite"
+    cftc_code: "005602"  # SOYBEANS - CHICAGO BOARD OF TRADE
     contract_months: [1, 3, 5, 7, 8, 9, 11]
     max_tenor: 12
     contract_multiplier: 5000
@@ -111,8 +138,11 @@ commodities:
     name: "Wheat (SRW)"
     exchange: "CBOT"
     sector: "agriculture"
-    nasdaq_prefix: "CHRIS/CME_W"
-    stooq_symbol: "ZW.F"
+    yfinance_symbol: "ZW=F"
+    wrds_contrcode: 464
+    wrds_dscontrid: "CZW"
+    wrds_contrname: "CBT Wheat Electronic"
+    cftc_code: "001602"  # WHEAT-SRW - CHICAGO BOARD OF TRADE
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 5000
@@ -123,8 +153,11 @@ commodities:
     name: "Coffee"
     exchange: "ICE"
     sector: "softs"
-    nasdaq_prefix: "CHRIS/ICE_KC"
-    stooq_symbol: "KC.F"
+    yfinance_symbol: "KC=F"
+    wrds_contrcode: 2038
+    wrds_dscontrid: "NKC"
+    wrds_contrname: "COFFEE 'C'"
+    cftc_code: "083731"  # COFFEE C - ICE FUTURES U.S.
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 37500
@@ -135,8 +168,11 @@ commodities:
     name: "Sugar #11"
     exchange: "ICE"
     sector: "softs"
-    nasdaq_prefix: "CHRIS/ICE_SB"
-    stooq_symbol: "SB.F"
+    yfinance_symbol: "SB=F"
+    wrds_contrcode: 2104
+    wrds_dscontrid: "NSB"
+    wrds_contrname: "SUGAR #11"
+    cftc_code: "080732"  # SUGAR NO. 11 - ICE FUTURES U.S.
     contract_months: [3, 5, 7, 10]
     max_tenor: 12
     contract_multiplier: 112000
@@ -147,8 +183,11 @@ commodities:
     name: "Cocoa"
     exchange: "ICE"
     sector: "softs"
-    nasdaq_prefix: "CHRIS/ICE_CC"
-    stooq_symbol: "CC.F"
+    yfinance_symbol: "CC=F"
+    wrds_contrcode: 1980
+    wrds_dscontrid: "NCC"
+    wrds_contrname: "COCOA"
+    cftc_code: "073732"  # COCOA - ICE FUTURES U.S.
     contract_months: [3, 5, 7, 9, 12]
     max_tenor: 12
     contract_multiplier: 10

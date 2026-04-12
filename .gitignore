@@ -1,9 +1,10 @@
 # Data (downloaded via pipeline)
 /data/raw/*
 /data/processed/*
+/data/cache/*
 !/data/raw/.gitkeep
 !/data/processed/.gitkeep
-!/data/cache/*
+!/data/cache/.gitkeep
 
 # Python
 __pycache__/
@@ -22,6 +23,7 @@ build/
 venv/
 .venv/
 .env
+.env.local
 
 # OS / IDE
 .DS_Store
@@ -30,6 +32,8 @@ Thumbs.db
 .vscode/
 .cursor/
 
+# Claude (local development context)
+.claude/
+
 # API keys (NEVER commit)
-.env.local
 secrets.yaml
