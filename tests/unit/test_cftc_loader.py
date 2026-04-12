@@ -233,3 +233,47 @@ def test_download_cot_history_all_years_fail(monkeypatch) -> None:
         "mm_net",
         "open_interest",
     ]
+
+
+def test_compute_net_speculative_warns_on_duplicates(caplog) -> None:
+    """Duplicate (report_date, commodity) rows should log a warning."""
+    import logging
+
+    cot = pd.DataFrame(
+        {
+            "commodity": ["CL", "CL", "CL"],
+            "report_date": pd.to_datetime(["2020-06-16", "2020-06-16", "2020-06-23"]),
+            "mm_long": [100.0, 110.0, 120.0],
+            "mm_short": [50.0, 55.0, 60.0],
+            "mm_net": [50.0, 55.0, 60.0],
+            "open_interest": [1000.0, 1000.0, 1000.0],
+        }
+    )
+    with caplog.at_level(logging.WARNING, logger="commodity_curve_factors.data.cftc_loader"):
+        result = compute_net_speculative(cot)
+    assert any("duplicate" in rec.message.lower() for rec in caplog.records)
+    # keeps last (55, not 50) for the duplicate date
+    assert result.loc[pd.Timestamp("2020-06-16"), "CL"] == 55.0
+
+
+def test_lag_to_release_date_propagates_nat() -> None:
+    """NaT report_date should produce NaT release_date (not crash)."""
+    cot = pd.DataFrame(
+        {
+            "commodity": ["CL", "CL"],
+            "report_date": [pd.Timestamp("2020-06-16"), pd.NaT],
+            "mm_long": [100.0, 110.0],
+            "mm_short": [50.0, 55.0],
+            "mm_net": [50.0, 55.0],
+            "open_interest": [1000.0, 1000.0],
+        }
+    )
+    result = lag_to_release_date(cot)
+    # Tuesday -> Friday for the valid row
+    valid = result[result["report_date"] == pd.Timestamp("2020-06-16")]
+    assert len(valid) == 1
+    assert valid["release_date"].iloc[0] == pd.Timestamp("2020-06-19")
+    # NaT propagates for the invalid row
+    nat_row = result[result["report_date"].isna()]
+    assert len(nat_row) == 1
+    assert pd.isna(nat_row["release_date"].iloc[0])

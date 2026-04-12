@@ -146,11 +146,17 @@ def download_cot_zip(year: int, *, use_cache: bool = True) -> pd.DataFrame | Non
 
     try:
         with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
-            members = zf.namelist()
-            if not members:
-                logger.warning("CFTC zip for %d is empty", year)
+            txt_members = [name for name in zf.namelist() if name.endswith(".txt")]
+            if not txt_members:
+                logger.error("CFTC zip for %d contains no .txt files: %s", year, zf.namelist())
                 return None
-            member = members[0]
+            if len(txt_members) > 1:
+                logger.warning(
+                    "CFTC zip for %d contains multiple .txt files, using first: %s",
+                    year,
+                    txt_members,
+                )
+            member = txt_members[0]
             with zf.open(member) as fh:
                 df = pd.read_csv(fh, low_memory=False)
     except (zipfile.BadZipFile, ValueError, pd.errors.ParserError) as exc:
@@ -237,7 +243,7 @@ def parse_cot_csv(
     out = pd.DataFrame(
         {
             "commodity": subset[_COL_CODE].map(code_to_symbol),
-            "report_date": pd.to_datetime(subset[_COL_DATE]),
+            "report_date": pd.to_datetime(subset[_COL_DATE], format="%Y-%m-%d"),
             "mm_long": mm_long.astype(float),
             "mm_short": mm_short.astype(float),
             "mm_net": (mm_long - mm_short).astype(float),
@@ -348,6 +354,15 @@ def compute_net_speculative(cot: pd.DataFrame) -> pd.DataFrame:
         positioning (``mm_net``, contracts).  Used as the raw input to the
         Phase 3 positioning factor.
     """
+    dupes = cot.duplicated(subset=["report_date", "commodity"], keep=False)
+    if dupes.any():
+        n_dupes = int(dupes.sum())
+        logger.warning(
+            "compute_net_speculative: %d duplicate (report_date, commodity) rows; "
+            "keeping last. Check universe.yaml for duplicate cftc_code mappings.",
+            n_dupes,
+        )
+
     wide = cot.pivot_table(
         index="report_date",
         columns="commodity",
@@ -367,6 +382,8 @@ def _next_release_date(obs_date: pd.Timestamp, release_dow: int) -> pd.Timestamp
     that happens to fall on the release day rolls to the *next* week —
     the COT data cannot be known the same day it is dated.
     """
+    if pd.isna(obs_date):
+        return pd.NaT
     next_day = obs_date + pd.Timedelta(days=1)
     days_ahead = (release_dow - next_day.weekday()) % 7
     return next_day + pd.Timedelta(days=days_ahead)
@@ -420,7 +437,7 @@ def lag_to_release_date(
     out["release_date"] = pd.DatetimeIndex(
         [_next_release_date(ts, release_dow) for ts in out["report_date"]]
     )
-    out = out.sort_values("release_date", kind="stable").reset_index(drop=True)
+    out = out.sort_values("release_date", kind="stable", na_position="last").reset_index(drop=True)
     return out
 
 
