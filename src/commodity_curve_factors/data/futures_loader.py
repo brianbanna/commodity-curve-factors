@@ -1,7 +1,7 @@
 """Download continuous futures price data for all commodities.
 
 Primary source: yfinance (front-month continuous contracts).
-Back-month contracts (2nd through 12th) will come from Nasdaq Data Link (task 2.2).
+Back-month contracts come from WRDS Datastream (task 2.5, wrds_loader.py).
 
 yfinance provides free daily OHLCV for front-month continuous futures using the
 '{SYMBOL}=F' convention (e.g. 'CL=F' for WTI crude front month). Data available

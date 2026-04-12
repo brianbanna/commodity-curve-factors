@@ -61,6 +61,8 @@ _REQUEST_TIMEOUT_SECONDS = 60
 _COL_NAME = "Market_and_Exchange_Names"
 _COL_CODE = "CFTC_Contract_Market_Code"
 _COL_DATE = "Report_Date_as_YYYY-MM-DD"
+# Pre-2017 files used a different date column; we rename on load.
+_COL_DATE_LEGACY = "As_of_Date_In_Form_YYMMDD"
 _COL_OI = "Open_Interest_All"
 _COL_MM_LONG = "M_Money_Positions_Long_All"
 _COL_MM_SHORT = "M_Money_Positions_Short_All"
@@ -201,6 +203,15 @@ def parse_cot_csv(
         missing from ``raw``.  The error message lists every missing
         column so schema drift is easy to diagnose.
     """
+    # Pre-2017 CFTC files use a different date column name and YYMMDD format.
+    # Normalize to the modern schema so downstream code sees a single name.
+    if _COL_DATE_LEGACY in raw.columns and _COL_DATE not in raw.columns:
+        raw = raw.copy()
+        raw[_COL_DATE] = pd.to_datetime(
+            raw[_COL_DATE_LEGACY].astype(str), format="%y%m%d"
+        ).dt.strftime("%Y-%m-%d")
+        logger.debug("Renamed legacy date column %s → %s", _COL_DATE_LEGACY, _COL_DATE)
+
     missing = [col for col in _REQUIRED_COLUMNS if col not in raw.columns]
     if missing:
         raise ValueError(
