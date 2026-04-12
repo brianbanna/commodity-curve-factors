@@ -45,6 +45,50 @@ def _check_min_price(df: pd.DataFrame, start: str, end: str, col: str = "Close")
     return float(subset.min())
 
 
+def detect_gaps(
+    df: pd.DataFrame,
+    max_consecutive_missing: int = 5,
+    col: str | None = None,
+) -> list[tuple[pd.Timestamp, pd.Timestamp, int]]:
+    """Find runs of NaN values longer than a threshold.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with a DatetimeIndex.
+    max_consecutive_missing : int
+        Minimum gap length to report (inclusive). Default 5.
+    col : str, optional
+        Column to check. If None, checks if ALL columns are NaN on a row.
+
+    Returns
+    -------
+    list[tuple[pd.Timestamp, pd.Timestamp, int]]
+        Each tuple is (gap_start, gap_end, gap_length) for each run of
+        consecutive NaN rows longer than ``max_consecutive_missing``.
+        Sorted by gap_start ascending.
+    """
+    if col is not None:
+        is_nan = df[col].isna()
+    else:
+        is_nan = df.isna().all(axis=1)
+
+    # Each NaN run shares a group_id with the preceding non-NaN row (if any),
+    # because cumsum only increments on non-NaN values.  Isolate only the NaN
+    # rows before grouping so each group is a pure run of missing values.
+    nan_only = is_nan[is_nan]
+    group_id = (~is_nan).cumsum()[is_nan]
+    gaps: list[tuple[pd.Timestamp, pd.Timestamp, int]] = []
+
+    for _gid, group in nan_only.groupby(group_id):
+        length = len(group)
+        if length >= max_consecutive_missing:
+            gaps.append((group.index[0], group.index[-1], length))
+
+    gaps.sort(key=lambda t: t[0])
+    return gaps
+
+
 def validate_spot_checks(data: dict[str, pd.DataFrame]) -> list[str]:
     """Run known-fact spot checks against downloaded data.
 
