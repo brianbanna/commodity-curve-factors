@@ -25,7 +25,7 @@ signals: ## Generate portfolio signals and weights
 	$(PYTHON) -m $(PKG).signals.portfolio
 
 backtest: ## Run backtests for all strategy variants
-	$(PYTHON) -m $(PKG).backtest.engine
+	$(PYTHON) -m $(PKG).backtest
 
 evaluate: ## Compute performance metrics and attribution
 	$(PYTHON) -m $(PKG).evaluation.report
