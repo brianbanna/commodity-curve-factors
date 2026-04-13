@@ -30,6 +30,7 @@ from commodity_curve_factors.factors.momentum_ts import tsmom_signal
 from commodity_curve_factors.factors.momentum_xs import xsmom_signal
 from commodity_curve_factors.factors.positioning import compute_positioning_factor
 from commodity_curve_factors.factors.slope import compute_slope_factor
+from commodity_curve_factors.factors.transforms import expanding_zscore_df
 from commodity_curve_factors.factors.volatility import vol_regime_ratio
 from commodity_curve_factors.utils.config import load_config
 from commodity_curve_factors.utils.paths import DATA_PROCESSED
@@ -83,6 +84,10 @@ def main() -> None:
     logger.info("Computing momentum factors")
     tsmom = tsmom_signal(prices)
     xsmom = xsmom_signal(prices)
+    # Z-score XSMOM so it is on the same scale as other factors (mean~0, std~1)
+    # before entering the composite. Raw XSMOM is in [0,1]; without z-scoring
+    # it would be underweighted by ~3x in the nanmean composite.
+    xsmom = expanding_zscore_df(xsmom, min_periods=252)
 
     # --- Inventory ---
     logger.info("Computing inventory surprise")
