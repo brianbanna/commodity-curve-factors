@@ -30,6 +30,8 @@ strategies:
     near_tenor: 1
     far_tenor: 6
     rebalance: "weekly"
+    long_threshold: 0.5
+    short_threshold: -0.5
 
   regime_conditioned:
     type: "regime_conditioned"

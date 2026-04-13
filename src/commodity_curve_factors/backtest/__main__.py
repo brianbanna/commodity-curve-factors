@@ -281,7 +281,12 @@ def main() -> None:
     # Strategy 7: Calendar Spread Carry
     # ------------------------------------------------------------------
     logger.info("Strategy 7: Calendar Spread Carry")
-    spread_signal = calendar_spread_signal(carry)
+    cs_cfg = strategy_cfg["strategies"].get("calendar_spread", {})
+    spread_signal = calendar_spread_signal(
+        carry,
+        long_threshold=cs_cfg.get("long_threshold", 0.5),
+        short_threshold=cs_cfg.get("short_threshold", -0.5),
+    )
     # spread_signal has MultiIndex columns (commodity, leg).
     # Collapse to net position per commodity: front(+1) + back(-1) = net direction.
     commodities_in_signal = spread_signal.columns.get_level_values("commodity").unique()
