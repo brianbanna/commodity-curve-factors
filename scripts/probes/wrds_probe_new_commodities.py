@@ -210,7 +210,15 @@ def main() -> int:
         logger.info("=" * 70)
         logger.info("SUMMARY  (%d/%d found)", len(results), len(CANDIDATES))
         logger.info("=" * 70)
-        logger.info("%-4s  %-8s  %-12s  %-12s  %-6s  %s", "SYM", "CONTRCODE", "START", "END", "DATES", "NAME")
+        logger.info(
+            "%-4s  %-8s  %-12s  %-12s  %-6s  %s",
+            "SYM",
+            "CONTRCODE",
+            "START",
+            "END",
+            "DATES",
+            "NAME",
+        )
         logger.info("-" * 70)
         for sym, info in results.items():
             logger.info(

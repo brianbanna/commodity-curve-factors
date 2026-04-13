@@ -178,7 +178,9 @@ print(f"  z-score (H0: Sharpe=0): {z_score:.2f}")
 print(f"  p-value (single test): {p_single:.4f}")
 print(f"  P(at least 1 of {n_variants} >= {best_oos_sharpe:.2f} | H0): {p_multiple:.4f}")
 print(f"  Bonferroni-corrected threshold (5% family): Sharpe >= {bonferroni_sharpe:.2f}")
-print(f"  Our Sharpe of {best_oos_sharpe:+.3f} {'PASSES' if best_oos_sharpe >= bonferroni_sharpe else 'FAILS'} Bonferroni at 5%")
+print(
+    f"  Our Sharpe of {best_oos_sharpe:+.3f} {'PASSES' if best_oos_sharpe >= bonferroni_sharpe else 'FAILS'} Bonferroni at 5%"
+)
 
 # Bailey, Borwein, de Prado & Zhu (2014) deflated Sharpe
 # Expected max Sharpe under null = SE * E[max of N standard normals]
@@ -190,7 +192,9 @@ if n_variants > 1:
     deflated = best_oos_sharpe - e_max_sharpe
     print(f"\n  Expected max Sharpe under null (N={n_variants}): {e_max_sharpe:+.3f}")
     print(f"  Deflated Sharpe (actual - expected max): {deflated:+.3f}")
-    print(f"  Deflated Sharpe {'> 0 (marginally significant)' if deflated > 0 else '<= 0 (NOT significant)'}")
+    print(
+        f"  Deflated Sharpe {'> 0 (marginally significant)' if deflated > 0 else '<= 0 (NOT significant)'}"
+    )
 
 # =========================================================================
 # INVESTIGATION 3: Year-by-year decomposition
@@ -244,8 +248,15 @@ print("\n" + "=" * 72)
 print("INVESTIGATION 4: Covariance matrix condition number (60-day window)")
 print("=" * 72)
 
-check_dates = ["2010-01-04", "2015-01-02", "2018-01-02", "2020-01-02",
-               "2020-04-20", "2022-01-03", "2024-01-02"]
+check_dates = [
+    "2010-01-04",
+    "2015-01-02",
+    "2018-01-02",
+    "2020-01-02",
+    "2020-04-20",
+    "2022-01-03",
+    "2024-01-02",
+]
 
 print(f"\n  {'Date':<14} {'Cond #':>10} {'Min Eigval':>14} {'N Assets':>10} {'Status':<20}")
 print("  " + "-" * 72)
@@ -291,10 +302,14 @@ if cond_numbers:
     print(f"    Mean condition number:   {np.mean(cond_arr):.0f}")
     print(f"    95th percentile:         {np.percentile(cond_arr, 95):.0f}")
     print(f"    Max condition number:    {np.max(cond_arr):.0f}")
-    print(f"    Dates with cond > 100:   {(cond_arr > 100).sum()}/{len(cond_arr)} "
-          f"({(cond_arr > 100).mean()*100:.0f}%)")
-    print(f"    Dates with cond > 500:   {(cond_arr > 500).sum()}/{len(cond_arr)} "
-          f"({(cond_arr > 500).mean()*100:.0f}%)")
+    print(
+        f"    Dates with cond > 100:   {(cond_arr > 100).sum()}/{len(cond_arr)} "
+        f"({(cond_arr > 100).mean() * 100:.0f}%)"
+    )
+    print(
+        f"    Dates with cond > 500:   {(cond_arr > 500).sum()}/{len(cond_arr)} "
+        f"({(cond_arr > 500).mean() * 100:.0f}%)"
+    )
 
     # 13 assets, 60 observations: N/T ratio
     ratio_nt = n_commodities / LOOKBACK
@@ -362,8 +377,10 @@ try:
         # Compare to academic benchmark
         print("\n  Academic benchmark (Koijen et al. 2018):")
         print("    Carry Sharpe: 0.7-0.8 (24 commodities, 1972-2012)")
-        print(f"    Expected with {len(common_syms)} assets: "
-              f"~{0.75 * np.sqrt(len(common_syms) / 24):.2f}")
+        print(
+            f"    Expected with {len(common_syms)} assets: "
+            f"~{0.75 * np.sqrt(len(common_syms) / 24):.2f}"
+        )
         print(f"    We got: {sharpe_monthly:+.3f}")
 
         if sharpe_monthly < 0:
@@ -392,11 +409,11 @@ universe_config = {
     "GC": {"multiplier": 100, "unit": "oz", "typical_price": 2000},
     "SI": {"multiplier": 5000, "unit": "oz", "typical_price": 25},
     "HG": {"multiplier": 25000, "unit": "lb", "typical_price": 4},
-    "ZC": {"multiplier": 50, "unit": "bu", "typical_price": 450},     # cents -> dollars
-    "ZS": {"multiplier": 50, "unit": "bu", "typical_price": 1300},    # cents -> dollars
-    "ZW": {"multiplier": 50, "unit": "bu", "typical_price": 600},     # cents -> dollars
-    "KC": {"multiplier": 375, "unit": "lb", "typical_price": 200},    # cents -> dollars
-    "SB": {"multiplier": 1120, "unit": "lb", "typical_price": 20},    # cents -> dollars
+    "ZC": {"multiplier": 50, "unit": "bu", "typical_price": 450},  # cents -> dollars
+    "ZS": {"multiplier": 50, "unit": "bu", "typical_price": 1300},  # cents -> dollars
+    "ZW": {"multiplier": 50, "unit": "bu", "typical_price": 600},  # cents -> dollars
+    "KC": {"multiplier": 375, "unit": "lb", "typical_price": 200},  # cents -> dollars
+    "SB": {"multiplier": 1120, "unit": "lb", "typical_price": 20},  # cents -> dollars
     "CC": {"multiplier": 10, "unit": "tonne", "typical_price": 4000},
 }
 
@@ -433,11 +450,15 @@ cl_ret = returns["CL"].dropna()
 cl_cum = float(np.exp(cl_ret.sum()))
 cl_years = len(cl_ret) / 252
 cl_ann = cl_cum ** (1.0 / cl_years) - 1
-print(f"\n  CL cumulative return (yfinance continuous, {cl_ret.index[0].date()}"
-      f" to {cl_ret.index[-1].date()}):")
+print(
+    f"\n  CL cumulative return (yfinance continuous, {cl_ret.index[0].date()}"
+    f" to {cl_ret.index[-1].date()}):"
+)
 print(f"    Total: {cl_cum:.3f}x ({(cl_cum - 1) * 100:+.1f}%)")
 print(f"    Annualised: {cl_ann * 100:+.1f}% per year")
-print(f"    (WTI spot went from ~$45 to ~$70 over this period = ~{((70/45)**(1/20)-1)*100:.1f}% p.a.)")
+print(
+    f"    (WTI spot went from ~$45 to ~$70 over this period = ~{((70 / 45) ** (1 / 20) - 1) * 100:.1f}% p.a.)"
+)
 
 if cl_ann < 0:
     print("    yfinance CL return is NEGATIVE => contango roll drag dominates")
@@ -519,19 +540,29 @@ print(f"""
 
 issues = []
 if cond_numbers and np.median(cond_arr) > 100:
-    issues.append("   - Covariance matrix is ill-conditioned (median cond #: "
-                  f"{np.median(cond_arr):.0f}). MinVar weights are noise-amplifying.")
+    issues.append(
+        "   - Covariance matrix is ill-conditioned (median cond #: "
+        f"{np.median(cond_arr):.0f}). MinVar weights are noise-amplifying."
+    )
 if n_commodities / LOOKBACK > 0.15:
-    issues.append(f"   - N/T ratio = {n_commodities}/{LOOKBACK} = "
-                  f"{n_commodities/LOOKBACK:.2f}. Need shrinkage estimator.")
+    issues.append(
+        f"   - N/T ratio = {n_commodities}/{LOOKBACK} = "
+        f"{n_commodities / LOOKBACK:.2f}. Need shrinkage estimator."
+    )
 issues.append("   - Roll costs potentially double-counted: yfinance embeds roll yield,")
 issues.append("     backtest also subtracts roll_cost_bps. Direction of bias depends on")
-issues.append("     portfolio composition (net long contango = pessimistic, net short = optimistic).")
-issues.append(f"   - IS Sharpe ({sharpe_ratio(is_mv):+.3f}) vs OOS Sharpe "
-              f"({oos_sharpe_claim:+.3f}) is suspicious: OOS >> IS suggests regime luck.")
+issues.append(
+    "     portfolio composition (net long contango = pessimistic, net short = optimistic)."
+)
+issues.append(
+    f"   - IS Sharpe ({sharpe_ratio(is_mv):+.3f}) vs OOS Sharpe "
+    f"({oos_sharpe_claim:+.3f}) is suspicious: OOS >> IS suggests regime luck."
+)
 if positive_years < 5:
-    issues.append(f"   - Only {positive_years}/7 OOS years are positive — "
-                  "performance is not robust across time.")
+    issues.append(
+        f"   - Only {positive_years}/7 OOS years are positive — "
+        "performance is not robust across time."
+    )
 
 for issue in issues:
     print(issue)
