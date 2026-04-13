@@ -288,13 +288,16 @@ def main() -> None:
         short_threshold=cs_cfg.get("short_threshold", -0.5),
     )
     # spread_signal has MultiIndex columns (commodity, leg).
-    # Collapse to net position per commodity: front(+1) + back(-1) = net direction.
+    # The directional signal is captured entirely by the front leg:
+    #   backwardation → front = +1 (long front, short back)
+    #   contango      → front = -1 (short front, long back)
+    # front + back always sums to 0, so we use the front leg as the
+    # per-commodity directional weight for the cross-sectional portfolio.
     commodities_in_signal = spread_signal.columns.get_level_values("commodity").unique()
     net_spread = pd.DataFrame(index=spread_signal.index)
     for sym in commodities_in_signal:
         front = spread_signal.get((sym, "front"), pd.Series(0.0, index=spread_signal.index))
-        back = spread_signal.get((sym, "back"), pd.Series(0.0, index=spread_signal.index))
-        net_spread[sym] = front + back
+        net_spread[sym] = front
     # Scale by 1 / N active spread positions
     n_active_spread = (net_spread != 0).sum(axis=1).replace(0, 1)
     raw_w_spread = net_spread.div(n_active_spread, axis=0)
