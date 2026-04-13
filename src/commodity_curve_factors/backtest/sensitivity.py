@@ -24,7 +24,8 @@ def _sharpe(net_return: pd.Series) -> float:
     std = float(net_return.std())
     if std == 0.0 or len(net_return) == 0:
         return 0.0
-    return float(net_return.mean()) / std * np.sqrt(_TRADING_DAYS_PER_YEAR)
+    result: float = float(net_return.mean()) / std * np.sqrt(_TRADING_DAYS_PER_YEAR)
+    return result
 
 
 def _cagr(cumulative: pd.Series) -> float:
@@ -36,7 +37,8 @@ def _cagr(cumulative: pd.Series) -> float:
     end_val = float(cumulative.iloc[-1])
     if end_val <= 0.0 or years <= 0.0:
         return 0.0
-    return end_val ** (1.0 / years) - 1.0
+    result: float = end_val ** (1.0 / years) - 1.0
+    return result
 
 
 def _max_drawdown(drawdown: pd.Series) -> float:

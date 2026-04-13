@@ -149,11 +149,12 @@ def compute_roll_costs(
         if date not in roll_dates:
             continue
         for col in weights.columns:
-            w = weights.at[date, col]
-            if pd.isna(w) or w == 0.0:
+            w_val: float = float(weights.at[date, col])  # type: ignore[arg-type]
+            if pd.isna(w_val) or w_val == 0.0:
                 continue
             rate = get_cost(col, "roll_cost_bps", config) / 10_000
-            roll_costs.at[date] += abs(w) * rate
+            prev: float = float(roll_costs.at[date])  # type: ignore[arg-type]
+            roll_costs.at[date] = prev + abs(w_val) * rate
 
     logger.debug(
         "compute_roll_costs: %d roll days found, total_cost=%.4f",
