@@ -98,8 +98,11 @@ class TestMultiIndexColumns:
         z = _make_carry({"CL": 0.0, "NG": 0.0, "GC": 0.0})
         sig = calendar_spread_signal(z)
         expected_cols = [
-            ("CL", "front"), ("CL", "back"),
-            ("NG", "front"), ("NG", "back"),
-            ("GC", "front"), ("GC", "back"),
+            ("CL", "front"),
+            ("CL", "back"),
+            ("NG", "front"),
+            ("NG", "back"),
+            ("GC", "front"),
+            ("GC", "back"),
         ]
         assert list(sig.columns) == expected_cols

@@ -88,8 +88,9 @@ class TestClassifyRegimeNan:
         assert result.iloc[2] == "turbulent"
 
     def test_all_nan(self):
-        vix = pd.Series([np.nan, np.nan, np.nan],
-                        index=pd.date_range("2020-01-01", periods=3, freq="B"))
+        vix = pd.Series(
+            [np.nan, np.nan, np.nan], index=pd.date_range("2020-01-01", periods=3, freq="B")
+        )
         result = classify_regime(vix)
         assert result.isna().all()
 

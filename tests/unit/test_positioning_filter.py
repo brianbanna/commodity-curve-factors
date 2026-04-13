@@ -104,5 +104,5 @@ class TestFilterHandlesNan:
         pos = pd.DataFrame({"CL": [0.95, 0.95, 0.05]}, index=dates)
         result = apply_positioning_filter(sig, pos, crowded_threshold=0.90)
         assert result.loc[dates[0], "CL"] == pytest.approx(0.0)  # crowded long → zeroed
-        assert np.isnan(result.loc[dates[1], "CL"])              # NaN signal → NaN
+        assert np.isnan(result.loc[dates[1], "CL"])  # NaN signal → NaN
         assert result.loc[dates[2], "CL"] == pytest.approx(0.0)  # crowded short → zeroed

@@ -22,16 +22,15 @@ class TestWeightsSumToZero:
     def test_multiple_rows(self):
         rng = np.random.default_rng(42)
         dates = pd.date_range("2020-01-01", periods=20, freq="B")
-        scores = pd.DataFrame(rng.standard_normal((20, 6)), index=dates,
-                               columns=["A", "B", "C", "D", "E", "F"])
+        scores = pd.DataFrame(
+            rng.standard_normal((20, 6)), index=dates, columns=["A", "B", "C", "D", "E", "F"]
+        )
         w = rank_and_select(scores, long_n=2, short_n=2)
         row_sums = w.sum(axis=1)
         assert (row_sums.abs() < 1e-10).all()
 
     def test_standard_3_3(self):
-        scores = _make_scores(
-            {"CL": 1.5, "NG": 0.8, "HO": 0.2, "GC": -0.3, "SI": -1.0, "ZC": -1.8}
-        )
+        scores = _make_scores({"CL": 1.5, "NG": 0.8, "HO": 0.2, "GC": -0.3, "SI": -1.0, "ZC": -1.8})
         w = rank_and_select(scores, long_n=3, short_n=3)
         assert abs(w.iloc[0].sum()) < 1e-10
 

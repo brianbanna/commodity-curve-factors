@@ -44,9 +44,7 @@ def apply_positioning_filter(
         NaN in either input → NaN in output.
     """
     if not (0.0 < crowded_threshold < 1.0):
-        raise ValueError(
-            f"crowded_threshold must be in (0, 1), got {crowded_threshold}"
-        )
+        raise ValueError(f"crowded_threshold must be in (0, 1), got {crowded_threshold}")
 
     # Align on common index/columns
     sig, pos = momentum_signal.align(positioning_percentile, join="left")

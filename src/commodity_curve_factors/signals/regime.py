@@ -7,7 +7,6 @@ strategy to tilt factor weights across environments.
 
 import logging
 
-import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -51,12 +50,12 @@ def classify_regime(
     if lo >= hi:
         raise ValueError(f"thresholds must be strictly increasing, got [{lo}, {hi}]")
 
-    result = pd.Series(np.nan, index=vix.index, dtype=object)
+    result = pd.Series(index=vix.index, dtype=object)
     valid = vix.notna()
 
-    result[valid & (vix < lo)] = "calm"
-    result[valid & (vix >= lo) & (vix < hi)] = "moderate"
-    result[valid & (vix >= hi)] = "turbulent"
+    result[valid & (vix < lo)] = "calm"  # type: ignore[index]
+    result[valid & (vix >= lo) & (vix < hi)] = "moderate"  # type: ignore[index]
+    result[valid & (vix >= hi)] = "turbulent"  # type: ignore[index]
 
     logger.info(
         "classify_regime: %d dates, thresholds=[%.1f, %.1f], "

@@ -46,6 +46,7 @@ def _make_returns(
 # apply_execution_lag
 # ---------------------------------------------------------------------------
 
+
 class TestExecutionLag:
     def test_lag_by_one_shifts_forward(self):
         dates = pd.date_range("2020-01-01", periods=5, freq="B")
@@ -84,6 +85,7 @@ class TestExecutionLag:
 # apply_vol_target
 # ---------------------------------------------------------------------------
 
+
 class TestVolTargetScalesWeights:
     def test_portfolio_vol_near_target(self):
         # Use a longer series so rolling window is filled
@@ -109,8 +111,9 @@ class TestVolTargetScalesWeights:
         # Near-zero returns → near-zero portfolio vol → scalar tries to be huge
         returns = pd.DataFrame({"A": np.ones(n) * 1e-10}, index=dates)
         max_lev = 2.0
-        scaled = apply_vol_target(weights, returns, target_vol=0.10,
-                                   lookback=60, max_leverage=max_lev)
+        scaled = apply_vol_target(
+            weights, returns, target_vol=0.10, lookback=60, max_leverage=max_lev
+        )
         # No scaled weight should exceed max_leverage * original weight
         assert (scaled.abs() <= weights.abs() * max_lev + 1e-9).all().all()
 
@@ -124,6 +127,7 @@ class TestVolTargetScalesWeights:
 # ---------------------------------------------------------------------------
 # apply_position_limits
 # ---------------------------------------------------------------------------
+
 
 class TestPositionLimitsCapsWeights:
     def test_no_weight_exceeds_max(self):
@@ -155,6 +159,7 @@ class TestPositionLimitsCapsWeights:
 # ---------------------------------------------------------------------------
 # apply_sector_limits
 # ---------------------------------------------------------------------------
+
 
 class TestSectorLimits:
     def _energy_weights(self, weight_per: float = 0.15) -> pd.DataFrame:
@@ -197,6 +202,7 @@ class TestSectorLimits:
 # ---------------------------------------------------------------------------
 # build_portfolio end-to-end
 # ---------------------------------------------------------------------------
+
 
 class TestBuildPortfolioChainsAll:
     def _make_strategy_config(self) -> dict:
@@ -254,9 +260,7 @@ class TestBuildPortfolioChainsAll:
         dates = pd.date_range("2020-01-01", periods=n, freq="B")
         w = pd.DataFrame(rng.uniform(-0.15, 0.15, (n, 4)), index=dates, columns=cols)
         r = pd.DataFrame(rng.normal(0, 0.01, (n, 4)), index=dates, columns=cols)
-        universe = {
-            "commodities": {c: {"sector": "energy"} for c in cols}
-        }
+        universe = {"commodities": {c: {"sector": "energy"} for c in cols}}
         cfg = {
             "constraints": {
                 "vol_target": 0.10,

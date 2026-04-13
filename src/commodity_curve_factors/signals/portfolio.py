@@ -80,8 +80,7 @@ def apply_vol_target(
     scaled = weights.multiply(scalar, axis=0)
 
     logger.info(
-        "apply_vol_target: target_vol=%.2f, lookback=%d, "
-        "mean_scalar=%.3f, max_scalar=%.3f",
+        "apply_vol_target: target_vol=%.2f, lookback=%d, mean_scalar=%.3f, max_scalar=%.3f",
         target_vol,
         lookback,
         float(scalar.mean()),
