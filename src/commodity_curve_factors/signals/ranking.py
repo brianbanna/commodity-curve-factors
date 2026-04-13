@@ -11,6 +11,14 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+_WEEKDAY_MAP: dict[str, int] = {
+    "monday": 0,
+    "tuesday": 1,
+    "wednesday": 2,
+    "thursday": 3,
+    "friday": 4,
+}
+
 
 def rank_and_select(
     scores: pd.DataFrame,
@@ -76,3 +84,45 @@ def rank_and_select(
     )
 
     return weights
+
+
+def resample_weights_weekly(
+    weights: pd.DataFrame,
+    rebalance_day: str = "friday",
+) -> pd.DataFrame:
+    """Downsample daily weights to weekly rebalancing.
+
+    Takes the weight on each ``rebalance_day`` and forward-fills through
+    the following week. Positions are held ~5 business days.
+
+    Parameters
+    ----------
+    weights : pd.DataFrame
+        DatetimeIndex × commodity columns, daily weights.
+    rebalance_day : str
+        Day of week to lock in weights.  One of ``"monday"`` through
+        ``"friday"``.  Default ``"friday"``.
+
+    Returns
+    -------
+    pd.DataFrame
+        Same shape as *weights* but values are constant within each week
+        (forward-filled from the most recent rebalance day).
+    """
+    day_key = rebalance_day.lower()
+    if day_key not in _WEEKDAY_MAP:
+        raise ValueError(
+            f"rebalance_day must be one of {list(_WEEKDAY_MAP)}, got {rebalance_day!r}"
+        )
+    target = _WEEKDAY_MAP[day_key]
+    dt_index = pd.DatetimeIndex(weights.index)
+    is_rebal = dt_index.weekday == target
+    rebal_only = weights.loc[is_rebal]
+    result: pd.DataFrame = rebal_only.reindex(weights.index, method="ffill")
+    logger.info(
+        "resample_weights_weekly: rebalance_day=%s, rebal_rows=%d / %d total",
+        rebalance_day,
+        int(is_rebal.sum()),
+        len(weights),
+    )
+    return result

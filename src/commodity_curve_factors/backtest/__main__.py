@@ -26,7 +26,7 @@ from commodity_curve_factors.data.futures_loader import load_front_month_data
 from commodity_curve_factors.data.macro_loader import load_macro_data
 from commodity_curve_factors.signals.calendar_spreads import calendar_spread_signal
 from commodity_curve_factors.signals.portfolio import build_portfolio
-from commodity_curve_factors.signals.ranking import rank_and_select
+from commodity_curve_factors.signals.ranking import rank_and_select, resample_weights_weekly
 from commodity_curve_factors.signals.threshold import threshold_signal
 from commodity_curve_factors.utils.config import load_config
 from commodity_curve_factors.utils.paths import DATA_PROCESSED
@@ -176,6 +176,9 @@ def main() -> None:
     composite_ic = _load_factor("composite_ic")
     composite_regime = _load_factor("composite_regime")
 
+    # Shared execution config
+    rebal_day: str = strategy_cfg.get("execution", {}).get("rebalance_day", "friday")
+
     # Strategy-level config shortcuts
     xs_carry_cfg = strategy_cfg["strategies"]["cross_sectional_carry"]
     mf_cfg = strategy_cfg["strategies"]["multi_factor"]
@@ -192,6 +195,7 @@ def main() -> None:
         long_n=xs_carry_cfg["long_n"],
         short_n=xs_carry_cfg["short_n"],
     )
+    raw_w = resample_weights_weekly(raw_w, rebalance_day=rebal_day)
     w = build_portfolio(raw_w, returns, strategy_cfg, universe_cfg)
     strategies["xs_carry"] = run_backtest(w, returns, cost_config)
 
@@ -204,6 +208,7 @@ def main() -> None:
         long_n=mf_cfg["long_n"],
         short_n=mf_cfg["short_n"],
     )
+    raw_w = resample_weights_weekly(raw_w, rebalance_day=rebal_day)
     w = build_portfolio(raw_w, returns, strategy_cfg, universe_cfg)
     strategies["multi_factor_ew"] = run_backtest(w, returns, cost_config)
 
@@ -216,6 +221,7 @@ def main() -> None:
         long_n=mf_cfg["long_n"],
         short_n=mf_cfg["short_n"],
     )
+    raw_w = resample_weights_weekly(raw_w, rebalance_day=rebal_day)
     w = build_portfolio(raw_w, returns, strategy_cfg, universe_cfg)
     strategies["multi_factor_ic"] = run_backtest(w, returns, cost_config)
 
@@ -228,6 +234,7 @@ def main() -> None:
         long_n=mf_cfg["long_n"],
         short_n=mf_cfg["short_n"],
     )
+    raw_w = resample_weights_weekly(raw_w, rebalance_day=rebal_day)
     w = build_portfolio(raw_w, returns, strategy_cfg, universe_cfg)
     strategies["regime_conditioned"] = run_backtest(w, returns, cost_config)
 
@@ -250,6 +257,7 @@ def main() -> None:
     if sector_weight_parts:
         # Combine across sectors; fill missing symbols with 0
         raw_w = pd.concat(sector_weight_parts, axis=1).fillna(0.0)
+        raw_w = resample_weights_weekly(raw_w, rebalance_day=rebal_day)
         w = build_portfolio(raw_w, returns, strategy_cfg, universe_cfg)
         strategies["sector_neutral"] = run_backtest(w, returns, cost_config)
     else:
@@ -265,6 +273,7 @@ def main() -> None:
     raw_w_filled = raw_w.fillna(0.0)
     n_active = (raw_w_filled != 0).sum(axis=1).replace(0, 1)
     raw_w_norm = raw_w_filled.div(n_active, axis=0)
+    raw_w_norm = resample_weights_weekly(raw_w_norm, rebalance_day=rebal_day)
     w = build_portfolio(raw_w_norm, returns, strategy_cfg, universe_cfg)
     strategies["tsmom"] = run_backtest(w, returns, cost_config)
 
@@ -284,6 +293,7 @@ def main() -> None:
     # Scale by 1 / N active spread positions
     n_active_spread = (net_spread != 0).sum(axis=1).replace(0, 1)
     raw_w_spread = net_spread.div(n_active_spread, axis=0)
+    raw_w_spread = resample_weights_weekly(raw_w_spread, rebalance_day=rebal_day)
     w = build_portfolio(raw_w_spread, returns, strategy_cfg, universe_cfg)
     strategies["calendar_spread"] = run_backtest(w, returns, cost_config)
 
@@ -348,6 +358,7 @@ def main() -> None:
             long_n=mf_cfg["long_n"],
             short_n=mf_cfg["short_n"],
         )
+        raw_w_flagship = resample_weights_weekly(raw_w_flagship, rebalance_day=rebal_day)
         w_flagship = build_portfolio(raw_w_flagship, returns, strategy_cfg, universe_cfg)
 
         sensitivity_df = run_cost_sensitivity(w_flagship, returns, sensitivity_bps)
