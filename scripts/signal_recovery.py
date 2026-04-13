@@ -248,7 +248,9 @@ if sector_weights_list:
     combined = pd.concat(sector_weights_list, axis=1).fillna(0.0)
     # Avoid duplicate columns in case any symbol appears twice
     combined = combined.loc[:, ~combined.columns.duplicated()]
-    res_sector = _run_pipeline(combined, returns, freq="monthly", label="Within-sector carry, monthly")
+    res_sector = _run_pipeline(
+        combined, returns, freq="monthly", label="Within-sector carry, monthly"
+    )
     print(
         f"  Within-sector monthly: IS={res_sector['IS']:+.3f}  OOS={res_sector['OOS']:+.3f}"
         f"  turnover={res_sector['turnover']:.4f}"
@@ -301,10 +303,7 @@ for vname, vc in carry_variants.items():
     print(f"    IC lag1={ic1:+.4f}  lag5={ic5:+.4f}  lag21={ic21:+.4f}")
 
     res_v = _run_pipeline(vc, returns, freq="monthly", label=f"Carry {vname}, monthly")
-    print(
-        f"    IS={res_v['IS']:+.3f}  OOS={res_v['OOS']:+.3f}"
-        f"  turnover={res_v['turnover']:.4f}"
-    )
+    print(f"    IS={res_v['IS']:+.3f}  OOS={res_v['OOS']:+.3f}  turnover={res_v['turnover']:.4f}")
     phase2_results.append(res_v)
 
 # ---------------------------------------------------------------------------
@@ -393,8 +392,8 @@ if contracts_dir.exists():
             pq = d / "all_contracts.parquet"
             if pq.exists():
                 df_check = pd.read_parquet(pq)
-                td_min = pd.Timestamp(df_check['trade_date'].min()).date()
-                td_max = pd.Timestamp(df_check['trade_date'].max()).date()
+                td_min = pd.Timestamp(df_check["trade_date"].min()).date()
+                td_max = pd.Timestamp(df_check["trade_date"].max()).date()
                 print(
                     f"  {d.name}: {len(df_check):,} rows, "
                     f"{df_check['futcode'].nunique()} contracts, "
@@ -405,14 +404,14 @@ else:
 
 print("\n  Additional commodities feasible with WRDS access (not in current 13):")
 additional = [
-    ("Platinum",     "NYMEX",  "quarterly"),
-    ("Palladium",    "NYMEX",  "quarterly"),
-    ("Cotton",       "ICE",    "monthly"),
-    ("Live Cattle",  "CME",    "bi-monthly"),
-    ("Lean Hogs",    "CME",    "bi-monthly"),
-    ("Brent Crude",  "ICE",    "monthly"),
-    ("Soybean Oil",  "CBOT",   "monthly"),
-    ("Soybean Meal", "CBOT",   "monthly"),
+    ("Platinum", "NYMEX", "quarterly"),
+    ("Palladium", "NYMEX", "quarterly"),
+    ("Cotton", "ICE", "monthly"),
+    ("Live Cattle", "CME", "bi-monthly"),
+    ("Lean Hogs", "CME", "bi-monthly"),
+    ("Brent Crude", "ICE", "monthly"),
+    ("Soybean Oil", "CBOT", "monthly"),
+    ("Soybean Meal", "CBOT", "monthly"),
 ]
 for name, exch, freq_note in additional:
     print(f"    {name:<16} ({exch}, {freq_note}) — requires new WRDS wrds_contrcode lookup")
@@ -596,9 +595,7 @@ phase2_results.extend([res_decon_weekly, res_decon_monthly])
 print("\n" + "=" * 70)
 print("=== PHASE 2 CARRY RECOVERY SUMMARY ===")
 print("=" * 70)
-print(
-    f"{'Variant':<40}  {'IS_Sharpe':>10}  {'OOS_Sharpe':>10}  {'Turnover':>9}"
-)
+print(f"{'Variant':<40}  {'IS_Sharpe':>10}  {'OOS_Sharpe':>10}  {'Turnover':>9}")
 print("-" * 75)
 for r in phase2_results:
     is_s = f"{r['IS']:+.3f}" if not np.isnan(r["IS"]) else "  n/a"
@@ -610,8 +607,7 @@ print("\n" + "=" * 70)
 print("=== PHASE 3 CONTAMINATION SUMMARY ===")
 print("=" * 70)
 print(
-    f"{'Factor':<22}  {'lag0_IC':>8}  {'lag1_IC':>8}  "
-    f"{'Contaminated?':>14}  {'Decon_lag1_IC':>14}"
+    f"{'Factor':<22}  {'lag0_IC':>8}  {'lag1_IC':>8}  {'Contaminated?':>14}  {'Decon_lag1_IC':>14}"
 )
 print("-" * 75)
 for fname, res in sorted(decon_results.items()):
@@ -628,14 +624,19 @@ for fname, res in sorted(decon_results.items()):
 print("\nNon-curve factor ICs (from audit):")
 print(f"{'Factor':<22}  {'lag0_IC':>8}  {'lag1_IC':>8}  {'lag5_IC':>8}  {'lag21_IC':>8}")
 print("-" * 60)
-non_curve = [k for k in audit_results if k not in decon_results and k not in
-             {"carry_raw", "slope_raw", "curvature_raw", "term_carry_raw"}]
+non_curve = [
+    k
+    for k in audit_results
+    if k not in decon_results
+    and k not in {"carry_raw", "slope_raw", "curvature_raw", "term_carry_raw"}
+]
 for fname in sorted(non_curve):
     ics = audit_results[fname]
     ic0 = ics["lag0"][0]
     ic1 = ics["lag1"][0]
     ic5 = ics["lag5"][0]
     ic21 = ics["lag21"][0]
+
     def _fmt(v: float) -> str:
         return f"{v:+.4f}" if not np.isnan(v) else "    n/a"
 

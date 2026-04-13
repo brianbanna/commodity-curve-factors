@@ -213,7 +213,9 @@ try:
     # Rank → weekly rebal → portfolio → backtest
     raw_w = rank_and_select(momentum_composite, long_n=3, short_n=3)
     raw_w = resample_weights_weekly(raw_w)
-    r41 = _run_variant(raw_w, returns, "4.1 Momentum Composite (TSMOM+XSMOM EW)", "momentum_composite")
+    r41 = _run_variant(
+        raw_w, returns, "4.1 Momentum Composite (TSMOM+XSMOM EW)", "momentum_composite"
+    )
     results.append(r41)
     print(f"  IS={r41['IS_Sharpe']:+.3f}  OOS={r41['OOS_Sharpe']:+.3f}  MaxDD={r41['MaxDD']:+.3f}")
 except Exception as exc:  # noqa: BLE001
@@ -376,7 +378,9 @@ try:
     flat_signal = flat_signal.div(n45, axis=0)
 
     raw_w45 = resample_weights_weekly(flat_signal)
-    r45 = _run_variant(raw_w45, returns, "4.5 Calendar Spread + TSMOM Overlay", "calendar_tsmom_overlay")
+    r45 = _run_variant(
+        raw_w45, returns, "4.5 Calendar Spread + TSMOM Overlay", "calendar_tsmom_overlay"
+    )
     results.append(r45)
     print(f"  IS={r45['IS_Sharpe']:+.3f}  OOS={r45['OOS_Sharpe']:+.3f}  MaxDD={r45['MaxDD']:+.3f}")
 except Exception as exc:  # noqa: BLE001
@@ -479,15 +483,17 @@ for strat_name, fname in EXISTING_STRATEGIES.items():
     try:
         bt = pd.read_parquet(fpath)
         is_r, oos_r = split_is_oos(bt["net_return"])
-        results.append({
-            "Strategy": strat_name,
-            "IS_Sharpe": sharpe_ratio(is_r) if len(is_r) > 0 else float("nan"),
-            "OOS_Sharpe": sharpe_ratio(oos_r) if len(oos_r) > 0 else float("nan"),
-            "Turnover": float(bt["turnover"].mean(skipna=True)),
-            "MaxDD": max_drawdown(bt["net_return"]),
-            "HitRate": float((bt["net_return"] > 0).mean()),
-            "Error": None,
-        })
+        results.append(
+            {
+                "Strategy": strat_name,
+                "IS_Sharpe": sharpe_ratio(is_r) if len(is_r) > 0 else float("nan"),
+                "OOS_Sharpe": sharpe_ratio(oos_r) if len(oos_r) > 0 else float("nan"),
+                "Turnover": float(bt["turnover"].mean(skipna=True)),
+                "MaxDD": max_drawdown(bt["net_return"]),
+                "HitRate": float((bt["net_return"] > 0).mean()),
+                "Error": None,
+            }
+        )
         print(
             f"  {strat_name:<38}  IS={results[-1]['IS_Sharpe']:+.3f}"
             f"  OOS={results[-1]['OOS_Sharpe']:+.3f}"
@@ -508,6 +514,7 @@ print(header)
 print("-" * len(header))
 
 for r in results:
+
     def _fmt(v: float, prefix: str = "") -> str:
         if v != v:  # NaN check
             return "     n/a"
@@ -527,7 +534,11 @@ print("\n" + "=" * 70)
 print("ANALYSIS SUMMARY")
 print("=" * 70)
 
-oos_positive = [(r["Strategy"], r["OOS_Sharpe"]) for r in results if r["OOS_Sharpe"] == r["OOS_Sharpe"] and r["OOS_Sharpe"] > 0.40]
+oos_positive = [
+    (r["Strategy"], r["OOS_Sharpe"])
+    for r in results
+    if r["OOS_Sharpe"] == r["OOS_Sharpe"] and r["OOS_Sharpe"] > 0.40
+]
 oos_positive.sort(key=lambda x: x[1], reverse=True)
 
 print("\nVariants with OOS Sharpe > 0.40:")
@@ -538,7 +549,11 @@ else:
     print("  None achieved OOS Sharpe > 0.40")
 
 # Best OOS overall
-valid_oos = [(r["Strategy"], r["OOS_Sharpe"]) for r in results if r["OOS_Sharpe"] == r["OOS_Sharpe"] and not r["Error"]]
+valid_oos = [
+    (r["Strategy"], r["OOS_Sharpe"])
+    for r in results
+    if r["OOS_Sharpe"] == r["OOS_Sharpe"] and not r["Error"]
+]
 if valid_oos:
     best_strat, best_oos = max(valid_oos, key=lambda x: x[1])
     print(f"\nBest overall (OOS Sharpe): {best_strat}  ({best_oos:+.3f})")
