@@ -194,6 +194,96 @@ commodities:
     tick_size: 1.0
     currency: "USD"
 
+  PL:
+    name: "Platinum"
+    exchange: "NYMEX"
+    sector: "metals"
+    yfinance_symbol: "PL=F"
+    wrds_contrcode: 2074
+    wrds_dscontrid: "NPL"
+    wrds_contrname: "PLATINUM"
+    cftc_code: "076651"  # PLATINUM - NEW YORK MERCANTILE EXCHANGE
+    contract_months: [1, 4, 7, 10]
+    max_tenor: 12
+    contract_multiplier: 50
+    tick_size: 0.10
+    currency: "USD"
+
+  PA:
+    name: "Palladium"
+    exchange: "NYMEX"
+    sector: "metals"
+    yfinance_symbol: "PA=F"
+    wrds_contrcode: 2065
+    wrds_dscontrid: "NPA"
+    wrds_contrname: "PALLADIUM"
+    cftc_code: "075651"  # PALLADIUM - NEW YORK MERCANTILE EXCHANGE
+    contract_months: [3, 6, 9, 12]
+    max_tenor: 12
+    contract_multiplier: 100
+    tick_size: 0.05
+    currency: "USD"
+
+  LC:
+    name: "Live Cattle"
+    exchange: "CME"
+    sector: "livestock"
+    yfinance_symbol: "LE=F"
+    wrds_contrcode: 2675
+    wrds_dscontrid: "CLD"
+    wrds_contrname: "LIVE CATTLE COMP."
+    cftc_code: "057642"  # LIVE CATTLE - CHICAGO MERCANTILE EXCHANGE
+    contract_months: [2, 4, 6, 8, 10, 12]
+    max_tenor: 12
+    contract_multiplier: 40000
+    tick_size: 0.00025
+    currency: "USc"
+
+  LH:
+    name: "Lean Hogs"
+    exchange: "CME"
+    sector: "livestock"
+    yfinance_symbol: "HE=F"
+    wrds_contrcode: 2676
+    wrds_dscontrid: "CLG"
+    wrds_contrname: "LEAN HOGS COMP."
+    cftc_code: "054642"  # LEAN HOGS - CHICAGO MERCANTILE EXCHANGE
+    contract_months: [2, 4, 5, 6, 7, 8, 10, 12]
+    max_tenor: 12
+    contract_multiplier: 40000
+    tick_size: 0.00025
+    currency: "USc"
+
+  FC:
+    name: "Feeder Cattle"
+    exchange: "CME"
+    sector: "livestock"
+    yfinance_symbol: "GF=F"
+    wrds_contrcode: 3250
+    wrds_dscontrid: "CFD"
+    wrds_contrname: "FEEDER CATTLE COMP."
+    cftc_code: "061641"  # FEEDER CATTLE - CHICAGO MERCANTILE EXCHANGE
+    contract_months: [1, 3, 4, 5, 8, 9, 10, 11]
+    max_tenor: 12
+    contract_multiplier: 50000
+    tick_size: 0.00025
+    currency: "USc"
+
+  LB:
+    name: "Lumber"
+    exchange: "CME"
+    sector: "agriculture"
+    yfinance_symbol: "LBS=F"
+    wrds_contrcode: 361
+    wrds_dscontrid: "CLB"
+    wrds_contrname: "LUMBER"
+    cftc_code: "058643"  # RANDOM LENGTH LUMBER - CHICAGO MERCANTILE EXCHANGE
+    contract_months: [1, 3, 5, 7, 9, 11]
+    max_tenor: 12
+    contract_multiplier: 27500
+    tick_size: 0.10
+    currency: "USD"
+
 date_range:
   start: "2005-01-01"
   end: "2024-12-31"

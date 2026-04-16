@@ -15,6 +15,12 @@ roll_rules:
   GC:
     roll_days_before_expiry: 10
     roll_to: "next_active_month"
+  PL:
+    roll_days_before_expiry: 10
+    roll_to: "next_active_month"
+  PA:
+    roll_days_before_expiry: 10
+    roll_to: "next_active_month"
   ZC:
     roll_days_before_expiry: 15
     roll_to: "next_delivery_month"

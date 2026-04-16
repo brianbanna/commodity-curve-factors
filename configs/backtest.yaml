@@ -17,6 +17,12 @@ costs:
     KC: { commission_bps: 5, slippage_bps: 3, roll_cost_bps: 3 }
     SB: { commission_bps: 5, slippage_bps: 3, roll_cost_bps: 3 }
     CC: { commission_bps: 5, slippage_bps: 3, roll_cost_bps: 3 }
+    PL: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    PA: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    LC: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    LH: { commission_bps: 3, slippage_bps: 2, roll_cost_bps: 2 }
+    FC: { commission_bps: 4, slippage_bps: 3, roll_cost_bps: 3 }
+    LB: { commission_bps: 5, slippage_bps: 3, roll_cost_bps: 3 }
 
 risk_free_rate:
   source: "FRED"

@@ -12,7 +12,7 @@ def test_load_universe_config() -> None:
     assert "commodities" in cfg
     assert "CL" in cfg["commodities"]
     assert "GC" in cfg["commodities"]
-    assert len(cfg["commodities"]) == 13
+    assert len(cfg["commodities"]) == 19
 
 
 def test_load_universe_has_yfinance_symbols() -> None:
