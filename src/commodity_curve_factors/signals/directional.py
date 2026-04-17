@@ -1,13 +1,12 @@
-"""Layer 1: Directional positioning with trend filter.
+"""Layer 1: Curve-informed directional positioning.
 
-Chains curve-regime classification → position weights → TSMOM trend gate →
-monthly-to-daily resampling to produce a daily directional weight matrix.
+Long-biased regime tilt: scales a 1/N long-only base allocation by
+convenience yield regime multipliers and a multiplicative TSMOM trend tilt.
 
-Signal logic
-------------
-- Long weights (> 0) are zeroed when TSMOM ≤ 0 (no uptrend confirmation).
-- Short weights (< 0) are zeroed when TSMOM > 0 (no downtrend confirmation).
-- Zero weights pass through unchanged.
+The strategy is almost always long (capturing the commodity risk premium),
+varying SIZE based on fundamental curve signals and trend confirmation.
+This avoids the problem of being out of the market too much — the previous
+binary trend filter zeroed 60%+ of positions, giving up the risk premium.
 """
 
 import logging
@@ -24,48 +23,52 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-def apply_trend_filter(
+def apply_trend_tilt(
     positions: pd.DataFrame,
     tsmom: pd.DataFrame,
+    trend_up_mult: float = 1.2,
+    trend_down_mult: float = 0.7,
 ) -> pd.DataFrame:
-    """Zero out positions that conflict with the TSMOM trend direction.
+    """Apply a multiplicative TSMOM trend tilt to regime positions.
+
+    Instead of zeroing positions that conflict with the trend (which removes
+    most of the commodity risk premium), this scales positions up when trend
+    confirms and down when it disagrees.
 
     Parameters
     ----------
     positions : pd.DataFrame
-        Raw position weights (dates x commodities).  Values are typically
-        in {-1.0, -0.5, 0.0, 0.5, 1.0}.
+        Regime-based position weights (dates x commodities).
     tsmom : pd.DataFrame
-        Time-series momentum signal (dates x commodities).  Positive values
-        indicate an uptrend; non-positive values indicate no uptrend.
+        TSMOM signal (dates x commodities). Sign is what matters.
+    trend_up_mult : float
+        Multiplier when TSMOM > 0. Default 1.2.
+    trend_down_mult : float
+        Multiplier when TSMOM <= 0. Default 0.7.
 
     Returns
     -------
     pd.DataFrame
-        Filtered positions.  Long positions (> 0) where TSMOM ≤ 0 are set
-        to 0.0.  Short positions (< 0) where TSMOM > 0 are set to 0.0.
+        Tilted positions.
     """
     result = positions.copy()
-
-    # Align on shared columns and index
-    shared_cols = positions.columns.intersection(tsmom.columns)
     tsmom_aligned = tsmom.reindex(index=positions.index, columns=positions.columns)
 
-    # Zero longs when TSMOM <= 0
-    long_mask = result[shared_cols] > 0
-    trend_neg = tsmom_aligned[shared_cols] <= 0
-    result[shared_cols] = result[shared_cols].where(~(long_mask & trend_neg), 0.0)
-
-    # Zero shorts when TSMOM > 0
-    short_mask = result[shared_cols] < 0
+    shared_cols = positions.columns.intersection(tsmom.columns)
     trend_pos = tsmom_aligned[shared_cols] > 0
-    result[shared_cols] = result[shared_cols].where(~(short_mask & trend_pos), 0.0)
+
+    # Multiplicative tilt: up when trend confirms, down when it disagrees
+    multiplier = pd.DataFrame(trend_down_mult, index=positions.index, columns=shared_cols)
+    multiplier[trend_pos] = trend_up_mult
+
+    result[shared_cols] = result[shared_cols] * multiplier
 
     logger.info(
-        "apply_trend_filter: %d rows, %d cols, %.1f%% zeroed by filter",
+        "apply_trend_tilt: %d rows, %d cols, up=%.2f, down=%.2f",
         len(result),
         len(result.columns),
-        (result[shared_cols] == 0.0).mean().mean() * 100,
+        trend_up_mult,
+        trend_down_mult,
     )
     return result
 
@@ -110,47 +113,74 @@ def build_directional_weights(
     daily_index: pd.DatetimeIndex,
     thresholds: list[int] | None = None,
     position_map: dict[str, float] | None = None,
+    trend_up_mult: float = 1.2,
+    trend_down_mult: float = 0.7,
 ) -> pd.DataFrame:
-    """Build daily directional position weights from convenience yield and TSMOM.
+    """Build daily long-biased directional weights from convenience yield and TSMOM.
 
     Pipeline:
     1. ``classify_regime`` — classify each commodity-month by CY percentile.
-    2. ``regime_to_position`` — map regime labels to base position weights.
-    3. ``apply_trend_filter`` — zero conflicting positions using monthly TSMOM.
-    4. ``resample_weights_monthly`` — forward-fill to the target daily index.
+    2. ``regime_to_position`` — map regime labels to regime multipliers.
+    3. Apply 1/N base weight scaled by regime multiplier.
+    4. ``apply_trend_tilt`` — multiplicative TSMOM tilt (scale, not zero-out).
+    5. ``resample_weights_monthly`` — forward-fill to the target daily index.
 
     Parameters
     ----------
     monthly_cy : pd.DataFrame
         Monthly convenience yield (month-end dates x commodities).
     tsmom : pd.DataFrame
-        TSMOM signal on the *same monthly* frequency as ``monthly_cy``
-        (month-end dates x commodities).  Resampled to monthly internally if
-        needed by aligning on ``monthly_cy`` index.
+        TSMOM signal (dates x commodities). Resampled to monthly internally.
     daily_index : pd.DatetimeIndex
         Target daily business-day index for the output.
     thresholds : list[int] or None
         Percentile thresholds forwarded to ``classify_regime``.
     position_map : dict[str, float] or None
-        Position map forwarded to ``regime_to_position``.
+        Regime-to-multiplier mapping. Default: crisis_backwardation=1.5,
+        mild_backwardation=1.25, balanced=1.0, mild_contango=0.5,
+        deep_contango=0.0.
+    trend_up_mult : float
+        TSMOM > 0 multiplier. Default 1.2.
+    trend_down_mult : float
+        TSMOM <= 0 multiplier. Default 0.7.
 
     Returns
     -------
     pd.DataFrame
         Daily position weights (``len(daily_index)`` rows x commodities).
     """
+    if position_map is None:
+        position_map = {
+            "crisis_backwardation": 1.5,
+            "mild_backwardation": 1.25,
+            "balanced": 1.0,
+            "mild_contango": 0.5,
+            "deep_contango": 0.0,
+        }
+
     regimes = classify_regime(monthly_cy, thresholds=thresholds)
-    positions = regime_to_position(regimes, position_map=position_map)
+    regime_multipliers = regime_to_position(regimes, position_map=position_map)
 
-    # Align TSMOM to the monthly index of positions
+    # Apply 1/N base weight scaled by regime multiplier
+    n_commodities = len(monthly_cy.columns)
+    base_weight = 1.0 / n_commodities
+    positions = regime_multipliers * base_weight
+
+    # Multiplicative TSMOM tilt (scale, not zero-out)
     tsmom_monthly = tsmom.reindex(index=positions.index, method="ffill")
+    tilted = apply_trend_tilt(
+        positions,
+        tsmom_monthly,
+        trend_up_mult=trend_up_mult,
+        trend_down_mult=trend_down_mult,
+    )
 
-    filtered = apply_trend_filter(positions, tsmom_monthly)
-    daily_weights = resample_weights_monthly(filtered, daily_index)
+    daily_weights = resample_weights_monthly(tilted, daily_index)
 
     logger.info(
-        "build_directional_weights: %d daily rows, %d commodities",
+        "build_directional_weights: %d daily rows, %d commodities, mean_weight=%.4f",
         len(daily_weights),
         len(daily_weights.columns),
+        daily_weights.mean().mean(),
     )
     return daily_weights
