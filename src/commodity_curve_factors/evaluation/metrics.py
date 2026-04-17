@@ -29,7 +29,7 @@ def sharpe_ratio(returns: pd.Series, rf: float = 0.0) -> float:
     """
     excess = returns - rf
     std = float(excess.std())
-    if std == 0 or len(returns) == 0:
+    if std < 1e-10 or len(returns) == 0:
         return 0.0
     result: float = float(excess.mean()) / std * np.sqrt(_TRADING_DAYS)
     return result
@@ -55,7 +55,7 @@ def sortino_ratio(returns: pd.Series, rf: float = 0.0) -> float:
     if len(downside) == 0:
         return 0.0
     down_std = float(downside.std())
-    if down_std == 0:
+    if down_std < 1e-10:
         return 0.0
     result: float = float(excess.mean()) / down_std * np.sqrt(_TRADING_DAYS)
     return result
