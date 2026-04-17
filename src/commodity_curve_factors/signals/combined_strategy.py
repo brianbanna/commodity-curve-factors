@@ -132,10 +132,12 @@ def combine_layers(
     lookback: int = 252,
     max_leverage: float = 2.0,
 ) -> pd.DataFrame:
-    """Combine multiple strategy layers with risk budgeting.
+    """Combine multiple strategy layers with risk budgeting and single vol-target.
 
-    Each layer is vol-targeted independently to ``target_vol * budget`` with a
-    leverage cap of ``max_leverage * budget``, then all layers are summed.
+    Layers are weighted by their risk budget fractions, summed into a single
+    combined weight matrix, then vol-targeted ONCE to the total target vol.
+    This avoids the double-dampening problem of vol-targeting each layer
+    independently and then again at the portfolio level.
 
     Parameters
     ----------
@@ -152,7 +154,7 @@ def combine_layers(
     lookback : int
         Lookback window passed through to ``apply_ledoit_wolf_vol_target``.
     max_leverage : float
-        Aggregate leverage cap passed through (scaled by budget per layer).
+        Aggregate leverage cap.
 
     Returns
     -------
@@ -176,27 +178,22 @@ def combine_layers(
         all_cols = all_cols.union(lw.columns)
     all_cols_sorted = sorted(all_cols)
 
+    # Sum layers weighted by risk budget (no per-layer vol targeting)
     combined = pd.DataFrame(0.0, index=all_indices, columns=all_cols_sorted)
-
     for lw, budget in zip(layer_weights, norm_budgets):
         if budget <= 0.0:
             continue
-
-        layer_target_vol = target_vol * budget
-        layer_max_leverage = max_leverage * budget
-
-        # Reindex to the union shape before vol-targeting
         lw_reindexed = lw.reindex(index=all_indices, columns=all_cols_sorted).fillna(0.0)
+        combined = combined + lw_reindexed * budget
 
-        layer_scaled = apply_ledoit_wolf_vol_target(
-            weights=lw_reindexed,
-            returns=returns,
-            target_vol=layer_target_vol,
-            lookback=lookback,
-            max_leverage=layer_max_leverage,
-        )
-
-        combined = combined.add(layer_scaled, fill_value=0.0)
+    # Single vol-target on the combined portfolio
+    combined = apply_ledoit_wolf_vol_target(
+        weights=combined,
+        returns=returns,
+        target_vol=target_vol,
+        lookback=lookback,
+        max_leverage=max_leverage,
+    )
 
     logger.info(
         "combine_layers: %d layers, budgets=%s, target_vol=%.2f",
