@@ -66,3 +66,40 @@ constraints:
 execution:
   rebalance_day: "friday"
   lag_days: 1
+
+# Term Structure Intelligence strategy
+tsi:
+  curve_directional:
+    convenience_yield_tenor: "F6M"
+    regime_thresholds: [10, 30, 70, 90]
+    position_map:
+      crisis_backwardation: 1.0
+      mild_backwardation: 0.5
+      balanced: 0.0
+      mild_contango: 0.0
+      deep_contango: -0.5
+    trend_filter: true
+    trend_lookback_days: 252
+    rebalance: "monthly"
+    risk_budget: 0.40
+  curve_transition:
+    lookback_days: 63
+    threshold_std: 0.5
+    tsmom_confirmation: true
+    rebalance: "weekly"
+    risk_budget: 0.25
+  structural_spreads:
+    crack_spread:
+      commodities: ["CL", "RB", "HO"]
+      z_threshold: 1.5
+      rebalance: "biweekly"
+    inventory_overlay:
+      commodities: ["CL", "NG"]
+      amplification: 1.5
+    livestock_spread:
+      long_leg: "LC"
+      short_leg: "LH"
+      z_threshold: 1.5
+      seasonal_lookback_years: 5
+      rebalance: "biweekly"
+    risk_budget: 0.35
