@@ -28,7 +28,7 @@ backtest: ## Run backtests for all strategy variants
 	$(PYTHON) -m $(PKG).backtest
 
 evaluate: ## Compute performance metrics and attribution
-	$(PYTHON) -m $(PKG).evaluation.report
+	$(PYTHON) -m $(PKG).evaluation
 
 report: ## Generate visualization tearsheet
 	$(PYTHON) -m $(PKG).visualization.tearsheet
