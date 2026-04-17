@@ -205,6 +205,7 @@ def livestock_spread_signal(
     lh_prices: pd.Series,
     seasonal_years: int = 5,
     threshold: float = 1.5,
+    rolling_window: int = 504,
 ) -> pd.DataFrame:
     """Mean-reversion signal on the live cattle / lean hog log spread.
 
@@ -213,8 +214,9 @@ def livestock_spread_signal(
         spread = ln(LC) - ln(LH)
 
     If at least ``seasonal_years * 252`` observations are available, the
-    spread is deseasonalised before z-scoring.  An expanding z-score (no
-    lookahead) is then applied.
+    spread is deseasonalised before z-scoring.  A **rolling** z-score is
+    used (instead of expanding) because the cattle-hog spread has structural
+    shifts that make the expanding mean inappropriate.
 
     Position logic (mean-reversion):
 
@@ -237,6 +239,10 @@ def livestock_spread_signal(
         Default 5.
     threshold : float
         Absolute z-score threshold for triggering a position.  Default 1.5.
+    rolling_window : int
+        Rolling window for z-score (trading days). Default 504 (~2 years).
+        Uses rolling instead of expanding to adapt to structural shifts
+        in the cattle-hog relationship.
 
     Returns
     -------
@@ -263,7 +269,10 @@ def livestock_spread_signal(
             min_obs,
         )
 
-    z = expanding_zscore(spread, min_periods=252)
+    # Rolling z-score (adapts to structural shifts in the spread)
+    roll_mean = spread.rolling(rolling_window, min_periods=rolling_window // 2).mean()
+    roll_std = spread.rolling(rolling_window, min_periods=rolling_window // 2).std()
+    z = (spread - roll_mean) / roll_std.replace(0, np.nan)
 
     lc = pd.Series(np.nan, index=spread.index, dtype=float)
     lh = pd.Series(np.nan, index=spread.index, dtype=float)

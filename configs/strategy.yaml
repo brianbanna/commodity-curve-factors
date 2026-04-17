@@ -80,14 +80,14 @@ tsi:
   curve_directional:
     convenience_yield_tenor: "F6M"       # futures tenor for CY estimation (F6M = 6-month)
     regime_thresholds: [10, 30, 70, 90]  # expanding-percentile boundaries for 5 regimes
-    position_map:                         # regime → base position weight
-      crisis_backwardation: 1.0           #   CY > 90th pct: full long (physical scarcity)
-      mild_backwardation: 0.5             #   CY 70-90th pct: half long
-      balanced: 0.0                       #   CY 30-70th pct: flat (no edge)
-      mild_contango: 0.0                  #   CY 10-30th pct: flat (negative roll yield)
-      deep_contango: -0.5                 #   CY < 10th pct: half short (oversupply)
-    trend_filter: true                    # gate positions on TSMOM sign (avoid falling knives)
-    trend_lookback_days: 252              # 12-month TSMOM lookback
+    position_map:                         # regime → multiplier on 1/N base weight
+      crisis_backwardation: 1.5           #   CY > 90th pct: 1.5x base (physical scarcity)
+      mild_backwardation: 1.25            #   CY 70-90th pct: 1.25x base
+      balanced: 1.0                       #   CY 30-70th pct: 1.0x base (neutral, still long)
+      mild_contango: 0.5                  #   CY 10-30th pct: 0.5x base (reduce, not exit)
+      deep_contango: 0.0                  #   CY < 10th pct: 0x base (only exit in extreme oversupply)
+    trend_up_mult: 1.2                    # TSMOM > 0: scale position up by 1.2x
+    trend_down_mult: 0.7                  # TSMOM <= 0: scale position down to 0.7x (not zero)
     rebalance: "monthly"                  # slow signal — monthly to avoid contamination
     risk_budget: 0.40                     # 40% of total portfolio vol budget
 
@@ -101,7 +101,7 @@ tsi:
   structural_spreads:
     crack_spread:
       commodities: ["CL", "RB", "HO"]    # energy complex: crude vs products
-      z_threshold: 1.5                    # expanding z-score entry threshold (mean reversion)
+      z_threshold: 1.0                    # expanding z-score entry threshold (mean reversion)
       rebalance: "biweekly"
     inventory_overlay:
       commodities: ["CL", "NG"]           # EIA inventory data available for these
@@ -109,7 +109,8 @@ tsi:
     livestock_spread:
       long_leg: "LC"                      # live cattle
       short_leg: "LH"                     # lean hogs
-      z_threshold: 1.5                    # deseasonalised spread z-score entry threshold
+      z_threshold: 1.0                    # deseasonalised spread z-score entry threshold
       seasonal_lookback_years: 5          # ISO-week seasonal average lookback
+      rolling_window: 504                 # 2-year rolling window (not expanding) for structural shift adaptation
       rebalance: "biweekly"
     risk_budget: 0.35                     # 35% of total portfolio vol budget
