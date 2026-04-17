@@ -1,0 +1,145 @@
+# universe_additions.yaml
+#
+# Template entries to add under `commodities:` in configs/universe.yaml once
+# wrds_probe_new_commodities.py has confirmed contrcodes and dscontrids.
+#
+# Fields marked "FILL FROM PROBE" must be replaced with values from
+# scripts/probes/new_commodities_probe.json before these entries are usable.
+#
+# CFTC codes are the standard COT legacy-format commodity codes:
+#   https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm
+
+  PL:
+    name: "Platinum"
+    exchange: "NYMEX"
+    sector: "metals"
+    yfinance_symbol: "PL=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "076651"    # PLATINUM - NEW YORK MERCANTILE EXCHANGE
+    contract_months: [1, 4, 7, 10]
+    max_tenor: 12
+    contract_multiplier: 50
+    tick_size: 0.10
+    currency: "USD"
+
+  PA:
+    name: "Palladium"
+    exchange: "NYMEX"
+    sector: "metals"
+    yfinance_symbol: "PA=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "075651"    # PALLADIUM - NEW YORK MERCANTILE EXCHANGE
+    contract_months: [3, 6, 9, 12]
+    max_tenor: 12
+    contract_multiplier: 100
+    tick_size: 0.05
+    currency: "USD"
+
+  CT:
+    name: "Cotton No. 2"
+    exchange: "ICE"
+    sector: "softs"
+    yfinance_symbol: "CT=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "033661"    # COTTON NO. 2 - ICE FUTURES U.S.
+    contract_months: [3, 5, 7, 10, 12]
+    max_tenor: 12
+    contract_multiplier: 50000
+    tick_size: 0.01
+    currency: "USc"
+
+  LC:
+    name: "Live Cattle"
+    exchange: "CME"
+    sector: "livestock"
+    yfinance_symbol: "LE=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "057642"    # LIVE CATTLE - CHICAGO MERCANTILE EXCHANGE
+    contract_months: [2, 4, 6, 8, 10, 12]
+    max_tenor: 12
+    contract_multiplier: 40000
+    tick_size: 0.025
+    currency: "USc"
+
+  LH:
+    name: "Lean Hogs"
+    exchange: "CME"
+    sector: "livestock"
+    yfinance_symbol: "HE=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "054642"    # LEAN HOGS - CHICAGO MERCANTILE EXCHANGE
+    contract_months: [2, 4, 5, 6, 7, 8, 10, 12]
+    max_tenor: 12
+    contract_multiplier: 40000
+    tick_size: 0.025
+    currency: "USc"
+
+  FC:
+    name: "Feeder Cattle"
+    exchange: "CME"
+    sector: "livestock"
+    yfinance_symbol: "GF=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "061641"    # FEEDER CATTLE - CHICAGO MERCANTILE EXCHANGE
+    contract_months: [1, 3, 4, 5, 8, 9, 10, 11]
+    max_tenor: 12
+    contract_multiplier: 50000
+    tick_size: 0.025
+    currency: "USc"
+
+  ZL:
+    name: "Soybean Oil"
+    exchange: "CBOT"
+    sector: "agriculture"
+    yfinance_symbol: "ZL=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "007601"    # SOYBEAN OIL - CHICAGO BOARD OF TRADE
+    contract_months: [1, 3, 5, 7, 8, 9, 10, 12]
+    max_tenor: 12
+    contract_multiplier: 60000
+    tick_size: 0.01
+    currency: "USc"
+
+  ZM:
+    name: "Soybean Meal"
+    exchange: "CBOT"
+    sector: "agriculture"
+    yfinance_symbol: "ZM=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "026603"    # SOYBEAN MEAL - CHICAGO BOARD OF TRADE
+    contract_months: [1, 3, 5, 7, 8, 9, 10, 12]
+    max_tenor: 12
+    contract_multiplier: 100
+    tick_size: 0.10
+    currency: "USD"
+
+  LB:
+    name: "Lumber"
+    exchange: "CME"
+    sector: "agriculture"
+    yfinance_symbol: "LBS=F"
+    wrds_contrcode: null   # FILL FROM PROBE
+    wrds_dscontrid: null   # FILL FROM PROBE
+    wrds_contrname: null   # FILL FROM PROBE
+    cftc_code: "058643"    # LUMBER - CHICAGO MERCANTILE EXCHANGE
+    contract_months: [1, 3, 5, 7, 9, 11]
+    max_tenor: 12
+    contract_multiplier: 110000
+    tick_size: 0.10
+    currency: "USD"

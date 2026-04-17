@@ -4,9 +4,10 @@ TRADING_DAYS_PER_YEAR = 252
 
 SECTORS = {
     "energy": ["CL", "NG", "HO", "RB"],
-    "metals": ["GC", "SI", "HG"],
-    "agriculture": ["ZC", "ZS", "ZW"],
+    "metals": ["GC", "SI", "HG", "PL", "PA"],
+    "agriculture": ["ZC", "ZS", "ZW", "LB"],
     "softs": ["KC", "SB", "CC"],
+    "livestock": ["LC", "LH", "FC"],
 }
 
 ALL_COMMODITIES = [sym for syms in SECTORS.values() for sym in syms]
@@ -16,6 +17,7 @@ SECTOR_COLORS = {
     "metals": "#ffa726",
     "agriculture": "#66bb6a",
     "softs": "#4fc3f7",
+    "livestock": "#ce93d8",
 }
 
 FACTOR_COLORS = {

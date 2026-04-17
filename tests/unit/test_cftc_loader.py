@@ -210,9 +210,9 @@ def test_download_cot_history_skips_missing_years(monkeypatch) -> None:
     result = download_cot_history(2022, 2023)
 
     assert calls == [2022, 2023]
-    # Only the 2023 year produced rows (8 = 2 commodities x 4 weeks).
-    assert len(result) == 8
-    assert set(result["commodity"].unique()) == {"CL", "GC"}
+    # Only the 2023 year produced rows (9 = CL×4 + GC×4 + PA×1).
+    assert len(result) == 9
+    assert set(result["commodity"].unique()) == {"CL", "GC", "PA"}
 
 
 def test_download_cot_history_all_years_fail(monkeypatch) -> None:
