@@ -1,0 +1,101 @@
+{
+  "PL": {
+    "contrcode": 2074,
+    "contrname": "PLATINUM",
+    "dscontrid": "NPL",
+    "search_term_matched": "PLATINUM",
+    "n_contracts": 1,
+    "start_date": "2003-01-02",
+    "end_date": "2026-04-03",
+    "n_dates": 5851,
+    "n_rows": 39394
+  },
+  "PA": {
+    "contrcode": 2065,
+    "contrname": "PALLADIUM",
+    "dscontrid": "NPA",
+    "search_term_matched": "PALLADIUM",
+    "n_contracts": 1,
+    "start_date": "2003-01-02",
+    "end_date": "2026-04-08",
+    "n_dates": 5861,
+    "n_rows": 40391
+  },
+  "CT": {
+    "contrcode": 192,
+    "contrname": "COTTON",
+    "dscontrid": "BMK",
+    "search_term_matched": "COTTON",
+    "n_contracts": 1,
+    "start_date": "2007-06-14",
+    "end_date": "2007-09-06",
+    "n_dates": 60,
+    "n_rows": 70
+  },
+  "LC": {
+    "contrcode": 2675,
+    "contrname": "LIVE CATTLE COMP.",
+    "dscontrid": "CLD",
+    "search_term_matched": "LIVE CATTLE",
+    "n_contracts": 1,
+    "start_date": "2003-01-02",
+    "end_date": "2026-04-03",
+    "n_dates": 5857,
+    "n_rows": 50665
+  },
+  "LH": {
+    "contrcode": 2676,
+    "contrname": "LEAN HOGS COMP.",
+    "dscontrid": "CLG",
+    "search_term_matched": "LEAN HOGS",
+    "n_contracts": 1,
+    "start_date": "2003-01-02",
+    "end_date": "2026-04-03",
+    "n_dates": 5856,
+    "n_rows": 63979
+  },
+  "FC": {
+    "contrcode": 3250,
+    "contrname": "FEEDER CATTLE COMP.",
+    "dscontrid": "CFD",
+    "search_term_matched": "FEEDER CATTLE",
+    "n_contracts": 1,
+    "start_date": "2003-01-02",
+    "end_date": "2026-04-03",
+    "n_dates": 5857,
+    "n_rows": 46752
+  },
+  "ZL": {
+    "contrcode": 282,
+    "contrname": "SOYBEAN OIL",
+    "dscontrid": "CBO",
+    "search_term_matched": "SOYBEAN OIL",
+    "n_contracts": 1,
+    "start_date": "2003-01-02",
+    "end_date": "2015-07-02",
+    "n_dates": 3152,
+    "n_rows": 59944
+  },
+  "ZM": {
+    "contrcode": 402,
+    "contrname": "SOYBEAN MEAL",
+    "dscontrid": "CSM",
+    "search_term_matched": "SOYBEAN MEAL",
+    "n_contracts": 1,
+    "start_date": "2003-01-02",
+    "end_date": "2015-07-10",
+    "n_dates": 3157,
+    "n_rows": 59780
+  },
+  "LB": {
+    "contrcode": 361,
+    "contrname": "LUMBER",
+    "dscontrid": "CLB",
+    "search_term_matched": "LUMBER",
+    "n_contracts": 1,
+    "start_date": "2003-01-02",
+    "end_date": "2023-05-15",
+    "n_dates": 5134,
+    "n_rows": 32811
+  }
+}

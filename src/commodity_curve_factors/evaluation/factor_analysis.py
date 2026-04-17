@@ -225,7 +225,5 @@ def cumulative_factor_returns(
             cum_returns[name] = s.cumsum()
 
     result = pd.DataFrame(cum_returns)
-    logger.info(
-        "cumulative_factor_returns: %d factors, %d dates", len(cum_returns), len(result)
-    )
+    logger.info("cumulative_factor_returns: %d factors, %d dates", len(cum_returns), len(result))
     return result

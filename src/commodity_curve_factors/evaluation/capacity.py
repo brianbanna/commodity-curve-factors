@@ -122,5 +122,9 @@ def estimate_max_capacity(
         max_aum_per_day = (max_participation * v / w).replace([np.inf, -np.inf], np.nan).min(axis=1)
 
     result = float(max_aum_per_day.median())
-    logger.info("estimate_max_capacity: median max AUM=%.0f at %.1f%% participation", result, max_participation * 100)
+    logger.info(
+        "estimate_max_capacity: median max AUM=%.0f at %.1f%% participation",
+        result,
+        max_participation * 100,
+    )
     return result

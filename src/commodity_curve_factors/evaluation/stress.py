@@ -37,7 +37,7 @@ def historical_stress_test(
     rows = []
     for name, window in periods.items():
         start, end = window["start"], window["end"]
-        subset = returns.loc[start:end]
+        subset = returns.loc[start:end]  # type: ignore[misc]
         if len(subset) < 5:
             logger.warning("Stress period %s has only %d observations", name, len(subset))
             continue
@@ -46,18 +46,22 @@ def historical_stress_test(
         worst_day = float(subset.min())
         worst_date = subset.idxmin()
 
-        rows.append({
-            "period": name,
-            "start": start,
-            "end": end,
-            "n_days": len(subset),
-            "cumulative_return": float(np.exp(subset.sum()) - 1),
-            "max_drawdown": metrics["max_drawdown"],
-            "worst_day": worst_day,
-            "worst_date": str(worst_date.date()) if hasattr(worst_date, "date") else str(worst_date),
-            "volatility": metrics["volatility"],
-            "sharpe": metrics["sharpe"],
-        })
+        rows.append(
+            {
+                "period": name,
+                "start": start,
+                "end": end,
+                "n_days": len(subset),
+                "cumulative_return": float(np.exp(subset.sum()) - 1),
+                "max_drawdown": metrics["max_drawdown"],
+                "worst_day": worst_day,
+                "worst_date": str(worst_date.date())
+                if hasattr(worst_date, "date")
+                else str(worst_date),
+                "volatility": metrics["volatility"],
+                "sharpe": metrics["sharpe"],
+            }
+        )
 
     result = pd.DataFrame(rows)
     logger.info("historical_stress_test: %d periods evaluated", len(result))
@@ -108,27 +112,41 @@ def drawdown_anatomy(
             in_dd = False
             duration = (trough_date - peak_date).days if peak_date else 0
             recovery = (dt - trough_date).days if trough_date else 0
-            drawdowns.append({
-                "peak_date": str(peak_date.date()) if hasattr(peak_date, "date") else str(peak_date),
-                "trough_date": str(trough_date.date()) if hasattr(trough_date, "date") else str(trough_date),
-                "recovery_date": str(dt.date()) if hasattr(dt, "date") else str(dt),
-                "depth": trough_val,
-                "duration_days": duration,
-                "recovery_days": recovery,
-            })
+            drawdowns.append(
+                {
+                    "peak_date": str(peak_date.date())  # type: ignore[union-attr]
+                    if hasattr(peak_date, "date")
+                    else str(peak_date),
+                    "trough_date": str(trough_date.date())  # type: ignore[union-attr]
+                    if hasattr(trough_date, "date")
+                    else str(trough_date),
+                    "recovery_date": str(dt.date()) if hasattr(dt, "date") else str(dt),
+                    "depth": trough_val,
+                    "duration_days": duration,
+                    "recovery_days": recovery,
+                }
+            )
 
     if in_dd and peak_date is not None:
         duration = (trough_date - peak_date).days if trough_date else 0
-        drawdowns.append({
-            "peak_date": str(peak_date.date()) if hasattr(peak_date, "date") else str(peak_date),
-            "trough_date": str(trough_date.date()) if hasattr(trough_date, "date") else str(trough_date),
-            "recovery_date": None,
-            "depth": trough_val,
-            "duration_days": duration,
-            "recovery_days": None,
-        })
+        drawdowns.append(
+            {
+                "peak_date": str(peak_date.date())  # type: ignore[union-attr]
+                if hasattr(peak_date, "date")
+                else str(peak_date),
+                "trough_date": str(trough_date.date())  # type: ignore[union-attr]
+                if hasattr(trough_date, "date")
+                else str(trough_date),
+                "recovery_date": None,
+                "depth": trough_val,
+                "duration_days": duration,
+                "recovery_days": None,
+            }
+        )
 
     drawdowns.sort(key=lambda x: x["depth"])
     result = drawdowns[:top_n]
-    logger.info("drawdown_anatomy: found %d drawdowns, returning top %d", len(drawdowns), len(result))
+    logger.info(
+        "drawdown_anatomy: found %d drawdowns, returning top %d", len(drawdowns), len(result)
+    )
     return result

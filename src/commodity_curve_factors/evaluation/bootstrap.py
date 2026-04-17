@@ -39,7 +39,7 @@ def bootstrap_sharpe_ci(
         (point_estimate, ci_lower, ci_upper) — all annualised.
     """
     rng = np.random.default_rng(seed)
-    arr = returns.dropna().values
+    arr = np.asarray(returns.dropna().values, dtype=np.float64)
     n = len(arr)
 
     if n < block_size * 2:
@@ -62,7 +62,8 @@ def bootstrap_sharpe_ci(
         else:
             sharpes[i] = 0.0
 
-    point = float((arr.mean() / arr.std()) * np.sqrt(252)) if arr.std() > 0 else 0.0
+    arr_std = float(arr.std())
+    point = float((float(arr.mean()) / arr_std) * np.sqrt(252)) if arr_std > 0 else 0.0
     alpha = (1 - confidence) / 2
     ci_lower = float(np.percentile(sharpes, alpha * 100))
     ci_upper = float(np.percentile(sharpes, (1 - alpha) * 100))

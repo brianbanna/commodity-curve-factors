@@ -72,7 +72,7 @@ def rolling_sharpe(returns: pd.Series, window: int = 252) -> pd.Series:
     """
     roll_mean = returns.rolling(window, min_periods=window // 2).mean()
     roll_std = returns.rolling(window, min_periods=window // 2).std()
-    result = (roll_mean / roll_std) * np.sqrt(252)
+    result: pd.Series = (roll_mean / roll_std) * np.sqrt(252)  # type: ignore[assignment]
     result.name = "rolling_sharpe"
     return result
 
@@ -130,14 +130,16 @@ def attribution_by_year(returns: pd.Series) -> pd.DataFrame:
         One row per year with columns: year, return, sharpe, max_drawdown.
     """
     rows = []
-    for year, group in returns.groupby(returns.index.year):
+    for year, group in returns.groupby(returns.index.year):  # type: ignore[attr-defined]
         metrics = compute_all_metrics(group)
-        rows.append({
-            "year": year,
-            "return": metrics["cagr"],
-            "sharpe": metrics["sharpe"],
-            "max_drawdown": metrics["max_drawdown"],
-        })
+        rows.append(
+            {
+                "year": year,
+                "return": metrics["cagr"],
+                "sharpe": metrics["sharpe"],
+                "max_drawdown": metrics["max_drawdown"],
+            }
+        )
 
     result = pd.DataFrame(rows)
     logger.info("attribution_by_year: %d years", len(result))

@@ -73,23 +73,25 @@ def build_performance_table() -> pd.DataFrame:
         df = pd.read_parquet(path)
         mean_turnover = float(df["turnover"].mean()) if "turnover" in df.columns else np.nan
 
-        rows.append({
-            "strategy": name,
-            "is_sharpe": is_metrics["sharpe"],
-            "is_sortino": is_metrics["sortino"],
-            "is_cagr": is_metrics["cagr"],
-            "is_max_dd": is_metrics["max_drawdown"],
-            "is_vol": is_metrics["volatility"],
-            "oos_sharpe": oos_metrics["sharpe"],
-            "oos_sortino": oos_metrics["sortino"],
-            "oos_cagr": oos_metrics["cagr"],
-            "oos_max_dd": oos_metrics["max_drawdown"],
-            "oos_vol": oos_metrics["volatility"],
-            "full_sharpe": point,
-            "sharpe_ci_lo": ci_lo,
-            "sharpe_ci_hi": ci_hi,
-            "turnover": mean_turnover,
-        })
+        rows.append(
+            {
+                "strategy": name,
+                "is_sharpe": is_metrics["sharpe"],
+                "is_sortino": is_metrics["sortino"],
+                "is_cagr": is_metrics["cagr"],
+                "is_max_dd": is_metrics["max_drawdown"],
+                "is_vol": is_metrics["volatility"],
+                "oos_sharpe": oos_metrics["sharpe"],
+                "oos_sortino": oos_metrics["sortino"],
+                "oos_cagr": oos_metrics["cagr"],
+                "oos_max_dd": oos_metrics["max_drawdown"],
+                "oos_vol": oos_metrics["volatility"],
+                "full_sharpe": point,
+                "sharpe_ci_lo": ci_lo,
+                "sharpe_ci_hi": ci_hi,
+                "turnover": mean_turnover,
+            }
+        )
 
     # Benchmarks
     benchmarks = _load_benchmark_returns()
@@ -99,23 +101,25 @@ def build_performance_table() -> pd.DataFrame:
         oos_metrics = compute_all_metrics(oos_ret)
         point, ci_lo, ci_hi = bootstrap_sharpe_ci(bm_ret, n_samples=10000, seed=42)
 
-        rows.append({
-            "strategy": f"BM_{bm_name}",
-            "is_sharpe": is_metrics["sharpe"],
-            "is_sortino": is_metrics["sortino"],
-            "is_cagr": is_metrics["cagr"],
-            "is_max_dd": is_metrics["max_drawdown"],
-            "is_vol": is_metrics["volatility"],
-            "oos_sharpe": oos_metrics["sharpe"],
-            "oos_sortino": oos_metrics["sortino"],
-            "oos_cagr": oos_metrics["cagr"],
-            "oos_max_dd": oos_metrics["max_drawdown"],
-            "oos_vol": oos_metrics["volatility"],
-            "full_sharpe": point,
-            "sharpe_ci_lo": ci_lo,
-            "sharpe_ci_hi": ci_hi,
-            "turnover": np.nan,
-        })
+        rows.append(
+            {
+                "strategy": f"BM_{bm_name}",
+                "is_sharpe": is_metrics["sharpe"],
+                "is_sortino": is_metrics["sortino"],
+                "is_cagr": is_metrics["cagr"],
+                "is_max_dd": is_metrics["max_drawdown"],
+                "is_vol": is_metrics["volatility"],
+                "oos_sharpe": oos_metrics["sharpe"],
+                "oos_sortino": oos_metrics["sortino"],
+                "oos_cagr": oos_metrics["cagr"],
+                "oos_max_dd": oos_metrics["max_drawdown"],
+                "oos_vol": oos_metrics["volatility"],
+                "full_sharpe": point,
+                "sharpe_ci_lo": ci_lo,
+                "sharpe_ci_hi": ci_hi,
+                "turnover": np.nan,
+            }
+        )
 
     result = pd.DataFrame(rows)
     logger.info("build_performance_table: %d strategies + benchmarks", len(result))
@@ -142,7 +146,8 @@ def build_stress_table() -> pd.DataFrame:
 
     if not all_rows:
         return pd.DataFrame()
-    return pd.concat(all_rows, ignore_index=True)
+    result: pd.DataFrame = pd.concat(all_rows, ignore_index=True)
+    return result
 
 
 def main() -> None:
@@ -158,7 +163,9 @@ def main() -> None:
     # Print performance table
     pd.set_option("display.max_columns", 20)
     pd.set_option("display.width", 200)
-    logger.info("\n=== IS/OOS Performance ===\n%s", perf.to_string(index=False, float_format="%.3f"))
+    logger.info(
+        "\n=== IS/OOS Performance ===\n%s", perf.to_string(index=False, float_format="%.3f")
+    )
 
     logger.info("Building stress test table")
     stress = build_stress_table()
@@ -170,5 +177,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+    )
     main()
