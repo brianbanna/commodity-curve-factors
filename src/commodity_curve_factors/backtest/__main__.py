@@ -351,16 +351,20 @@ def main() -> None:
         daily_cy = compute_convenience_yield(curves, rf_series, storage_costs, tenor="F6M")
         monthly_cy = monthly_convenience_yield(daily_cy)
 
-        # --- Layer 1: Curve Directional ---
+        # --- Layer 1: Curve Directional (long-biased regime tilt) ---
         dir_cfg = tsi_cfg.get("curve_directional", {})
         thresholds = dir_cfg.get("regime_thresholds")
         position_map = dir_cfg.get("position_map")
+        trend_up = float(dir_cfg.get("trend_up_mult", 1.2))
+        trend_down = float(dir_cfg.get("trend_down_mult", 0.7))
         layer1 = build_directional_weights(
             monthly_cy,
             tsmom,
             returns.index,
             thresholds=thresholds,
             position_map=position_map,
+            trend_up_mult=trend_up,
+            trend_down_mult=trend_down,
         )
 
         # --- Layer 2: Curve Transition ---
