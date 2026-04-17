@@ -23,6 +23,7 @@ STRATEGY_NAMES = [
     "sector_neutral",
     "tsmom",
     "calendar_spread",
+    "tsi",
 ]
 
 
