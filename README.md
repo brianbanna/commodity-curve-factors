@@ -2,7 +2,7 @@
 
 Extract carry, slope, curvature, and momentum signals from commodity futures term structures. Build systematic factor portfolios. Backtest with realistic roll costs.
 
-This framework constructs daily term structures across 13 commodity markets, computes factor signals from curve shape, and runs long-short trading strategies through a futures-aware backtest that accounts for roll costs, margin, and per-commodity transaction costs. Everything is config-driven.
+This framework constructs daily term structures across 19 commodity markets (5 sectors: energy, metals, agriculture, softs, livestock), computes factor signals from curve shape, and runs long-short trading strategies through a futures-aware backtest that accounts for roll costs, margin, and per-commodity transaction costs. Everything is config-driven.
 
 <!--
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)]()
@@ -18,13 +18,13 @@ A commodity futures price is not a single number - it is a curve, a series of pr
 - **Curve flattening** tends to show up before or during price rallies
 - **Curve steepening** tends to show up before or during selloffs
 
-This framework takes those dynamics and turns them into systematic trading signals across energy, metals, and agricultural markets.
+This framework takes those dynamics and turns them into systematic trading signals across energy, metals, agriculture, softs, and livestock markets.
 
 **What it does:**
 
-- Downloads futures data across multiple maturities for 13 commodities
+- Downloads futures data across multiple maturities for 19 commodities
 - Builds daily term structures with proper contract roll handling
-- Computes five factor signals from curve shape and fundamental data
+- Computes 11 factor signals from curve shape, momentum, positioning, and fundamental data
 - Constructs cross-sectional and time-series trading portfolios
 - Runs vectorized backtests with roll costs, slippage, and margin tracking
 - Evaluates performance at the factor level (IC, decay, attribution)
@@ -32,7 +32,7 @@ This framework takes those dynamics and turns them into systematic trading signa
 **What it produces:**
 
 - Daily term structures and curve metrics for every commodity
-- Factor signals: carry, slope, curvature, momentum, inventory surprise
+- Factor signals: carry, slope, curvature, curve momentum, convenience yield, TSMOM, XSMOM, CFTC positioning, inventory surprise, macro exposure, volatility regime
 - Net-of-cost strategy returns across multiple portfolio variants
 - Performance tearsheet with factor IC analysis and cost sensitivity
 - Static research website with term structure visualizations
@@ -41,7 +41,7 @@ This framework takes those dynamics and turns them into systematic trading signa
 
 ```
               Futures Price Data
-            (Stooq + Nasdaq Data Link)
+          (yfinance + WRDS Datastream)
                       |
             Curve Construction
       (interpolation, roll handling)
@@ -67,30 +67,63 @@ This framework takes those dynamics and turns them into systematic trading signa
 
 ## Factors
 
-Five factors extracted from curve structure and fundamentals:
+Eleven factors across three families:
 
-| Factor | Formula | What It Captures |
-| --- | --- | --- |
-| **Carry** | `(F1 - F2) / F2 x 12` | Annualized roll yield. Positive in backwardation, negative in contango. The single biggest return driver in commodity futures. |
-| **Slope** | `(F12M - F1M) / F1M` | Full-curve tilt. Steep contango is bearish, steep backwardation is bullish. Tends to mean-revert over weeks. |
-| **Curvature** | `F1M - 2 x F6M + F12M` | Butterfly shape - convexity vs concavity of the term structure. The fastest mean-reverting curve signal. |
-| **Curve Momentum** | `slope(t) - slope(t-L)` | How fast the curve shape is changing. Flattening tends to precede rallies, steepening tends to precede declines. |
-| **Inventory Surprise** | `(actual - seasonal_avg) / std` | Deviation from 5-year seasonal norm. Draws support backwardation, builds support contango. |
+**Structural curve** (from WRDS back-month contracts):
+
+| Factor | What It Captures |
+| --- | --- |
+| **Carry** | Annualized roll yield (F1-F2). Positive in backwardation, negative in contango. |
+| **Slope** | Full-curve tilt (F12M vs F1M). Steep contango is bearish, steep backwardation is bullish. |
+| **Curvature** | Butterfly shape (F1M - 2xF6M + F12M). Fastest mean-reverting curve signal. |
+| **Curve Momentum** | Rate of change in slope. Flattening precedes rallies, steepening precedes declines. |
+| **Convenience Yield** | Implied benefit of holding physical commodity. Spikes signal scarcity. |
+
+**Flow & behavioral:**
+
+| Factor | What It Captures |
+| --- | --- |
+| **TSMOM** | Time-series momentum. Per-commodity trend signal with the strongest persistent IC. |
+| **XSMOM** | Cross-sectional momentum. Relative strength ranking across the universe. |
+| **CFTC Positioning** | Net speculative positioning from Commitments of Traders. Contrarian at extremes. |
+
+**Fundamental & macro:**
+
+| Factor | What It Captures |
+| --- | --- |
+| **Inventory Surprise** | Deviation from 5-year seasonal norm (EIA energy data). Draws support backwardation. |
+| **Macro Exposure** | Regression-based sensitivity to rates, inflation, and USD. |
+| **Volatility Regime** | VIX-based regime classification (calm / moderate / turbulent). |
 
 All factors z-scored with expanding windows so there is no lookahead.
 
 ## Strategies
 
-Six portfolio strategies built on top of the factor signals:
+Two strategy generations reflecting the research arc of this project.
 
-| Strategy | Method | Characteristics |
+### Generation 1 -- Research baseline
+
+7 strategies using the 10 standard commodity factors. Key finding: standard factors are arbitraged to near-zero post-2010. TSMOM is the only factor with persistent lag-1 IC.
+
+| Strategy | Method |
+| --- | --- |
+| Cross-Sectional Carry | Long top-N carry, short bottom-N |
+| Multi-Factor | Composite z-score ranking across all factors |
+| Sector-Neutral | Within-sector long/short (strips sector beta) |
+| Time-Series Carry | Per-commodity threshold signals |
+| Calendar Spread Carry | Long front / short back per commodity |
+| Regime-Conditioned | Factor weights shift with VIX regime |
+| MinVar + TSMOM | Minimum-variance allocation filtered by trend |
+
+### Generation 2 -- Term Structure Intelligence
+
+3-layer strategy that reads the term structure like a physical trader:
+
+| Layer | Signal | Logic |
 | --- | --- | --- |
-| Cross-Sectional Carry | Long top 3 carry, short bottom 3 | The classic commodity carry trade |
-| Multi-Factor | Composite z-score ranking | Diversified across all five factors |
-| Sector-Neutral | Within-sector long/short | Strips out sector beta |
-| Time-Series Carry | Per-commodity threshold signals | No cross-sectional dependence |
-| Calendar Spread Carry | Long front / short back per commodity | Lower margin, direct curve expression |
-| Regime-Conditioned | Factor weights shift with vol regime | Heavier carry in calm, heavier momentum in turbulent |
+| **L1: Directional** | Convenience yield + TSMOM filter | CY-based positioning, trend confirmation gates entry |
+| **L2: Curve Regime** | Curve regime transition momentum | Trade the shift between contango and backwardation regimes |
+| **L3: Structural Spreads** | CY crack spread, inventory-conditioned energy, deseasonalised livestock spread | Relative-value within and across sectors |
 
 All strategies include:
 
@@ -106,24 +139,25 @@ Benchmarks: equal-weight long-only commodity basket, cash (for long-short).
 
 | Dataset | Source | Frequency |
 | --- | --- | --- |
-| Continuous futures (front + second month) | Stooq | Daily |
-| Back-month contracts (3M-12M) | Nasdaq Data Link | Daily |
+| Continuous futures (front-month) | yfinance | Daily |
+| Back-month contracts (curve construction) | WRDS Datastream | Daily |
 | US crude / gas / product inventories | EIA API | Weekly |
 | Speculative positioning | CFTC COT | Weekly |
 | Dollar index, rates, inflation | FRED | Daily |
 
-`make data` handles all downloads. API keys for Nasdaq Data Link and EIA are read from environment variables.
+`make data` handles all downloads. API keys for EIA and FRED are read from environment variables; WRDS credentials required for back-month data.
 
 ## Commodity Universe
 
 | Sector | Commodities |
 | --- | --- |
-| Energy | WTI Crude (CL), Natural Gas (NG), Heating Oil (HO), Gasoline (RB) |
-| Metals | Gold (GC), Silver (SI), Copper (HG) |
-| Agriculture | Corn (ZC), Soybeans (ZS), Wheat (ZW) |
-| Softs | Coffee (KC), Sugar (SB), Cocoa (CC) |
+| Energy | WTI Crude (CL), Brent Crude (BZ), Natural Gas (NG), Heating Oil (HO), Gasoline (RB) |
+| Metals | Gold (GC), Silver (SI), Copper (HG), Platinum (PL), Palladium (PA) |
+| Agriculture | Corn (ZC), Soybeans (ZS), Wheat (ZW), Soybean Oil (ZL) |
+| Softs | Coffee (KC), Sugar (SB), Cocoa (CC), Cotton (CT) |
+| Livestock | Live Cattle (LE), Lean Hogs (HE) |
 
-13 commodities across 4 sectors. Curve depth varies - monthly contracts for energy, seasonal delivery months for agriculture.
+19 commodities across 5 sectors. Curve depth varies - monthly contracts for energy, seasonal delivery months for agriculture and livestock.
 
 ## Key Research Outputs
 
@@ -149,7 +183,7 @@ make all
 # Or run stages individually
 make data          # Download futures, inventory, and macro data
 make curves        # Construct daily term structures
-make factors       # Compute carry, slope, curvature, momentum, inventory
+make factors       # Compute all 11 factor signals
 make signals       # Generate portfolio signals and weights
 make backtest      # Run strategy backtests with roll costs
 make evaluate      # Compute performance metrics and factor analysis
@@ -159,7 +193,7 @@ make report        # Generate tearsheet and charts
 make test
 ```
 
-Requires Python 3.10+. Free API keys needed for Nasdaq Data Link and EIA.
+Requires Python 3.10+. Free API keys needed for EIA and FRED. WRDS institutional credentials needed for back-month data.
 
 ## Project Structure
 
@@ -176,7 +210,7 @@ commodity-curve-factors/
 │
 ├── src/
 │   └── commodity_curve_factors/
-│       ├── data/              # Stooq, Nasdaq Data Link, EIA, FRED loaders
+│       ├── data/              # yfinance, WRDS, EIA, CFTC, FRED loaders
 │       ├── curves/            # Term structure builder, interpolation, rolls
 │       ├── factors/           # Carry, slope, curvature, momentum, inventory
 │       ├── signals/           # Ranking, thresholds, calendar spreads, regime
