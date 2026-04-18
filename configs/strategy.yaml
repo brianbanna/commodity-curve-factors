@@ -86,8 +86,8 @@ tsi:
       balanced: 1.0                       #   CY 30-70th pct: 1.0x base (neutral, still long)
       mild_contango: 0.5                  #   CY 10-30th pct: 0.5x base (reduce, not exit)
       deep_contango: 0.0                  #   CY < 10th pct: 0x base (only exit in extreme oversupply)
-    trend_up_mult: 1.2                    # TSMOM > 0: scale position up by 1.2x
-    trend_down_mult: 0.7                  # TSMOM <= 0: scale position down to 0.7x (not zero)
+    trend_up_mult: 1.05                   # TSMOM > 0: gentle boost (regime signal dominates)
+    trend_down_mult: 0.90                 # TSMOM <= 0: gentle reduction (not aggressive risk-off)
     rebalance: "monthly"                  # slow signal — monthly to avoid contamination
     risk_budget: 0.40                     # 40% of total portfolio vol budget
 

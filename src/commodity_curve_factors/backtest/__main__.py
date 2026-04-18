@@ -30,6 +30,7 @@ from commodity_curve_factors.curves.convenience_yield import (
 )
 from commodity_curve_factors.data.futures_loader import load_front_month_data
 from commodity_curve_factors.data.macro_loader import load_macro_data
+from commodity_curve_factors.factors.momentum_ts import tsmom_multi_horizon
 from commodity_curve_factors.signals.calendar_spreads import calendar_spread_signal
 from commodity_curve_factors.signals.combined_strategy import combine_layers
 from commodity_curve_factors.signals.curve_transition import (
