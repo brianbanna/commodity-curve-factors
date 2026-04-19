@@ -1,6 +1,6 @@
-.PHONY: help data curves factors signals backtest evaluate report website-build clean run figures \
-       run-from-scratch all test lint lint-fix format typecheck coverage check catalog validate \
-       env install clean-all
+.PHONY: help data curves factors signals backtest evaluate report figures website website-build \
+       clean run run-from-scratch all test lint lint-fix format typecheck coverage check \
+       catalog validate env install clean-all
 
 PKG = commodity_curve_factors
 PYTHON = python
@@ -33,16 +33,19 @@ evaluate: ## Compute performance metrics and attribution
 report: ## Generate visualization tearsheet
 	$(PYTHON) -m $(PKG).visualization.tearsheet
 
-all: data curves factors signals backtest evaluate report ## Run full pipeline end-to-end
+figures: ## Generate all publication-quality charts and website data
+	$(PYTHON) -m $(PKG).visualization
+
+website: figures ## Build website (figures + copy assets)
+	@echo "Website ready at website/index.html"
+
+all: data curves factors signals backtest evaluate figures ## Run full pipeline end-to-end
 
 ## —— Convenience ———————————————————————————————————————
 run: ## Run pipeline via script
 	$(PYTHON) scripts/run_pipeline.py
 
-figures: ## Generate all publication-quality charts
-	$(PYTHON) scripts/generate_figures.py
-
-run-from-scratch: data run figures website-build ## Full pipeline from raw data to website
+run-from-scratch: data run figures ## Full pipeline from raw data to website
 	@echo "Full pipeline complete. Results in results/, website in website/"
 
 catalog: ## Print data catalog (row counts, date ranges, file sizes)
