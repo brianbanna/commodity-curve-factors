@@ -66,3 +66,51 @@ constraints:
 execution:
   rebalance_day: "friday"
   lag_days: 1
+
+# ---------------------------------------------------------------------------
+# Term Structure Intelligence (TSI) strategy
+# Three-layer architecture that reads the commodity term structure the way
+# a physical trader does. Each layer captures a different return source:
+#   Layer 1 (curve_directional): convenience-yield regime → position sizing
+#   Layer 2 (curve_transition):  regime transitions → momentum timing
+#   Layer 3 (structural_spreads): cross-commodity CY divergence → relative value
+# Risk budgets (0.40 + 0.25 + 0.35 = 1.0) determine vol allocation per layer.
+# ---------------------------------------------------------------------------
+tsi:
+  curve_directional:
+    convenience_yield_tenor: "F6M"       # futures tenor for CY estimation (F6M = 6-month)
+    regime_thresholds: [10, 30, 70, 90]  # expanding-percentile boundaries for 5 regimes
+    position_map:                         # regime → multiplier on 1/N base weight
+      crisis_backwardation: 1.5           #   CY > 90th pct: 1.5x base (physical scarcity)
+      mild_backwardation: 1.25            #   CY 70-90th pct: 1.25x base
+      balanced: 1.0                       #   CY 30-70th pct: 1.0x base (neutral, still long)
+      mild_contango: 0.5                  #   CY 10-30th pct: 0.5x base (reduce, not exit)
+      deep_contango: 0.0                  #   CY < 10th pct: 0x base (only exit in extreme oversupply)
+    trend_up_mult: 1.05                   # TSMOM > 0: gentle boost (regime signal dominates)
+    trend_down_mult: 0.90                 # TSMOM <= 0: gentle reduction (not aggressive risk-off)
+    rebalance: "monthly"                  # slow signal — monthly to avoid contamination
+    risk_budget: 0.40                     # 40% of total portfolio vol budget
+
+  curve_transition:
+    lookback_days: 63                     # 3-month CY z-score change window
+    threshold_std: 0.5                    # expanding std threshold for transition detection
+    tsmom_confirmation: true              # only trade transitions confirmed by TSMOM direction
+    rebalance: "weekly"                   # faster than Layer 1 — transitions are more dynamic
+    risk_budget: 0.25                     # 25% of total portfolio vol budget
+
+  structural_spreads:
+    crack_spread:
+      commodities: ["CL", "RB", "HO"]    # energy complex: crude vs products
+      z_threshold: 1.0                    # expanding z-score entry threshold (mean reversion)
+      rebalance: "biweekly"
+    inventory_overlay:
+      commodities: ["CL", "NG"]           # EIA inventory data available for these
+      amplification: 1.5                  # multiply position by 1.5x when inv + CY confirm
+    livestock_spread:
+      long_leg: "LC"                      # live cattle
+      short_leg: "LH"                     # lean hogs
+      z_threshold: 1.0                    # deseasonalised spread z-score entry threshold
+      seasonal_lookback_years: 5          # ISO-week seasonal average lookback
+      rolling_window: 504                 # 2-year rolling window (not expanding) for structural shift adaptation
+      rebalance: "biweekly"
+    risk_budget: 0.35                     # 35% of total portfolio vol budget

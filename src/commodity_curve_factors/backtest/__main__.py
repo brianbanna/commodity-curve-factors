@@ -22,11 +22,30 @@ from commodity_curve_factors.backtest.benchmarks import (
 )
 from commodity_curve_factors.backtest.engine import run_backtest
 from commodity_curve_factors.backtest.sensitivity import run_cost_sensitivity
+from commodity_curve_factors.curves.builder import load_curves
+from commodity_curve_factors.curves.convenience_yield import (
+    compute_convenience_yield,
+    estimate_storage_cost,
+    monthly_convenience_yield,
+)
 from commodity_curve_factors.data.futures_loader import load_front_month_data
 from commodity_curve_factors.data.macro_loader import load_macro_data
+from commodity_curve_factors.factors.momentum_ts import tsmom_multi_horizon
 from commodity_curve_factors.signals.calendar_spreads import calendar_spread_signal
+from commodity_curve_factors.signals.combined_strategy import combine_layers
+from commodity_curve_factors.signals.curve_transition import (
+    compute_transition_signal,
+    transition_to_position,
+)
+from commodity_curve_factors.signals.directional import build_directional_weights
 from commodity_curve_factors.signals.portfolio import build_portfolio
 from commodity_curve_factors.signals.ranking import rank_and_select, resample_weights_weekly
+from commodity_curve_factors.signals.spreads import (
+    compute_cy_crack,
+    crack_spread_signal,
+    inventory_overlay,
+    livestock_spread_signal,
+)
 from commodity_curve_factors.signals.threshold import threshold_signal
 from commodity_curve_factors.utils.config import load_config
 from commodity_curve_factors.utils.paths import DATA_PROCESSED
@@ -304,6 +323,133 @@ def main() -> None:
     raw_w_spread = resample_weights_weekly(raw_w_spread, rebalance_day=rebal_day)
     w = build_portfolio(raw_w_spread, returns, strategy_cfg, universe_cfg)
     strategies["calendar_spread"] = run_backtest(w, returns, cost_config)
+
+    # ------------------------------------------------------------------
+    # Strategy 8: Term Structure Intelligence (TSI)
+    # ------------------------------------------------------------------
+    logger.info("Strategy 8: Term Structure Intelligence (TSI)")
+    tsi_cfg = strategy_cfg.get("tsi", {})
+    try:
+        curves = load_curves()
+        if not curves:
+            raise ValueError("No curve data found — run 'make curves' first")
+
+        # Risk-free rate
+        rf_df = macro.get("dgs3mo")
+        if rf_df is not None and not rf_df.empty:
+            rf_col = "Close" if "Close" in rf_df.columns else rf_df.columns[0]
+            rf_series = rf_df[rf_col].rename("rf")
+        else:
+            logger.warning("TSI: dgs3mo not available — using constant 2.0%% risk-free rate")
+            all_curve_dates = sorted(set().union(*(df.index for df in curves.values())))
+            rf_series = pd.Series(
+                2.0,
+                index=pd.DatetimeIndex(all_curve_dates),
+                name="rf",
+            )
+
+        storage_costs = estimate_storage_cost(curves, is_end="2017-12-31")
+        daily_cy = compute_convenience_yield(curves, rf_series, storage_costs, tenor="F6M")
+        monthly_cy = monthly_convenience_yield(daily_cy)
+
+        # --- Layer 1: Curve Directional (long-biased regime tilt) ---
+        dir_cfg = tsi_cfg.get("curve_directional", {})
+        thresholds = dir_cfg.get("regime_thresholds")
+        position_map = dir_cfg.get("position_map")
+        trend_up = float(dir_cfg.get("trend_up_mult", 1.2))
+        trend_down = float(dir_cfg.get("trend_down_mult", 0.7))
+        layer1 = build_directional_weights(
+            monthly_cy,
+            tsmom,
+            returns.index,
+            thresholds=thresholds,
+            position_map=position_map,
+            trend_up_mult=trend_up,
+            trend_down_mult=trend_down,
+        )
+
+        # --- Layer 2: Curve Transition ---
+        trans_cfg = tsi_cfg.get("curve_transition", {})
+        lookback_days = int(trans_cfg.get("lookback_days", 63))
+        threshold_std = float(trans_cfg.get("threshold_std", 0.5))
+        transition = compute_transition_signal(monthly_cy, lookback=lookback_days)
+        layer2_raw = transition_to_position(transition, tsmom, threshold=threshold_std)
+        layer2 = resample_weights_weekly(layer2_raw, rebalance_day=rebal_day)
+
+        # --- Layer 3: Structural Spreads ---
+        spread_cfg = tsi_cfg.get("structural_spreads", {})
+
+        # Crack spread
+        crack_cfg = spread_cfg.get("crack_spread", {})
+        crack_threshold = float(crack_cfg.get("z_threshold", 1.5))
+        cy_crack = compute_cy_crack(daily_cy)
+        layer3_crack = crack_spread_signal(cy_crack, threshold=crack_threshold)
+
+        # Inventory overlay on crack positions (CL component)
+        inv_cfg = spread_cfg.get("inventory_overlay", {})
+        inv_amplification = float(inv_cfg.get("amplification", 1.5))
+        # Use CY change as proxy for inventory signal (no EIA data for non-energies)
+        cy_change_cl = daily_cy["CL"].diff() if "CL" in daily_cy.columns else pd.Series(dtype=float)
+        inv_surprise_proxy = -cy_change_cl  # positive CY change → draw (negative surprise)
+        layer3_crack = inventory_overlay(
+            layer3_crack,
+            inventory_surprise=inv_surprise_proxy,
+            cy_change=cy_change_cl,
+            amplification=inv_amplification,
+        )
+
+        # Livestock spread
+        ls_cfg = spread_cfg.get("livestock_spread", {})
+        ls_threshold = float(ls_cfg.get("z_threshold", 1.5))
+        ls_years = int(ls_cfg.get("seasonal_lookback_years", 5))
+        lc_df = futures.get("LC", pd.DataFrame())
+        lh_df = futures.get("LH", pd.DataFrame())
+        lc_close = lc_df["Close"] if "Close" in lc_df.columns else pd.Series(dtype=float)
+        lh_close = lh_df["Close"] if "Close" in lh_df.columns else pd.Series(dtype=float)
+
+        if lc_close.empty or lh_close.empty:
+            logger.warning("TSI: LC or LH price data unavailable — skipping livestock layer")
+            layer3_livestock = pd.DataFrame(dtype=float)
+        else:
+            layer3_livestock = livestock_spread_signal(
+                lc_close,
+                lh_close,
+                seasonal_years=ls_years,
+                threshold=ls_threshold,
+            )
+
+        # Combine crack + livestock into layer3
+        if layer3_livestock.empty:
+            layer3 = layer3_crack.reindex(returns.index).fillna(0.0)
+        else:
+            layer3 = pd.concat(
+                [
+                    layer3_crack.reindex(returns.index),
+                    layer3_livestock.reindex(returns.index),
+                ],
+                axis=1,
+            ).fillna(0.0)
+
+        # Combine all layers with risk budgets
+        dir_budget = float(dir_cfg.get("risk_budget", 0.40))
+        trans_budget = float(trans_cfg.get("risk_budget", 0.25))
+        spread_budget = float(spread_cfg.get("risk_budget", 0.35))
+
+        layer1_aligned = layer1.reindex(returns.index).fillna(0.0)
+        layer2_aligned = layer2.reindex(returns.index).fillna(0.0)
+        layer3_aligned = layer3.reindex(returns.index).fillna(0.0)
+
+        tsi_raw = combine_layers(
+            [layer1_aligned, layer2_aligned, layer3_aligned],
+            [dir_budget, trans_budget, spread_budget],
+            returns,
+        )
+
+        tsi_w = build_portfolio(tsi_raw, returns, strategy_cfg, universe_cfg)
+        strategies["tsi"] = run_backtest(tsi_w, returns, cost_config)
+
+    except Exception:
+        logger.exception("Strategy 8 (TSI) failed — skipping")
 
     # ------------------------------------------------------------------
     # Benchmarks
