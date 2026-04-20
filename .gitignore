@@ -35,5 +35,12 @@ Thumbs.db
 # Claude (local development context)
 .claude/
 
+# Generated outputs (reproducible via `make figures`)
+/results/figures/
+/results/tables/
+/results/tearsheets/
+/website/assets/figures/
+/website/js/chart_data_inline.js
+
 # API keys (NEVER commit)
 secrets.yaml

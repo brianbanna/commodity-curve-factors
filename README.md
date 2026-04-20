@@ -187,7 +187,8 @@ make factors       # Compute all 11 factor signals
 make signals       # Generate portfolio signals and weights
 make backtest      # Run strategy backtests with roll costs
 make evaluate      # Compute performance metrics and factor analysis
-make report        # Generate tearsheet and charts
+make figures       # Generate 15 publication-quality charts + website data
+make website       # Build static research website
 
 # Run tests
 make test
