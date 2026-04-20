@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commodity Factor Trading · Brian Banna</title>
+    <meta name="description" content="Ten factors tested across nineteen commodity markets. Carry, momentum, positioning — all arbitraged to near-zero. The simplest strategy wins. Twenty years of data, no peeking.">
+    <meta property="og:title" content="Commodity Factor Trading">
+    <meta property="og:description" content="10 factors, 19 commodities, honest research. The equal-weight long portfolio beats every active strategy after costs.">
+    <meta property="og:image" content="assets/figures/01_equity_curves.png">
+    <meta property="og:type" content="article">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+    <script src="js/chart_data_inline.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     § 00 · Masthead
+     ════════════════════════════════════════════════════════ -->
+<header class="masthead">
+    <div class="masthead-grid" aria-hidden="true"></div>
+    <div class="masthead-glow" aria-hidden="true"></div>
+
+    <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+            <span class="ticker-item"><b>COMMODITIES</b> <span class="t-gold">19</span></span>
+            <span class="ticker-item"><b>FACTORS</b> <span class="t-gold">10</span></span>
+            <span class="ticker-item"><b>TESTS</b> <span class="t-gold">438</span></span>
+            <span class="ticker-item"><b>OOS SHARPE</b> <span class="t-up">+0.35</span></span>
+            <span class="ticker-item"><b>SECTORS</b> <span class="t-gold">5</span></span>
+            <span class="ticker-item"><b>HISTORY</b> <span class="t-gold">20 YEARS</span></span>
+            <span class="ticker-item"><b>STRATEGY</b> <span class="t-up">EW LONG</span></span>
+            <span class="ticker-item"><b>SPLIT</b> <span class="t-gold">IS/OOS</span></span>
+            <span class="ticker-item"><b>DATA</b> <span class="t-gold">WRDS</span></span>
+            <span class="ticker-item"><b>EXEC LAG</b> <span>T+1</span></span>
+            <!-- duplicate for seamless loop -->
+            <span class="ticker-item"><b>COMMODITIES</b> <span class="t-gold">19</span></span>
+            <span class="ticker-item"><b>FACTORS</b> <span class="t-gold">10</span></span>
+            <span class="ticker-item"><b>TESTS</b> <span class="t-gold">438</span></span>
+            <span class="ticker-item"><b>OOS SHARPE</b> <span class="t-up">+0.35</span></span>
+            <span class="ticker-item"><b>SECTORS</b> <span class="t-gold">5</span></span>
+            <span class="ticker-item"><b>HISTORY</b> <span class="t-gold">20 YEARS</span></span>
+            <span class="ticker-item"><b>STRATEGY</b> <span class="t-up">EW LONG</span></span>
+            <span class="ticker-item"><b>SPLIT</b> <span class="t-gold">IS/OOS</span></span>
+            <span class="ticker-item"><b>DATA</b> <span class="t-gold">WRDS</span></span>
+            <span class="ticker-item"><b>EXEC LAG</b> <span>T+1</span></span>
+        </div>
+    </div>
+
+    <div class="editorial">
+        <div class="byline">
+            <a href="https://brianbanna.com">Brian Banna</a>
+            <span class="byline-sep">·</span>
+            <span class="byline-item">Quantitative Research</span>
+            <span class="byline-sep byline-extra">·</span>
+            <span class="byline-item byline-extra">Volume II</span>
+        </div>
+
+        <div class="title-block">
+            <h1 class="display">
+                <span class="line">Commodity</span>
+                <span class="line"><em>Factor</em> Trading</span>
+            </h1>
+        </div>
+
+        <div class="hero-lower">
+            <div>
+                <p class="tagline">
+                    Ten factors tested across nineteen commodity markets. All arbitraged to near-zero. The simplest strategy — equal-weight long — wins. <em>Twenty years</em> of data, no peeking.
+                </p>
+                <a href="#hook" class="scroll-hint">
+                    <span>Begin reading</span>
+                    <span class="arrow" aria-hidden="true">↓</span>
+                </a>
+            </div>
+
+            <aside class="hero-preview" aria-label="Key performance summary">
+                <div class="hero-preview-head">
+                    <span><span class="live-dot"></span>OUT-OF-SAMPLE · 2018–2024</span>
+                    <span>EW LONG</span>
+                </div>
+                <div class="hero-preview-row">
+                    <span class="hp-label">Sharpe Ratio</span>
+                    <span class="hp-value hp-gold">0.35</span>
+                </div>
+                <div class="hero-preview-row">
+                    <span class="hp-label">CAGR</span>
+                    <span class="hp-value hp-pos">5.3%</span>
+                </div>
+                <div class="hero-preview-row">
+                    <span class="hp-label">Max Drawdown</span>
+                    <span class="hp-value hp-pos">−30%</span>
+                </div>
+                <div class="hero-preview-row">
+                    <span class="hp-label">Volatility</span>
+                    <span class="hp-value">14.7%</span>
+                </div>
+            </aside>
+        </div>
+
+        <div class="badges">
+            <div class="badge">
+                <div class="value"><span class="gold-val">0.35</span></div>
+                <div class="label">Sharpe<span class="delta neutral">vs SPY 0.67</span></div>
+                <div class="spark" aria-hidden="true"><span style="height:35%"></span><span style="height:42%"></span><span style="height:50%"></span><span style="height:45%"></span><span style="height:38%"></span><span style="height:55%"></span><span style="height:48%"></span><span style="height:40%"></span></div>
+            </div>
+            <div class="badge">
+                <div class="value"><span class="blue-val">19</span></div>
+                <div class="label">Commodities<span class="delta neutral">5 sectors</span></div>
+                <div class="spark" aria-hidden="true"><span style="height:50%"></span><span style="height:65%"></span><span style="height:80%"></span><span style="height:70%"></span><span style="height:55%"></span><span style="height:90%"></span><span style="height:75%"></span><span style="height:60%"></span></div>
+            </div>
+            <div class="badge">
+                <div class="value"><span class="positive">438</span></div>
+                <div class="label">Tests<span class="delta up">all pass</span></div>
+                <div class="spark" aria-hidden="true"><span style="height:70%"></span><span style="height:75%"></span><span style="height:80%"></span><span style="height:85%"></span><span style="height:90%"></span><span style="height:88%"></span><span style="height:92%"></span><span style="height:95%"></span></div>
+            </div>
+            <div class="badge">
+                <div class="value"><span class="gold-val">10</span></div>
+                <div class="label">Factors<span class="delta neutral">all tested</span></div>
+                <div class="spark" aria-hidden="true"><span style="height:60%"></span><span style="height:45%"></span><span style="height:70%"></span><span style="height:55%"></span><span style="height:40%"></span><span style="height:65%"></span><span style="height:50%"></span><span style="height:75%"></span></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ════════════════════════════════════════════════════════
+     § 01 · Hook
+     ════════════════════════════════════════════════════════ -->
+<main class="editorial">
+
+<section id="hook" class="reveal" data-theme="copper">
+    <div class="section-marker">§ 01 · Hook</div>
+    <div class="section-grid">
+        <div>
+            <h2>I tested ten commodity factors. <em>They're all dead.</em></h2>
+            <p class="lead">
+                Standard carry, momentum, and positioning signals worked in 1970–2010 papers. CTAs and systematic funds arbitraged them to near-zero. Every active strategy I built underperforms equal-weight long.
+            </p>
+        </div>
+        <div class="side-note">
+            <strong>Why this matters</strong>
+            Most quant projects cherry-pick the best variant. This one reports all ten factors and eight strategy combinations — including the ones that failed.
+        </div>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-card">
+            <div class="big negative-val">−0.15</div>
+            <div class="desc">Carry OOS Sharpe</div>
+            <div class="bar" style="--bar-w: 15%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big gold-val">+0.02</div>
+            <div class="desc">TSMOM OOS Sharpe</div>
+            <div class="bar" style="--bar-w: 5%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big blue-val">10</div>
+            <div class="desc">Factors Tested</div>
+            <div class="bar" style="--bar-w: 100%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big positive">+0.35</div>
+            <div class="desc">EW Long OOS Sharpe</div>
+            <div class="bar" style="--bar-w: 50%"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 02 · Evidence
+     ════════════════════════════════════════════════════════ -->
+<section id="evidence" class="reveal" data-theme="gold">
+    <div class="section-marker">§ 02 · Evidence</div>
+    <div class="section-grid">
+        <h2>All eight strategies, <em>after costs.</em></h2>
+        <div class="side-note">
+            <strong>Benchmarks</strong>
+            In-sample 2005–2017, out-of-sample 2018–2024. All results include execution lag, roll costs, and per-commodity commissions.
+        </div>
+    </div>
+
+    <div id="plotly-equity-curve" class="interactive-chart"></div>
+    <p class="chart-caption-inline">Hover for daily values. Click the legend to toggle strategies. Drag to zoom.</p>
+
+    <div class="chart-container">
+        <img src="assets/figures/02_drawdown.png" alt="Drawdown comparison" loading="lazy">
+        <div class="chart-caption">Drawdown from peak across all strategies. Active factor portfolios suffer deeper and longer drawdowns than the passive equal-weight long benchmark.</div>
+    </div>
+
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Strategy</th><th>CAGR</th><th>Vol</th><th>Sharpe</th><th>Max DD</th><th>Turnover</th></tr></thead>
+        <tbody>
+            <tr class="highlight"><td>TSMOM</td><td>1.2%</td><td>12.8%</td><td class="gold-val">0.02</td><td class="negative">−38%</td><td>8.4x</td></tr>
+            <tr><td>TSI</td><td class="negative">−2.1%</td><td>15.3%</td><td class="negative">−0.30</td><td class="negative">−45%</td><td>6.2x</td></tr>
+            <tr><td>XS Carry</td><td class="negative">−1.5%</td><td>11.2%</td><td class="negative">−0.15</td><td class="negative">−32%</td><td>4.8x</td></tr>
+            <tr><td>Multi-Factor EW</td><td>2.8%</td><td>13.5%</td><td>0.12</td><td class="negative">−35%</td><td>7.1x</td></tr>
+            <tr><td>Sector Neutral</td><td>1.1%</td><td>10.8%</td><td>0.05</td><td class="negative">−28%</td><td>9.3x</td></tr>
+            <tr><td>Calendar Spread</td><td>0.8%</td><td>8.5%</td><td>0.04</td><td class="negative">−22%</td><td>3.6x</td></tr>
+            <tr class="highlight"><td>EW Long</td><td class="positive">5.3%</td><td>14.7%</td><td class="gold-val">0.35</td><td class="positive">−30%</td><td>0.2x</td></tr>
+            <tr><td>SPY</td><td class="positive">10.2%</td><td>18.5%</td><td>0.67</td><td class="negative">−34%</td><td>0.0x</td></tr>
+            <tr><td>AGG</td><td>1.8%</td><td>5.2%</td><td>0.22</td><td>−10%</td><td>0.0x</td></tr>
+        </tbody>
+    </table>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 03 · Contamination
+     ════════════════════════════════════════════════════════ -->
+<section id="contamination" class="reveal" data-theme="copper">
+    <div class="section-marker">§ 03 · Contamination</div>
+    <div class="section-grid">
+        <div>
+            <h2>The contamination <em>no one talks about.</em></h2>
+            <p class="lead">
+                All four curve factors have lag-0 information coefficients three to four times larger than lag-1. Daily curve signals are tautological — they predict returns that already happened. Academic papers use monthly rebalancing, which masks this effect.
+            </p>
+        </div>
+        <div class="side-note">
+            <strong>Why it matters</strong>
+            Academic papers using monthly rebalancing never see this. Daily rebalancing exposes the contamination — and forces you to lag signals properly, which kills the alpha.
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <img src="assets/figures/05_factor_ic_decay.png" alt="Factor IC decay" loading="lazy">
+        <div class="chart-caption">Information coefficient at lag 0 vs lag 1 for each curve factor. The sharp decay reveals that most apparent predictive power comes from contemporaneous price correlation, not genuine forecasting ability.</div>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-card">
+            <div class="big gold-val">0.12</div>
+            <div class="desc">Carry Lag-0 IC</div>
+            <div class="bar" style="--bar-w: 80%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big negative-val">0.035</div>
+            <div class="desc">Carry Lag-1 IC</div>
+            <div class="bar" style="--bar-w: 23%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big negative-val">3.4x</div>
+            <div class="desc">Decay Ratio</div>
+            <div class="bar" style="--bar-w: 85%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big negative-val">4 / 4</div>
+            <div class="desc">Factors Contaminated</div>
+            <div class="bar" style="--bar-w: 100%"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 04 · Curve Structure
+     ════════════════════════════════════════════════════════ -->
+<section id="curve" class="reveal" data-theme="jade">
+    <div class="section-marker">§ 04 · Curve Structure</div>
+    <div class="section-grid">
+        <div>
+            <h2>Reading the curve <em>like a physical trader.</em></h2>
+            <p class="lead">
+                Convenience yield extracted from a cost-of-carry model, classified into five regimes: deep contango, mild contango, flat, mild backwardation, deep backwardation. Each regime maps to a physical market story.
+            </p>
+        </div>
+        <div class="side-note">
+            <strong>Theory of Storage</strong>
+            Convenience yield reflects physical scarcity. When inventories are low, the spot premium rises — the curve inverts into backwardation. This is the oldest signal in commodity markets.
+        </div>
+    </div>
+
+    <div id="plotly-cy-explorer" class="interactive-chart"></div>
+    <p class="chart-caption-inline">Click legend entries to toggle commodities. CL, NG, GC shown by default.</p>
+
+    <div class="chart-container">
+        <img src="assets/figures/08_curve_regime_heatmap.png" alt="Curve regime heatmap" loading="lazy">
+        <div class="chart-caption">Five-regime classification across all commodities and time. Deep backwardation (red) concentrates during supply crises — 2008 energy, 2022 grains.</div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 05 · TSI Strategy
+     ════════════════════════════════════════════════════════ -->
+<section id="tsi" class="reveal" data-theme="violet">
+    <div class="section-marker">§ 05 · TSI Strategy</div>
+    <h2>Three layers, <em>one thesis.</em></h2>
+    <p class="lead">
+        Directional regime tilt (40% risk), transition momentum (25%), structural spreads (35%). Each layer captures a different aspect of term structure dynamics.
+    </p>
+
+    <div class="pipeline">
+        <span class="pipeline-step">CY Estimation</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Regime Class.</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Directional</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Transition</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Spreads</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Vol Target</span>
+    </div>
+
+    <div class="chart-container">
+        <img src="assets/figures/09_tsi_layer_decomposition.png" alt="TSI layer decomposition" loading="lazy">
+        <div class="chart-caption">Cumulative return contribution by layer. Directional drives in-sample gains. Transition and spread layers add diversification but no persistent alpha out-of-sample.</div>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-card">
+            <div class="big positive">+0.39</div>
+            <div class="desc">TSI IS Sharpe</div>
+            <div class="bar" style="--bar-w: 65%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big negative-val">−0.30</div>
+            <div class="desc">TSI OOS Sharpe</div>
+            <div class="bar" style="--bar-w: 30%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big negative-val">−0.69</div>
+            <div class="desc">IS-to-OOS Gap</div>
+            <div class="bar" style="--bar-w: 69%"></div>
+        </div>
+        <div class="stat-card">
+            <div class="big gold-val">Yes</div>
+            <div class="desc">CI Includes Zero</div>
+            <div class="bar" style="--bar-w: 50%"></div>
+        </div>
+    </div>
+
+    <p>
+        TSI overfits. The three-layer architecture captures in-sample dynamics that don't persist out-of-sample. The confidence interval includes zero — there is no statistical evidence of genuine alpha.
+    </p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 06 · What Works
+     ════════════════════════════════════════════════════════ -->
+<section id="what-works" class="reveal" data-theme="jade">
+    <div class="section-marker">§ 06 · What Works</div>
+    <div class="section-grid">
+        <div>
+            <h2>The commodity risk premium <em>is the alpha.</em></h2>
+            <p class="lead">
+                Equal-weight long-only across nineteen markets. In-sample Sharpe +0.22, out-of-sample +0.35. No active strategy beats passive long after costs. The structural risk premium — insurance sellers earn a premium from hedgers — is the only durable source of return.
+            </p>
+        </div>
+        <div class="side-note">
+            <strong>Why simplicity wins</strong>
+            Fewer parameters means less overfitting. The EW long portfolio has zero free parameters — no lookback windows, no thresholds, no regime classification. It just harvests the commodity risk premium.
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <img src="assets/figures/04_rolling_sharpe.png" alt="Rolling Sharpe ratio" loading="lazy">
+        <div class="chart-caption">Three-year rolling Sharpe ratio. EW long (gold) is consistently positive. Active factor strategies oscillate around zero with high variance.</div>
+    </div>
+
+    <div class="chart-container">
+        <img src="assets/figures/14_bootstrap_ci.png" alt="Bootstrap confidence intervals" loading="lazy">
+        <div class="chart-caption">Bootstrap 95% confidence intervals for the Sharpe ratio. Only EW long has a CI that excludes zero. All active strategies are statistically indistinguishable from noise.</div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 07 · Cost Sensitivity
+     ════════════════════════════════════════════════════════ -->
+<section id="costs" class="reveal" data-theme="amber">
+    <div class="section-marker">§ 07 · Cost Sensitivity</div>
+    <h2>How much friction <em>can it take?</em></h2>
+    <p class="lead">Commodity futures execution costs are typically 2 to 5 bps. Drag the slider to see how they affect the EW long portfolio.</p>
+
+    <div class="sim-container">
+        <div class="sim-slider-row">
+            <label for="cost-slider">Transaction Cost</label>
+            <input type="range" id="cost-slider" min="0" max="20" value="5" step="1">
+            <span id="cost-display" class="sim-value">5 bps</span>
+        </div>
+
+        <div class="stat-row" id="sim-results">
+            <div class="stat-card">
+                <div class="big gold-val" id="sim-sharpe">0.35</div>
+                <div class="desc">Sharpe</div>
+                <div class="bar" style="--bar-w: 50%"></div>
+            </div>
+            <div class="stat-card">
+                <div class="big positive" id="sim-cagr">5.3%</div>
+                <div class="desc">CAGR</div>
+                <div class="bar" style="--bar-w: 53%"></div>
+            </div>
+            <div class="stat-card">
+                <div class="big positive" id="sim-maxdd">−30%</div>
+                <div class="desc">Max DD</div>
+                <div class="bar" style="--bar-w: 54%"></div>
+            </div>
+            <div class="stat-card">
+                <div class="big gold-val" id="sim-breakeven">42 bps</div>
+                <div class="desc">Breakeven</div>
+                <div class="bar" style="--bar-w: 84%"></div>
+            </div>
+        </div>
+        <p class="chart-caption-inline" id="sim-verdict"></p>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 08 · Stress Test
+     ════════════════════════════════════════════════════════ -->
+<section id="stress" class="reveal" data-theme="copper">
+    <div class="section-marker">§ 08 · Stress Test</div>
+    <h2>Through four <em>commodity crises.</em></h2>
+    <p class="lead">2008 financial crash, 2014 oil price collapse, 2020 COVID and negative WTI, 2022 energy and grain spike. How the EW long portfolio performs when markets break.</p>
+
+    <div class="chart-container">
+        <img src="assets/figures/10_stress_test.png" alt="Stress test results" loading="lazy">
+        <div class="chart-caption">Performance during four crisis periods. The diversified long portfolio recovers faster than concentrated commodity bets — sector diversification absorbs single-market shocks.</div>
+    </div>
+
+    <div class="chart-container">
+        <img src="assets/figures/13_sector_attribution.png" alt="Sector attribution" loading="lazy">
+        <div class="chart-caption">Return attribution by sector. Energy dominates both gains and losses. Precious metals act as a partial hedge during equity drawdowns. Agriculture provides diversification.</div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 09 · Architecture
+     ════════════════════════════════════════════════════════ -->
+<section id="architecture" class="reveal" data-theme="steel">
+    <div class="section-marker">§ 09 · Architecture</div>
+    <h2>Nineteen markets, <em>one pipeline.</em></h2>
+
+    <div class="pipeline">
+        <span class="pipeline-step">WRDS</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Curves</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Factors</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Signals</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Backtest</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Evaluation</span>
+    </div>
+
+    <ul>
+        <li><strong>Data sources</strong> · WRDS Datastream (back-month curves), yfinance (front-month, benchmarks), EIA (energy inventories), FRED (macro), CFTC (COT positioning)</li>
+        <li><strong>Commodities</strong> · CL, NG, RB, HO (energy) · GC, SI, HG (metals) · ZC, ZS, ZW, KC, SB, CC (agriculture) · LE, HE, LH, LC, FC, CT (livestock &amp; softs)</li>
+        <li><strong>Factors</strong> · Carry, slope, curvature, curve momentum (structural) · TSMOM, XSMOM, CFTC positioning (behavioral) · EIA inventory surprise, macro exposure, volatility regime (fundamental)</li>
+        <li><strong>Tests</strong> · 438 unit tests, ruff linting, expanding-window validation, no lookahead</li>
+    </ul>
+
+    <details>
+        <summary>Factor computation loop</summary>
+        <pre><code>for commodity in config["commodities"]:
+    curve = build_curve(wrds_data[commodity])
+    cy    = estimate_convenience_yield(curve, rates)
+    regime = classify_regime(cy, thresholds)
+
+    factors[commodity] = {
+        "carry":     compute_carry(curve),
+        "slope":     compute_slope(curve),
+        "curvature": compute_curvature(curve),
+        "curve_mom": compute_curve_momentum(curve),
+        "tsmom":     compute_tsmom(front_month[commodity]),
+        "xsmom":     compute_xsmom(returns, commodity),
+    }
+    signals[commodity] = combine_factors(factors[commodity])</code></pre>
+    </details>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     § 10 · Research
+     ════════════════════════════════════════════════════════ -->
+<section id="research" class="reveal" data-theme="steel">
+    <div class="section-marker">§ 10 · Research</div>
+    <h2>The journey <em>is the finding.</em></h2>
+    <p class="lead">
+        The methodology is the contribution. Honest in-sample vs out-of-sample testing. The contamination discovery. The proof that factor decay is real, not theoretical. All of this matters more than any single Sharpe ratio.
+    </p>
+
+    <div class="chart-container">
+        <img src="assets/figures/12_is_oos_comparison.png" alt="IS vs OOS comparison" loading="lazy">
+        <div class="chart-caption">In-sample vs out-of-sample Sharpe ratio for every strategy. The gap between IS and OOS reveals overfitting. Only EW long improves out-of-sample.</div>
+    </div>
+
+    <div class="chart-container">
+        <img src="assets/figures/06_factor_correlation.png" alt="Factor correlation matrix" loading="lazy">
+        <div class="chart-caption">Pairwise correlation between all ten factors. Carry and slope are highly correlated (0.75). Momentum factors are nearly orthogonal to curve factors — diversification potential that doesn't translate to alpha.</div>
+    </div>
+
+    <div class="chart-container">
+        <img src="assets/figures/03_monthly_heatmap.png" alt="Monthly returns heatmap" loading="lazy">
+        <div class="chart-caption">Monthly return heatmap for the EW long portfolio. Returns are broadly distributed with no strong seasonal pattern — consistent with a structural risk premium rather than a timing signal.</div>
+    </div>
+</section>
+
+</main>
+
+<!-- ════════════════════════════════════════════════════════
+     Colophon
+     ════════════════════════════════════════════════════════ -->
+<footer class="colophon">
+    <div class="editorial">
+        <div class="colophon-row">
+            <div class="colophon-mark">— Brian Banna</div>
+            <div class="colophon-meta">
+                <a href="https://brianbanna.com">brianbanna.com</a>
+                · Repository on
+                <a href="https://github.com/brianbanna/commodity-curve-factors">GitHub</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+(function() {
+    /* Mark body as JS-enabled so reveal animations activate */
+    document.body.classList.add('js');
+
+    /* ─── Signal palette tokens for charts ─── */
+    var INK    = '#0c0c0e';
+    var PAPER  = '#141417';
+    var BG     = '#0a0b0d';
+    var FG     = '#eae6de';
+    var FG_60  = 'rgba(234, 230, 222, 0.6)';
+    var FG_30  = 'rgba(234, 230, 222, 0.14)';
+    var ACCENT = '#c8a255';                 /* gold */
+    var UP     = '#62af7b';                 /* jade */
+    var DOWN   = '#cf664d';                 /* copper */
+    var BLUE   = '#6894be';                 /* steel */
+    var VIOLET = '#9b82c8';                 /* violet */
+    var FONT   = "JetBrains Mono, ui-monospace, monospace";
+
+    /* ─── Reveal sections on scroll ─── */
+    var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (e.isIntersecting) {
+                e.target.classList.add('in');
+                obs.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.reveal').forEach(function(s) { obs.observe(s); });
+
+    /* ─── Cost simulator ─── */
+    var costBps    = [0, 2, 5, 7, 10, 15, 20];
+    var costSharpe = [0.38, 0.37, 0.35, 0.34, 0.32, 0.28, 0.24];
+    var costCagr   = [5.8, 5.6, 5.3, 5.1, 4.8, 4.2, 3.5];
+    var costMaxdd  = [-29.5, -29.7, -30.0, -30.2, -30.5, -31.0, -31.8];
+
+    function lerp(arr, keys, t) {
+        if (t <= keys[0]) return arr[0];
+        if (t >= keys[keys.length-1]) return arr[arr.length-1];
+        for (var i=0; i<keys.length-1; i++) {
+            if (t >= keys[i] && t <= keys[i+1]) {
+                var f = (t - keys[i]) / (keys[i+1] - keys[i]);
+                return arr[i] + f * (arr[i+1] - arr[i]);
+            }
+        }
+        return arr[arr.length-1];
+    }
+
+    var sl = document.getElementById('cost-slider');
+    if (sl) {
+        sl.addEventListener('input', function() {
+            var b  = parseInt(sl.value);
+            var sh = lerp(costSharpe, costBps, b);
+            var ca = lerp(costCagr, costBps, b);
+            var md = lerp(costMaxdd, costBps, b);
+
+            document.getElementById('cost-display').textContent = b + ' bps';
+
+            var elS = document.getElementById('sim-sharpe');
+            var elC = document.getElementById('sim-cagr');
+            var elM = document.getElementById('sim-maxdd');
+            var elV = document.getElementById('sim-verdict');
+
+            elS.textContent = sh.toFixed(2);
+            elS.style.color = sh > 0.20 ? UP : DOWN;
+
+            elC.textContent = ca.toFixed(1) + '%';
+            elC.style.color = ca > 0 ? UP : DOWN;
+
+            elM.textContent = md.toFixed(0).replace('-', '\u2212') + '%';
+
+            if (sh > 0.20) {
+                elV.textContent = 'Positive risk-adjusted return at this cost level.';
+                elV.style.color = UP;
+            } else if (sh > 0) {
+                elV.textContent = 'Marginal — costs erode most of the risk premium.';
+                elV.style.color = ACCENT;
+            } else {
+                elV.textContent = 'Unprofitable at this cost level.';
+                elV.style.color = DOWN;
+            }
+        });
+    }
+
+    /* ─── Plotly charts ─── */
+    var mob = window.innerWidth < 640;
+
+    /* ─── Equity curve chart ─── */
+    if (typeof CHART_DATA !== 'undefined' && typeof Plotly !== 'undefined') {
+        var D = CHART_DATA;
+
+        var strategyColor = {
+            "TSMOM":          ACCENT,
+            "TSI":            DOWN,
+            "EW Long":        FG,
+            "SPY":            'rgba(207, 102, 77, 0.5)',
+            "AGG":            'rgba(234, 230, 222, 0.3)',
+            "XS Carry":       BLUE,
+            "Multi-Factor":   VIOLET,
+            "Sector Neutral": 'rgba(234, 230, 222, 0.42)',
+            "Calendar Spread":'rgba(234, 230, 222, 0.35)'
+        };
+
+        var strategyWidth = {
+            "TSMOM":    2.0,
+            "TSI":      1.6,
+            "EW Long":  2.4,
+            "SPY":      1.4
+        };
+
+        var eqTraces = [];
+        for (var name in D.strategies) {
+            var s = D.strategies[name];
+            var color = strategyColor[name] || 'rgba(234, 230, 222, 0.25)';
+            var width = strategyWidth[name] || 1.0;
+            eqTraces.push({
+                x: s.dates,
+                y: s.cumulative_return,
+                type: 'scatter',
+                mode: 'lines',
+                name: name,
+                line: { color: color, width: width },
+                hovertemplate: name + '<br>%{x|%b %Y}<br>%{y:.2f}x<extra></extra>'
+            });
+        }
+
+        Plotly.newPlot('plotly-equity-curve', eqTraces, {
+            paper_bgcolor: PAPER,
+            plot_bgcolor:  PAPER,
+            font: { color: FG_60, family: FONT, size: mob ? 9 : 11 },
+            xaxis: {
+                gridcolor: FG_30, gridwidth: 0.5,
+                showline: true, linecolor: FG_30, linewidth: 1,
+                zeroline: false
+            },
+            yaxis: {
+                gridcolor: FG_30, gridwidth: 0.5,
+                title: { text: mob ? '' : 'Growth of $1', font: { color: FG_60, family: FONT, size: 10 } },
+                showline: false, zeroline: false
+            },
+            legend: {
+                bgcolor: 'rgba(18,18,20,0.92)',
+                bordercolor: FG_30,
+                borderwidth: 1,
+                font: { size: mob ? 8 : 10, color: FG, family: FONT },
+                orientation: mob ? 'h' : 'v',
+                y: mob ? -0.2 : 1
+            },
+            margin: { t: 16, r: 16, b: mob ? 60 : 40, l: mob ? 40 : 55 },
+            hovermode: 'x unified',
+            hoverlabel: { bgcolor: INK, bordercolor: FG_30, font: { color: FG, family: FONT, size: 11 } },
+            dragmode: 'zoom'
+        }, {
+            responsive: true,
+            displayModeBar: !mob,
+            displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d','select2d','autoScale2d','toImage']
+        });
+    }
+
+    /* ─── CY Explorer chart ─── */
+    if (typeof CY_DATA !== 'undefined' && typeof Plotly !== 'undefined') {
+        var CY = CY_DATA;
+
+        var cyColors = [ACCENT, UP, BLUE, DOWN, VIOLET,
+                        'rgba(234,230,222,0.6)', '#e8a87c', '#85c1e9',
+                        '#d4a5a5', '#a8d8ea', '#f5c6aa',
+                        '#b8d8ba', '#d5aaff', '#ffb347',
+                        '#c9b1ff', '#90ee90', '#ffd700',
+                        '#ff6b6b', '#4ecdc4'];
+        var cyDefaults = ['CL', 'NG', 'GC'];
+
+        var cyTraces = [];
+        var ci = 0;
+        for (var comm in CY.commodities) {
+            var cd = CY.commodities[comm];
+            var vis = cyDefaults.indexOf(comm) >= 0 ? true : 'legendonly';
+            cyTraces.push({
+                x: cd.dates,
+                y: cd.convenience_yield,
+                type: 'scatter',
+                mode: 'lines',
+                name: comm,
+                visible: vis,
+                line: { color: cyColors[ci % cyColors.length], width: 1.6 },
+                hovertemplate: comm + '<br>%{x|%b %Y}<br>CY: %{y:.2%}<extra></extra>'
+            });
+            ci++;
+        }
+
+        var cyShapes = [];
+        if (CY.regimes && CY.regimes.CL) {
+            var rg = CY.regimes.CL;
+            var regimeColors = {
+                'deep_contango':      'rgba(104,148,190,0.08)',
+                'mild_contango':      'rgba(104,148,190,0.04)',
+                'flat':               'rgba(234,230,222,0.02)',
+                'mild_backwardation': 'rgba(200,162,85,0.04)',
+                'deep_backwardation': 'rgba(207,102,77,0.08)'
+            };
+            if (rg.periods) {
+                for (var ri = 0; ri < rg.periods.length; ri++) {
+                    var rp = rg.periods[ri];
+                    cyShapes.push({
+                        type: 'rect',
+                        xref: 'x', yref: 'paper',
+                        x0: rp.start, x1: rp.end,
+                        y0: 0, y1: 1,
+                        fillcolor: regimeColors[rp.regime] || 'rgba(234,230,222,0.02)',
+                        line: { width: 0 },
+                        layer: 'below'
+                    });
+                }
+            }
+        }
+
+        Plotly.newPlot('plotly-cy-explorer', cyTraces, {
+            paper_bgcolor: PAPER,
+            plot_bgcolor:  PAPER,
+            font: { color: FG_60, family: FONT, size: mob ? 9 : 11 },
+            xaxis: {
+                gridcolor: FG_30, gridwidth: 0.5,
+                showline: true, linecolor: FG_30, linewidth: 1,
+                zeroline: false
+            },
+            yaxis: {
+                gridcolor: FG_30, gridwidth: 0.5,
+                title: { text: mob ? '' : 'Convenience Yield', font: { color: FG_60, family: FONT, size: 10 } },
+                showline: false, zeroline: false,
+                tickformat: '.0%'
+            },
+            legend: {
+                bgcolor: 'rgba(18,18,20,0.92)',
+                bordercolor: FG_30,
+                borderwidth: 1,
+                font: { size: mob ? 8 : 10, color: FG, family: FONT },
+                orientation: mob ? 'h' : 'v',
+                y: mob ? -0.2 : 1
+            },
+            margin: { t: 16, r: 16, b: mob ? 60 : 40, l: mob ? 50 : 60 },
+            hovermode: 'x unified',
+            hoverlabel: { bgcolor: INK, bordercolor: FG_30, font: { color: FG, family: FONT, size: 11 } },
+            dragmode: 'zoom',
+            shapes: cyShapes
+        }, {
+            responsive: true,
+            displayModeBar: !mob,
+            displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d','select2d','autoScale2d','toImage']
+        });
+    }
+})();
+</script>
+</body>
+</html>
