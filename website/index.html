@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commodity Factor Trading · Brian Banna</title>
-    <meta name="description" content="A systematic commodity research framework: 10 factors, 19 markets, 20 years. Proves the commodity risk premium is the dominant return source — not factor timing. Full IS/OOS discipline.">
+    <meta name="description" content="Systematic commodity factor framework. 10 factors, 19 markets, 20 years of institutional data. The risk premium is the trade.">
     <meta property="og:title" content="Commodity Factor Trading">
-    <meta property="og:description" content="10 factors, 19 commodities, 20 years. Rigorous IS/OOS framework proves the commodity risk premium dominates factor alpha.">
-    <meta property="og:image" content="assets/figures/01_equity_curves.png">
+    <meta property="og:description" content="10 factors, 19 commodities, 20 years. Full IS/OOS framework. The commodity risk premium dominates factor alpha.">
+    <meta property="og:image" content="assets/figures/01_cumulative_returns.png">
     <meta property="og:type" content="article">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,7 +73,7 @@
         <div class="hero-lower">
             <div>
                 <p class="tagline">
-                    Ten commodity factors. Nineteen markets. <em>Twenty years</em> of institutional data. I built the full stack — curve construction, factor engine, signal generation, backtest with realistic costs — and tested every signal the literature says should work. The commodity risk premium dominates. Factor alpha is gone.
+                    I built a full commodity factor stack: curve construction from institutional WRDS data, ten factor signals, eight strategy variants, realistic execution. Tested everything across nineteen markets and <em>twenty years</em>. Factor alpha is gone. The risk premium is the trade.
                 </p>
                 <a href="#hook" class="scroll-hint">
                     <span>Begin reading</span>
@@ -83,7 +83,7 @@
 
             <aside class="hero-preview" aria-label="Key performance summary">
                 <div class="hero-preview-head">
-                    <span><span class="live-dot"></span>OUT-OF-SAMPLE · 2018–2024</span>
+                    <span><span class="live-dot"></span>OUT-OF-SAMPLE · 2018-2024</span>
                     <span>EW LONG</span>
                 </div>
                 <div class="hero-preview-row">
@@ -96,7 +96,7 @@
                 </div>
                 <div class="hero-preview-row">
                     <span class="hp-label">Max Drawdown</span>
-                    <span class="hp-value hp-pos">−30%</span>
+                    <span class="hp-value hp-pos">-30%</span>
                 </div>
                 <div class="hero-preview-row">
                     <span class="hp-label">Volatility</span>
@@ -136,23 +136,23 @@
 <main class="editorial">
 
 <section id="hook" class="reveal" data-theme="copper">
-    <div class="section-marker">§ 01 · Hook</div>
+    <div class="section-marker">§ 01 · The Question</div>
     <div class="section-grid">
         <div>
             <h2>Ten factors. Eight strategies. <em>One answer.</em></h2>
             <p class="lead">
-                Carry, momentum, positioning, volatility, macro exposure — every signal the academic literature says should work in commodities. I tested them all with institutional WRDS data, proper IS/OOS splits, and realistic execution costs. The result is definitive: factor alpha has been arbitraged away. The commodity risk premium is what remains.
+                Carry, momentum, positioning, volatility, macro exposure. Every signal the literature says should work in commodities. I ran them all through institutional WRDS data with proper IS/OOS splits and realistic costs. None of them beat equal-weight long. Factor alpha in commodities has been arbitraged out.
             </p>
         </div>
         <div class="side-note">
-            <strong>Why this matters</strong>
-            Every commodity desk has a carry signal. The question isn't whether it worked in a 2006 paper — it's whether it still works after CTAs deployed $400B into systematic commodity strategies. This research answers that question with twenty years of data.
+            <strong>The setup</strong>
+            Every commodity desk runs a carry signal. The real question is whether it still works after $400B of CTA capital piled into systematic commodity strategies. I built the infrastructure to answer that properly.
         </div>
     </div>
 
     <div class="stat-row">
         <div class="stat-card">
-            <div class="big negative-val">−0.15</div>
+            <div class="big negative-val">-0.15</div>
             <div class="desc">Carry OOS Sharpe</div>
             <div class="bar" style="--bar-w: 15%"></div>
         </div>
@@ -178,36 +178,36 @@
      § 02 · Evidence
      ════════════════════════════════════════════════════════ -->
 <section id="evidence" class="reveal" data-theme="gold">
-    <div class="section-marker">§ 02 · Evidence</div>
+    <div class="section-marker">§ 02 · Results</div>
     <div class="section-grid">
-        <h2>All eight strategies, <em>after costs.</em></h2>
+        <h2>Eight strategies, <em>after costs.</em></h2>
         <div class="side-note">
-            <strong>Benchmarks</strong>
-            In-sample 2005–2017, out-of-sample 2018–2024. All results include execution lag, roll costs, and per-commodity commissions.
+            <strong>Setup</strong>
+            In-sample: 2005 to 2017. Out-of-sample: 2018 to 2024. All results include one-day execution lag, roll costs, and per-commodity commissions.
         </div>
     </div>
 
     <div id="plotly-equity-curve" class="interactive-chart"></div>
-    <p class="chart-caption-inline">Hover for daily values. Click the legend to toggle strategies. Drag to zoom.</p>
+    <p class="chart-caption-inline">Hover for daily values. Click legend to toggle. Drag to zoom.</p>
 
     <div class="chart-container">
         <img src="assets/figures/02_drawdown.png" alt="Drawdown comparison" loading="lazy">
-        <div class="chart-caption">Drawdown from peak across all strategies. Active factor portfolios suffer deeper and longer drawdowns than the passive equal-weight long benchmark.</div>
+        <div class="chart-caption">Drawdown from peak. Active factor portfolios draw down harder and longer than passive EW long.</div>
     </div>
 
     <div class="table-wrap">
     <table>
         <thead><tr><th>Strategy</th><th>CAGR</th><th>Vol</th><th>Sharpe</th><th>Max DD</th><th>Turnover</th></tr></thead>
         <tbody>
-            <tr class="highlight"><td>TSMOM</td><td>1.2%</td><td>12.8%</td><td class="gold-val">0.02</td><td class="negative">−38%</td><td>8.4x</td></tr>
-            <tr><td>TSI</td><td class="negative">−2.1%</td><td>15.3%</td><td class="negative">−0.30</td><td class="negative">−45%</td><td>6.2x</td></tr>
-            <tr><td>XS Carry</td><td class="negative">−1.5%</td><td>11.2%</td><td class="negative">−0.15</td><td class="negative">−32%</td><td>4.8x</td></tr>
-            <tr><td>Multi-Factor EW</td><td>2.8%</td><td>13.5%</td><td>0.12</td><td class="negative">−35%</td><td>7.1x</td></tr>
-            <tr><td>Sector Neutral</td><td>1.1%</td><td>10.8%</td><td>0.05</td><td class="negative">−28%</td><td>9.3x</td></tr>
-            <tr><td>Calendar Spread</td><td>0.8%</td><td>8.5%</td><td>0.04</td><td class="negative">−22%</td><td>3.6x</td></tr>
-            <tr class="highlight"><td>EW Long</td><td class="positive">5.3%</td><td>14.7%</td><td class="gold-val">0.35</td><td class="positive">−30%</td><td>0.2x</td></tr>
-            <tr><td>SPY</td><td class="positive">10.2%</td><td>18.5%</td><td>0.67</td><td class="negative">−34%</td><td>0.0x</td></tr>
-            <tr><td>AGG</td><td>1.8%</td><td>5.2%</td><td>0.22</td><td>−10%</td><td>0.0x</td></tr>
+            <tr class="highlight"><td>TSMOM</td><td>1.2%</td><td>12.8%</td><td class="gold-val">0.02</td><td class="negative">-38%</td><td>8.4x</td></tr>
+            <tr><td>TSI</td><td class="negative">-2.1%</td><td>15.3%</td><td class="negative">-0.30</td><td class="negative">-45%</td><td>6.2x</td></tr>
+            <tr><td>XS Carry</td><td class="negative">-1.5%</td><td>11.2%</td><td class="negative">-0.15</td><td class="negative">-32%</td><td>4.8x</td></tr>
+            <tr><td>Multi-Factor EW</td><td>2.8%</td><td>13.5%</td><td>0.12</td><td class="negative">-35%</td><td>7.1x</td></tr>
+            <tr><td>Sector Neutral</td><td>1.1%</td><td>10.8%</td><td>0.05</td><td class="negative">-28%</td><td>9.3x</td></tr>
+            <tr><td>Calendar Spread</td><td>0.8%</td><td>8.5%</td><td>0.04</td><td class="negative">-22%</td><td>3.6x</td></tr>
+            <tr class="highlight"><td>EW Long</td><td class="positive">5.3%</td><td>14.7%</td><td class="gold-val">0.35</td><td class="positive">-30%</td><td>0.2x</td></tr>
+            <tr><td>SPY</td><td class="positive">10.2%</td><td>18.5%</td><td>0.67</td><td class="negative">-34%</td><td>0.0x</td></tr>
+            <tr><td>AGG</td><td>1.8%</td><td>5.2%</td><td>0.22</td><td>-10%</td><td>0.0x</td></tr>
         </tbody>
     </table>
     </div>
@@ -217,23 +217,23 @@
      § 03 · Contamination
      ════════════════════════════════════════════════════════ -->
 <section id="contamination" class="reveal" data-theme="copper">
-    <div class="section-marker">§ 03 · Contamination</div>
+    <div class="section-marker">§ 03 · Signal Contamination</div>
     <div class="section-grid">
         <div>
-            <h2>Daily curve signals are <em>contaminated.</em></h2>
+            <h2>Curve signals at daily frequency <em>are contaminated.</em></h2>
             <p class="lead">
-                All four curve factors show lag-0 IC three to four times larger than lag-1. The interpolated curve moves with the same prices you're trying to predict — same-day contamination. Lag your signals properly and the alpha disappears. Most backtests in the literature never test this because they rebalance monthly.
+                All four curve factors show lag-0 IC three to four times higher than lag-1. The interpolated curve moves with the same prices you are trying to predict. Once you lag signals properly, the alpha disappears. Most backtests in the literature rebalance monthly and never see this.
             </p>
         </div>
         <div class="side-note">
-            <strong>What I found</strong>
-            This is a genuine infrastructure finding. If you run carry signals at daily frequency without proper lagging, your backtest is lying to you. I built the diagnostic to catch it.
+            <strong>Infrastructure finding</strong>
+            If you run carry signals at daily frequency without proper lagging, your backtest is wrong. I built the diagnostic that catches this and documented the decay across all four curve factors.
         </div>
     </div>
 
     <div class="chart-container">
         <img src="assets/figures/05_factor_ic_decay.png" alt="Factor IC decay" loading="lazy">
-        <div class="chart-caption">Information coefficient at lag 0 vs lag 1 for each curve factor. The sharp decay reveals that most apparent predictive power comes from contemporaneous price correlation, not genuine forecasting ability.</div>
+        <div class="chart-caption">IC at lag 0 vs lag 1 for each curve factor. The drop shows that most of the apparent signal comes from same-day price correlation, not actual forecasting power.</div>
     </div>
 
     <div class="stat-row">
@@ -254,7 +254,7 @@
         </div>
         <div class="stat-card">
             <div class="big negative-val">4 / 4</div>
-            <div class="desc">Factors Contaminated</div>
+            <div class="desc">Curve Factors Hit</div>
             <div class="bar" style="--bar-w: 100%"></div>
         </div>
     </div>
@@ -269,21 +269,21 @@
         <div>
             <h2>Reading the curve <em>like a physical trader.</em></h2>
             <p class="lead">
-                Convenience yield extracted from a cost-of-carry model, classified into five regimes: deep contango, mild contango, flat, mild backwardation, deep backwardation. Each regime maps to a physical market story.
+                I extract convenience yield from a cost-of-carry model and classify each commodity into five regimes: deep contango through crisis backwardation. Each regime maps directly to a physical market state. This is how commodity desks actually think about curves.
             </p>
         </div>
         <div class="side-note">
             <strong>Theory of Storage</strong>
-            Convenience yield reflects physical scarcity. When inventories are low, the spot premium rises — the curve inverts into backwardation. This is the oldest signal in commodity markets.
+            Convenience yield reflects physical scarcity. Low inventories push the spot premium up and the curve inverts into backwardation. This is the oldest signal in commodity markets.
         </div>
     </div>
 
     <div id="plotly-cy-explorer" class="interactive-chart"></div>
-    <p class="chart-caption-inline">Click legend entries to toggle commodities. CL, NG, GC shown by default.</p>
+    <p class="chart-caption-inline">Click legend to toggle commodities. CL, NG, GC shown by default.</p>
 
     <div class="chart-container">
         <img src="assets/figures/08_curve_regime_heatmap.png" alt="Curve regime heatmap" loading="lazy">
-        <div class="chart-caption">Five-regime classification across all commodities and time. Deep backwardation (red) concentrates during supply crises — 2008 energy, 2022 grains.</div>
+        <div class="chart-caption">Regime classification across all 19 commodities over time. Deep backwardation clusters during supply crises: 2008 energy, 2022 grains.</div>
     </div>
 </section>
 
@@ -294,7 +294,7 @@
     <div class="section-marker">§ 05 · TSI Strategy</div>
     <h2>Three layers, <em>one thesis.</em></h2>
     <p class="lead">
-        Directional regime tilt (40% risk), transition momentum (25%), structural spreads (35%). Each layer captures a different aspect of term structure dynamics.
+        I built a three-layer strategy around the term structure: directional regime tilt (40% risk budget), transition momentum (25%), and structural spreads (35%). Every signal is grounded in physical commodity logic, not data-mined patterns.
     </p>
 
     <div class="pipeline">
@@ -313,7 +313,7 @@
 
     <div class="chart-container">
         <img src="assets/figures/09_tsi_layer_decomposition.png" alt="TSI layer decomposition" loading="lazy">
-        <div class="chart-caption">Cumulative return contribution by layer. Directional drives in-sample gains. Transition and spread layers add diversification but no persistent alpha out-of-sample.</div>
+        <div class="chart-caption">Per-layer cumulative returns. The directional layer drives in-sample gains. Transition and spread layers diversify but add no persistent OOS alpha.</div>
     </div>
 
     <div class="stat-row">
@@ -323,13 +323,13 @@
             <div class="bar" style="--bar-w: 65%"></div>
         </div>
         <div class="stat-card">
-            <div class="big negative-val">−0.30</div>
+            <div class="big negative-val">-0.30</div>
             <div class="desc">TSI OOS Sharpe</div>
             <div class="bar" style="--bar-w: 30%"></div>
         </div>
         <div class="stat-card">
-            <div class="big negative-val">−0.69</div>
-            <div class="desc">IS-to-OOS Gap</div>
+            <div class="big negative-val">-0.69</div>
+            <div class="desc">IS to OOS Gap</div>
             <div class="bar" style="--bar-w: 69%"></div>
         </div>
         <div class="stat-card">
@@ -340,7 +340,7 @@
     </div>
 
     <p>
-        The IS/OOS gap is −0.69 Sharpe. Even a physically-motivated signal architecture — convenience yield regimes, transition momentum, structural spreads — cannot generate persistent alpha in post-2010 commodity markets. The infrastructure works. The alpha doesn't exist.
+        IS/OOS gap of -0.69 Sharpe. Even with physically-motivated signals (convenience yield regimes, transition momentum, structural spreads), the strategy does not produce persistent alpha in post-2010 commodity markets. The infrastructure works. The alpha is not there.
     </p>
 </section>
 
@@ -353,23 +353,23 @@
         <div>
             <h2>The risk premium <em>is the trade.</em></h2>
             <p class="lead">
-                Equal-weight long across nineteen markets. OOS Sharpe +0.35, zero free parameters. Hedgers pay a structural premium to transfer price risk. That premium is persistent, diversified, and survives any cost model I throw at it. Every factor strategy I built is just adding noise on top of this.
+                Equal-weight long across nineteen markets. OOS Sharpe +0.35 with zero free parameters. Hedgers pay a structural premium to transfer price risk. That premium is persistent, diversified across sectors, and survives any cost model. Every factor strategy just adds noise on top.
             </p>
         </div>
         <div class="side-note">
             <strong>Zero parameters</strong>
-            No lookback windows. No thresholds. No regime classification. No estimation error. The EW long portfolio is the null hypothesis that every commodity factor paper should benchmark against — and most of them can't beat it.
+            No lookback windows. No thresholds. No regime classification. No estimation error. This is the null hypothesis every commodity factor paper should benchmark against. Most of them can't beat it.
         </div>
     </div>
 
     <div class="chart-container">
         <img src="assets/figures/04_rolling_sharpe.png" alt="Rolling Sharpe ratio" loading="lazy">
-        <div class="chart-caption">Three-year rolling Sharpe ratio. EW long (gold) is consistently positive. Active factor strategies oscillate around zero with high variance.</div>
+        <div class="chart-caption">252-day rolling Sharpe. EW long stays consistently positive. Active factor strategies oscillate around zero.</div>
     </div>
 
     <div class="chart-container">
         <img src="assets/figures/14_bootstrap_ci.png" alt="Bootstrap confidence intervals" loading="lazy">
-        <div class="chart-caption">Bootstrap 95% confidence intervals for the Sharpe ratio. Only EW long has a CI that excludes zero. All active strategies are statistically indistinguishable from noise.</div>
+        <div class="chart-caption">Bootstrap 95% CIs for the Sharpe ratio. Only EW long excludes zero. Active strategies are indistinguishable from noise at any reasonable confidence level.</div>
     </div>
 </section>
 
@@ -379,7 +379,7 @@
 <section id="costs" class="reveal" data-theme="amber">
     <div class="section-marker">§ 07 · Cost Sensitivity</div>
     <h2>How much friction <em>can it take?</em></h2>
-    <p class="lead">Commodity futures execution costs are typically 2 to 5 bps. Drag the slider to see how they affect the EW long portfolio.</p>
+    <p class="lead">Commodity futures execution runs 2 to 5 bps typically. Drag the slider.</p>
 
     <div class="sim-container">
         <div class="sim-slider-row">
@@ -400,7 +400,7 @@
                 <div class="bar" style="--bar-w: 53%"></div>
             </div>
             <div class="stat-card">
-                <div class="big positive" id="sim-maxdd">−30%</div>
+                <div class="big positive" id="sim-maxdd">-30%</div>
                 <div class="desc">Max DD</div>
                 <div class="bar" style="--bar-w: 54%"></div>
             </div>
@@ -419,17 +419,17 @@
      ════════════════════════════════════════════════════════ -->
 <section id="stress" class="reveal" data-theme="copper">
     <div class="section-marker">§ 08 · Stress Test</div>
-    <h2>Through four <em>commodity crises.</em></h2>
-    <p class="lead">2008 financial crash, 2014 oil price collapse, 2020 COVID and negative WTI, 2022 energy and grain spike. How the EW long portfolio performs when markets break.</p>
+    <h2>Four commodity crises. <em>How it holds up.</em></h2>
+    <p class="lead">2008 financial crash. 2014 oil price collapse. 2020 COVID and negative WTI. 2022 energy and grain spike.</p>
 
     <div class="chart-container">
         <img src="assets/figures/10_stress_test.png" alt="Stress test results" loading="lazy">
-        <div class="chart-caption">Performance during four crisis periods. The diversified long portfolio recovers faster than concentrated commodity bets — sector diversification absorbs single-market shocks.</div>
+        <div class="chart-caption">Crisis period performance. The diversified long portfolio recovers faster than concentrated bets. Sector diversification absorbs single-market shocks.</div>
     </div>
 
     <div class="chart-container">
         <img src="assets/figures/13_sector_attribution.png" alt="Sector attribution" loading="lazy">
-        <div class="chart-caption">Return attribution by sector. Energy dominates both gains and losses. Precious metals act as a partial hedge during equity drawdowns. Agriculture provides diversification.</div>
+        <div class="chart-caption">Return by sector. Energy dominates gains and losses. Precious metals partially hedge equity risk. Agriculture diversifies.</div>
     </div>
 </section>
 
@@ -455,10 +455,10 @@
     </div>
 
     <ul>
-        <li><strong>Data sources</strong> · WRDS Datastream (back-month curves), yfinance (front-month, benchmarks), EIA (energy inventories), FRED (macro), CFTC (COT positioning)</li>
-        <li><strong>Commodities</strong> · CL, NG, RB, HO (energy) · GC, SI, HG (metals) · ZC, ZS, ZW, KC, SB, CC (agriculture) · LE, HE, LH, LC, FC, CT (livestock &amp; softs)</li>
-        <li><strong>Factors</strong> · Carry, slope, curvature, curve momentum (structural) · TSMOM, XSMOM, CFTC positioning (behavioral) · EIA inventory surprise, macro exposure, volatility regime (fundamental)</li>
-        <li><strong>Infrastructure</strong> · 438 unit tests, CI-ready, config-driven pipeline, no lookahead, expanding-window validation throughout</li>
+        <li><strong>Data</strong> · WRDS Datastream for back-month curves, yfinance for front-month and benchmarks, EIA for energy inventories, FRED for macro, CFTC for positioning</li>
+        <li><strong>Universe</strong> · CL, NG, RB, HO (energy) · GC, SI, HG, PL, PA (metals) · ZC, ZS, ZW (grains) · KC, SB, CC (softs) · LC, LH, FC, LB (livestock)</li>
+        <li><strong>Factors</strong> · Carry, slope, curvature, curve momentum · TSMOM, XSMOM, CFTC positioning · EIA inventory surprise, macro exposure, volatility regime</li>
+        <li><strong>Infra</strong> · 438 unit tests, config-driven, no lookahead, expanding-window validation, CI-ready</li>
     </ul>
 
     <details>
@@ -484,25 +484,25 @@
      § 10 · Research
      ════════════════════════════════════════════════════════ -->
 <section id="research" class="reveal" data-theme="steel">
-    <div class="section-marker">§ 10 · Research</div>
-    <h2>This is what <em>rigorous</em> commodity quant looks like.</h2>
+    <div class="section-marker">§ 10 · Methodology</div>
+    <h2>Rigorous commodity quant. <em>No shortcuts.</em></h2>
     <p class="lead">
-        Full IS/OOS discipline across every strategy. Signal contamination caught and documented. Nineteen markets with institutional data. 438 tests. The infrastructure to answer the question — and the discipline to report the answer even when it's not what you wanted to hear.
+        Full IS/OOS discipline on every strategy. Signal contamination caught and documented. Nineteen markets with institutional data. 438 tests. I built the infrastructure to answer the question properly and reported the answer straight.
     </p>
 
     <div class="chart-container">
         <img src="assets/figures/12_is_oos_comparison.png" alt="IS vs OOS comparison" loading="lazy">
-        <div class="chart-caption">In-sample vs out-of-sample Sharpe ratio for every strategy. The gap between IS and OOS reveals overfitting. Only EW long improves out-of-sample.</div>
+        <div class="chart-caption">IS vs OOS Sharpe for every strategy. The gap shows overfitting. Only EW long improves out-of-sample.</div>
     </div>
 
     <div class="chart-container">
         <img src="assets/figures/06_factor_correlation.png" alt="Factor correlation matrix" loading="lazy">
-        <div class="chart-caption">Pairwise correlation between all ten factors. Carry and slope are highly correlated (0.75). Momentum factors are nearly orthogonal to curve factors — diversification potential that doesn't translate to alpha.</div>
+        <div class="chart-caption">Factor correlations. Carry and slope are 0.75 correlated. Momentum factors are nearly orthogonal to curve factors. Diversification potential that does not translate to alpha.</div>
     </div>
 
     <div class="chart-container">
         <img src="assets/figures/03_monthly_heatmap.png" alt="Monthly returns heatmap" loading="lazy">
-        <div class="chart-caption">Monthly return heatmap for the EW long portfolio. Returns are broadly distributed with no strong seasonal pattern — consistent with a structural risk premium rather than a timing signal.</div>
+        <div class="chart-caption">Monthly returns for EW long. Broadly distributed, no strong seasonal pattern. Consistent with a structural risk premium, not a timing signal.</div>
     </div>
 </section>
 
@@ -514,10 +514,10 @@
 <footer class="colophon">
     <div class="editorial">
         <div class="colophon-row">
-            <div class="colophon-mark">— Brian Banna</div>
+            <div class="colophon-mark">Brian Banna</div>
             <div class="colophon-meta">
                 <a href="https://brianbanna.com">brianbanna.com</a>
-                · Repository on
+                · Source on
                 <a href="https://github.com/brianbanna/commodity-curve-factors">GitHub</a>
             </div>
         </div>
@@ -526,24 +526,22 @@
 
 <script>
 (function() {
-    /* Mark body as JS-enabled so reveal animations activate */
     document.body.classList.add('js');
 
-    /* ─── Signal palette tokens for charts ─── */
     var INK    = '#0c0c0e';
     var PAPER  = '#141417';
     var BG     = '#0a0b0d';
     var FG     = '#eae6de';
     var FG_60  = 'rgba(234, 230, 222, 0.6)';
     var FG_30  = 'rgba(234, 230, 222, 0.14)';
-    var ACCENT = '#c8a255';                 /* gold */
-    var UP     = '#62af7b';                 /* jade */
-    var DOWN   = '#cf664d';                 /* copper */
-    var BLUE   = '#6894be';                 /* steel */
-    var VIOLET = '#9b82c8';                 /* violet */
+    var ACCENT = '#c8a255';
+    var UP     = '#62af7b';
+    var DOWN   = '#cf664d';
+    var BLUE   = '#6894be';
+    var VIOLET = '#9b82c8';
     var FONT   = "JetBrains Mono, ui-monospace, monospace";
 
-    /* ─── Reveal sections on scroll ─── */
+    /* Scroll reveal */
     var obs = new IntersectionObserver(function(entries) {
         entries.forEach(function(e) {
             if (e.isIntersecting) {
@@ -554,7 +552,7 @@
     }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
     document.querySelectorAll('.reveal').forEach(function(s) { obs.observe(s); });
 
-    /* ─── Cost simulator ─── */
+    /* Cost simulator */
     var costBps    = [0, 2, 5, 7, 10, 15, 20];
     var costSharpe = [0.38, 0.37, 0.35, 0.34, 0.32, 0.28, 0.24];
     var costCagr   = [5.8, 5.6, 5.3, 5.1, 4.8, 4.2, 3.5];
@@ -599,7 +597,7 @@
                 elV.textContent = 'Positive risk-adjusted return at this cost level.';
                 elV.style.color = UP;
             } else if (sh > 0) {
-                elV.textContent = 'Marginal — costs erode most of the risk premium.';
+                elV.textContent = 'Marginal. Costs eat most of the risk premium.';
                 elV.style.color = ACCENT;
             } else {
                 elV.textContent = 'Unprofitable at this cost level.';
@@ -608,10 +606,9 @@
         });
     }
 
-    /* ─── Plotly charts ─── */
+    /* Plotly equity curve */
     var mob = window.innerWidth < 640;
 
-    /* ─── Equity curve chart ─── */
     if (typeof CHART_DATA !== 'undefined' && typeof Plotly !== 'undefined') {
         var D = CHART_DATA;
 
@@ -684,7 +681,7 @@
         });
     }
 
-    /* ─── CY Explorer chart ─── */
+    /* CY Explorer */
     if (typeof CY_DATA !== 'undefined' && typeof Plotly !== 'undefined') {
         var CY = CY_DATA;
 
