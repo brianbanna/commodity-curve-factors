@@ -73,7 +73,7 @@
         <div class="hero-lower">
             <div>
                 <p class="tagline">
-                    I built a full commodity factor stack: curve construction from institutional WRDS data, ten factor signals, eight strategy variants, realistic execution. Tested everything across nineteen markets and <em>twenty years</em>. Factor alpha is gone. The risk premium is the trade.
+                    I built a full commodity factor stack: curve construction from institutional WRDS data, 10 factor signals, 8 strategy variants, realistic execution. Tested everything across 19 markets and <em>20 years</em>. Factor alpha is gone. The risk premium is the trade.
                 </p>
                 <a href="#hook" class="scroll-hint">
                     <span>Begin reading</span>
@@ -139,7 +139,7 @@
     <div class="section-marker">§ 01 · The Question</div>
     <div class="section-grid">
         <div>
-            <h2>Ten factors. Eight strategies. <em>One answer.</em></h2>
+            <h2>10 factors. 8 strategies. <em>One answer.</em></h2>
             <p class="lead">
                 Carry, momentum, positioning, volatility, macro exposure. Every signal the literature says should work in commodities. I ran them all through institutional WRDS data with proper IS/OOS splits and realistic costs. None of them beat equal-weight long. Factor alpha in commodities has been arbitraged out.
             </p>
@@ -180,7 +180,7 @@
 <section id="evidence" class="reveal" data-theme="gold">
     <div class="section-marker">§ 02 · Results</div>
     <div class="section-grid">
-        <h2>Eight strategies, <em>after costs.</em></h2>
+        <h2>8 strategies, <em>after costs.</em></h2>
         <div class="side-note">
             <strong>Setup</strong>
             In-sample: 2005 to 2017. Out-of-sample: 2018 to 2024. All results include one-day execution lag, roll costs, and per-commodity commissions.
@@ -222,12 +222,12 @@
         <div>
             <h2>Curve signals at daily frequency <em>are contaminated.</em></h2>
             <p class="lead">
-                All four curve factors show lag-0 IC three to four times higher than lag-1. The interpolated curve moves with the same prices you are trying to predict. Once you lag signals properly, the alpha disappears. Most backtests in the literature rebalance monthly and never see this.
+                All 4 curve factors show lag-0 IC 3-4x higher than lag-1. The interpolated curve moves with the same prices you're trying to predict. Once you lag signals properly, the alpha disappears. Most backtests in the literature rebalance monthly and never see this.
             </p>
         </div>
         <div class="side-note">
             <strong>Infrastructure finding</strong>
-            If you run carry signals at daily frequency without proper lagging, your backtest is wrong. I built the diagnostic that catches this and documented the decay across all four curve factors.
+            If you run carry signals at daily frequency without proper lagging, your backtest is wrong. I built the diagnostic that catches this and documented the decay across all 4 curve factors.
         </div>
     </div>
 
@@ -269,7 +269,7 @@
         <div>
             <h2>Reading the curve <em>like a physical trader.</em></h2>
             <p class="lead">
-                I extract convenience yield from a cost-of-carry model and classify each commodity into five regimes: deep contango through crisis backwardation. Each regime maps directly to a physical market state. This is how commodity desks actually think about curves.
+                I extract convenience yield from a cost-of-carry model and classify each commodity into 5 regimes: deep contango through crisis backwardation. Each regime maps directly to a physical market state. This is how commodity desks think about curves.
             </p>
         </div>
         <div class="side-note">
@@ -292,9 +292,9 @@
      ════════════════════════════════════════════════════════ -->
 <section id="tsi" class="reveal" data-theme="violet">
     <div class="section-marker">§ 05 · TSI Strategy</div>
-    <h2>Three layers, <em>one thesis.</em></h2>
+    <h2>3 layers, <em>one thesis.</em></h2>
     <p class="lead">
-        I built a three-layer strategy around the term structure: directional regime tilt (40% risk budget), transition momentum (25%), and structural spreads (35%). Every signal is grounded in physical commodity logic, not data-mined patterns.
+        I built a 3-layer strategy around the term structure: directional regime tilt (40% risk budget), transition momentum (25%), and structural spreads (35%). Every signal is grounded in physical commodity logic, not data-mined patterns.
     </p>
 
     <div class="pipeline">
@@ -353,7 +353,7 @@
         <div>
             <h2>The risk premium <em>is the trade.</em></h2>
             <p class="lead">
-                Equal-weight long across nineteen markets. OOS Sharpe +0.35 with zero free parameters. Hedgers pay a structural premium to transfer price risk. That premium is persistent, diversified across sectors, and survives any cost model. Every factor strategy just adds noise on top.
+                Equal-weight long across 19 markets. OOS Sharpe +0.35 with zero free parameters. Hedgers pay a structural premium to transfer price risk. That premium is persistent, diversified across sectors, and survives any cost model. Every factor strategy just adds noise on top.
             </p>
         </div>
         <div class="side-note">
@@ -419,7 +419,7 @@
      ════════════════════════════════════════════════════════ -->
 <section id="stress" class="reveal" data-theme="copper">
     <div class="section-marker">§ 08 · Stress Test</div>
-    <h2>Four commodity crises. <em>How it holds up.</em></h2>
+    <h2>4 commodity crises. <em>How it holds up.</em></h2>
     <p class="lead">2008 financial crash. 2014 oil price collapse. 2020 COVID and negative WTI. 2022 energy and grain spike.</p>
 
     <div class="chart-container">
@@ -487,7 +487,7 @@
     <div class="section-marker">§ 10 · Methodology</div>
     <h2>Rigorous commodity quant. <em>No shortcuts.</em></h2>
     <p class="lead">
-        Full IS/OOS discipline on every strategy. Signal contamination caught and documented. Nineteen markets with institutional data. 438 tests. I built the infrastructure to answer the question properly and reported the answer straight.
+        Full IS/OOS discipline on every strategy. Signal contamination caught and documented. 19 markets with institutional data. 438 tests. I built the infrastructure to answer the question properly and reported the answer straight.
     </p>
 
     <div class="chart-container">
