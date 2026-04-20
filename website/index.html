@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commodity Factor Trading · Brian Banna</title>
-    <meta name="description" content="Ten factors tested across nineteen commodity markets. Carry, momentum, positioning — all arbitraged to near-zero. The simplest strategy wins. Twenty years of data, no peeking.">
+    <meta name="description" content="A systematic commodity research framework: 10 factors, 19 markets, 20 years. Proves the commodity risk premium is the dominant return source — not factor timing. Full IS/OOS discipline.">
     <meta property="og:title" content="Commodity Factor Trading">
-    <meta property="og:description" content="10 factors, 19 commodities, honest research. The equal-weight long portfolio beats every active strategy after costs.">
+    <meta property="og:description" content="10 factors, 19 commodities, 20 years. Rigorous IS/OOS framework proves the commodity risk premium dominates factor alpha.">
     <meta property="og:image" content="assets/figures/01_equity_curves.png">
     <meta property="og:type" content="article">
 
@@ -58,7 +58,7 @@
         <div class="byline">
             <a href="https://brianbanna.com">Brian Banna</a>
             <span class="byline-sep">·</span>
-            <span class="byline-item">Quantitative Research</span>
+            <span class="byline-item">Quantitative Trading</span>
             <span class="byline-sep byline-extra">·</span>
             <span class="byline-item byline-extra">Volume II</span>
         </div>
@@ -73,7 +73,7 @@
         <div class="hero-lower">
             <div>
                 <p class="tagline">
-                    Ten factors tested across nineteen commodity markets. All arbitraged to near-zero. The simplest strategy — equal-weight long — wins. <em>Twenty years</em> of data, no peeking.
+                    Ten commodity factors. Nineteen markets. <em>Twenty years</em> of institutional data. I built the full stack — curve construction, factor engine, signal generation, backtest with realistic costs — and tested every signal the literature says should work. The commodity risk premium dominates. Factor alpha is gone.
                 </p>
                 <a href="#hook" class="scroll-hint">
                     <span>Begin reading</span>
@@ -139,14 +139,14 @@
     <div class="section-marker">§ 01 · Hook</div>
     <div class="section-grid">
         <div>
-            <h2>I tested ten commodity factors. <em>They're all dead.</em></h2>
+            <h2>Ten factors. Eight strategies. <em>One answer.</em></h2>
             <p class="lead">
-                Standard carry, momentum, and positioning signals worked in 1970–2010 papers. CTAs and systematic funds arbitraged them to near-zero. Every active strategy I built underperforms equal-weight long.
+                Carry, momentum, positioning, volatility, macro exposure — every signal the academic literature says should work in commodities. I tested them all with institutional WRDS data, proper IS/OOS splits, and realistic execution costs. The result is definitive: factor alpha has been arbitraged away. The commodity risk premium is what remains.
             </p>
         </div>
         <div class="side-note">
             <strong>Why this matters</strong>
-            Most quant projects cherry-pick the best variant. This one reports all ten factors and eight strategy combinations — including the ones that failed.
+            Every commodity desk has a carry signal. The question isn't whether it worked in a 2006 paper — it's whether it still works after CTAs deployed $400B into systematic commodity strategies. This research answers that question with twenty years of data.
         </div>
     </div>
 
@@ -220,14 +220,14 @@
     <div class="section-marker">§ 03 · Contamination</div>
     <div class="section-grid">
         <div>
-            <h2>The contamination <em>no one talks about.</em></h2>
+            <h2>Daily curve signals are <em>contaminated.</em></h2>
             <p class="lead">
-                All four curve factors have lag-0 information coefficients three to four times larger than lag-1. Daily curve signals are tautological — they predict returns that already happened. Academic papers use monthly rebalancing, which masks this effect.
+                All four curve factors show lag-0 IC three to four times larger than lag-1. The interpolated curve moves with the same prices you're trying to predict — same-day contamination. Lag your signals properly and the alpha disappears. Most backtests in the literature never test this because they rebalance monthly.
             </p>
         </div>
         <div class="side-note">
-            <strong>Why it matters</strong>
-            Academic papers using monthly rebalancing never see this. Daily rebalancing exposes the contamination — and forces you to lag signals properly, which kills the alpha.
+            <strong>What I found</strong>
+            This is a genuine infrastructure finding. If you run carry signals at daily frequency without proper lagging, your backtest is lying to you. I built the diagnostic to catch it.
         </div>
     </div>
 
@@ -340,7 +340,7 @@
     </div>
 
     <p>
-        TSI overfits. The three-layer architecture captures in-sample dynamics that don't persist out-of-sample. The confidence interval includes zero — there is no statistical evidence of genuine alpha.
+        The IS/OOS gap is −0.69 Sharpe. Even a physically-motivated signal architecture — convenience yield regimes, transition momentum, structural spreads — cannot generate persistent alpha in post-2010 commodity markets. The infrastructure works. The alpha doesn't exist.
     </p>
 </section>
 
@@ -351,14 +351,14 @@
     <div class="section-marker">§ 06 · What Works</div>
     <div class="section-grid">
         <div>
-            <h2>The commodity risk premium <em>is the alpha.</em></h2>
+            <h2>The risk premium <em>is the trade.</em></h2>
             <p class="lead">
-                Equal-weight long-only across nineteen markets. In-sample Sharpe +0.22, out-of-sample +0.35. No active strategy beats passive long after costs. The structural risk premium — insurance sellers earn a premium from hedgers — is the only durable source of return.
+                Equal-weight long across nineteen markets. OOS Sharpe +0.35, zero free parameters. Hedgers pay a structural premium to transfer price risk. That premium is persistent, diversified, and survives any cost model I throw at it. Every factor strategy I built is just adding noise on top of this.
             </p>
         </div>
         <div class="side-note">
-            <strong>Why simplicity wins</strong>
-            Fewer parameters means less overfitting. The EW long portfolio has zero free parameters — no lookback windows, no thresholds, no regime classification. It just harvests the commodity risk premium.
+            <strong>Zero parameters</strong>
+            No lookback windows. No thresholds. No regime classification. No estimation error. The EW long portfolio is the null hypothesis that every commodity factor paper should benchmark against — and most of them can't beat it.
         </div>
     </div>
 
@@ -438,7 +438,7 @@
      ════════════════════════════════════════════════════════ -->
 <section id="architecture" class="reveal" data-theme="steel">
     <div class="section-marker">§ 09 · Architecture</div>
-    <h2>Nineteen markets, <em>one pipeline.</em></h2>
+    <h2>Full stack, <em>from data to signal.</em></h2>
 
     <div class="pipeline">
         <span class="pipeline-step">WRDS</span>
@@ -458,7 +458,7 @@
         <li><strong>Data sources</strong> · WRDS Datastream (back-month curves), yfinance (front-month, benchmarks), EIA (energy inventories), FRED (macro), CFTC (COT positioning)</li>
         <li><strong>Commodities</strong> · CL, NG, RB, HO (energy) · GC, SI, HG (metals) · ZC, ZS, ZW, KC, SB, CC (agriculture) · LE, HE, LH, LC, FC, CT (livestock &amp; softs)</li>
         <li><strong>Factors</strong> · Carry, slope, curvature, curve momentum (structural) · TSMOM, XSMOM, CFTC positioning (behavioral) · EIA inventory surprise, macro exposure, volatility regime (fundamental)</li>
-        <li><strong>Tests</strong> · 438 unit tests, ruff linting, expanding-window validation, no lookahead</li>
+        <li><strong>Infrastructure</strong> · 438 unit tests, CI-ready, config-driven pipeline, no lookahead, expanding-window validation throughout</li>
     </ul>
 
     <details>
@@ -485,9 +485,9 @@
      ════════════════════════════════════════════════════════ -->
 <section id="research" class="reveal" data-theme="steel">
     <div class="section-marker">§ 10 · Research</div>
-    <h2>The journey <em>is the finding.</em></h2>
+    <h2>This is what <em>rigorous</em> commodity quant looks like.</h2>
     <p class="lead">
-        The methodology is the contribution. Honest in-sample vs out-of-sample testing. The contamination discovery. The proof that factor decay is real, not theoretical. All of this matters more than any single Sharpe ratio.
+        Full IS/OOS discipline across every strategy. Signal contamination caught and documented. Nineteen markets with institutional data. 438 tests. The infrastructure to answer the question — and the discipline to report the answer even when it's not what you wanted to hear.
     </p>
 
     <div class="chart-container">
