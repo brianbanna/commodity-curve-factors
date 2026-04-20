@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
 
 import matplotlib.pyplot as plt
 import pytest
@@ -88,8 +87,8 @@ def test_add_crisis_shading_respects_alpha() -> None:
     style.setup()
     fig, ax = plt.subplots()
     style.add_crisis_shading(ax, alpha=0.15)
-    for patch in ax.patches:
-        assert patch.get_alpha() == pytest.approx(0.15)
+    for p in ax.patches:
+        assert p.get_alpha() == pytest.approx(0.15)
     plt.close(fig)
 
 
