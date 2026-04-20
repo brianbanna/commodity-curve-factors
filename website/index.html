@@ -612,38 +612,50 @@
     if (typeof CHART_DATA !== 'undefined' && typeof Plotly !== 'undefined') {
         var D = CHART_DATA;
 
-        var strategyColor = {
-            "TSMOM":          ACCENT,
-            "TSI":            DOWN,
-            "EW Long":        FG,
-            "SPY":            'rgba(207, 102, 77, 0.5)',
-            "AGG":            'rgba(234, 230, 222, 0.3)',
-            "XS Carry":       BLUE,
-            "Multi-Factor":   VIOLET,
-            "Sector Neutral": 'rgba(234, 230, 222, 0.42)',
-            "Calendar Spread":'rgba(234, 230, 222, 0.35)'
+        /* Map raw parquet keys to display names and colors */
+        var nameMap = {
+            "tsmom": "TSMOM", "tsi": "TSI", "equal_weight_long": "EW Long",
+            "SPY": "SPY", "AGG": "AGG", "cash": "Cash",
+            "xs_carry": "XS Carry", "multi_factor_ew": "Multi-Factor EW",
+            "multi_factor_ic": "Multi-Factor IC", "sector_neutral": "Sector Neutral",
+            "calendar_spread": "Calendar Spread", "regime_conditioned": "Regime Cond.",
+            "minvar_momentum_tilt": "MinVar+Mom", "momentum_composite": "Mom Composite",
+            "carry_regime_switch": "Carry Regime", "carry_conditioned_tsmom": "Carry+TSMOM",
+            "calendar_tsmom_overlay": "Cal+TSMOM", "ts_carry": "TS Carry"
         };
 
-        var strategyWidth = {
-            "TSMOM":    2.0,
-            "TSI":      1.6,
-            "EW Long":  2.4,
-            "SPY":      1.4
+        var colorMap = {
+            "tsmom": ACCENT, "tsi": DOWN, "equal_weight_long": FG,
+            "SPY": 'rgba(207,102,77,0.5)', "AGG": 'rgba(234,230,222,0.3)',
+            "xs_carry": BLUE, "multi_factor_ew": VIOLET,
+            "sector_neutral": 'rgba(234,230,222,0.42)',
+            "calendar_spread": 'rgba(234,230,222,0.35)'
         };
+
+        var widthMap = {
+            "tsmom": 2.0, "tsi": 1.6, "equal_weight_long": 2.4, "SPY": 1.4
+        };
+
+        /* Only show key strategies, not all 18 */
+        var showKeys = ["equal_weight_long", "tsmom", "tsi", "SPY", "AGG",
+                        "xs_carry", "multi_factor_ew", "calendar_spread"];
 
         var eqTraces = [];
-        for (var name in D.strategies) {
-            var s = D.strategies[name];
-            var color = strategyColor[name] || 'rgba(234, 230, 222, 0.25)';
-            var width = strategyWidth[name] || 1.0;
+        for (var i = 0; i < showKeys.length; i++) {
+            var key = showKeys[i];
+            if (!D[key]) continue;
+            var s = D[key];
+            var label = nameMap[key] || key;
+            var color = colorMap[key] || 'rgba(234,230,222,0.25)';
+            var width = widthMap[key] || 1.0;
             eqTraces.push({
                 x: s.dates,
                 y: s.cumulative_return,
                 type: 'scatter',
                 mode: 'lines',
-                name: name,
+                name: label,
                 line: { color: color, width: width },
-                hovertemplate: name + '<br>%{x|%b %Y}<br>%{y:.2f}x<extra></extra>'
+                hovertemplate: label + '<br>%{x|%b %Y}<br>%{y:.2f}x<extra></extra>'
             });
         }
 
@@ -695,12 +707,13 @@
 
         var cyTraces = [];
         var ci = 0;
+        var sharedDates = CY.dates;
         for (var comm in CY.commodities) {
             var cd = CY.commodities[comm];
             var vis = cyDefaults.indexOf(comm) >= 0 ? true : 'legendonly';
             cyTraces.push({
-                x: cd.dates,
-                y: cd.convenience_yield,
+                x: sharedDates,
+                y: cd.cy,
                 type: 'scatter',
                 mode: 'lines',
                 name: comm,
@@ -711,28 +724,31 @@
             ci++;
         }
 
+        /* Build regime shading from CL's integer regime array */
         var cyShapes = [];
-        if (CY.regimes && CY.regimes.CL) {
-            var rg = CY.regimes.CL;
-            var regimeColors = {
-                'deep_contango':      'rgba(104,148,190,0.08)',
-                'mild_contango':      'rgba(104,148,190,0.04)',
-                'flat':               'rgba(234,230,222,0.02)',
-                'mild_backwardation': 'rgba(200,162,85,0.04)',
-                'deep_backwardation': 'rgba(207,102,77,0.08)'
-            };
-            if (rg.periods) {
-                for (var ri = 0; ri < rg.periods.length; ri++) {
-                    var rp = rg.periods[ri];
-                    cyShapes.push({
-                        type: 'rect',
-                        xref: 'x', yref: 'paper',
-                        x0: rp.start, x1: rp.end,
-                        y0: 0, y1: 1,
-                        fillcolor: regimeColors[rp.regime] || 'rgba(234,230,222,0.02)',
-                        line: { width: 0 },
-                        layer: 'below'
-                    });
+        var regimeShadeColors = [
+            'rgba(104,148,190,0.10)',   /* 0 = deep contango */
+            'rgba(104,148,190,0.05)',   /* 1 = mild contango */
+            'rgba(234,230,222,0.00)',   /* 2 = balanced */
+            'rgba(200,162,85,0.05)',    /* 3 = mild backwardation */
+            'rgba(207,102,77,0.10)'    /* 4 = crisis backwardation */
+        ];
+        if (CY.commodities.CL && CY.commodities.CL.regime) {
+            var clRegime = CY.commodities.CL.regime;
+            var rStart = 0;
+            for (var ri = 1; ri <= clRegime.length; ri++) {
+                if (ri === clRegime.length || clRegime[ri] !== clRegime[rStart]) {
+                    var regVal = clRegime[rStart];
+                    if (regVal !== 2) { /* skip balanced (transparent) */
+                        cyShapes.push({
+                            type: 'rect', xref: 'x', yref: 'paper',
+                            x0: sharedDates[rStart], x1: sharedDates[Math.min(ri, sharedDates.length - 1)],
+                            y0: 0, y1: 1,
+                            fillcolor: regimeShadeColors[regVal] || 'rgba(234,230,222,0.02)',
+                            line: { width: 0 }, layer: 'below'
+                        });
+                    }
+                    rStart = ri;
                 }
             }
         }
